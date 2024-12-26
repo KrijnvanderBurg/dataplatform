@@ -1,0 +1,91 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "terraform-backend",
+      "version": "0.20.10"
+    },
+    "outputs": {
+    }
+  },
+  "provider": {
+    "azurerm": [
+      {
+        "features": [
+          {
+          }
+        ],
+        "storage_use_azuread": true
+      }
+    ]
+  },
+  "resource": {
+    "azurerm_management_lock": {
+      "terraform-backend_st_init_prod_gwc_01_stinitprodgwc01_lock_8A4A0554": {
+        "//": {
+          "metadata": {
+            "path": "terraform-backend/terraform-backend/st_init_prod_gwc_01/stinitprodgwc01_lock",
+            "uniqueId": "terraform-backend_st_init_prod_gwc_01_stinitprodgwc01_lock_8A4A0554"
+          }
+        },
+        "lock_level": "CanNotDelete",
+        "name": "${azurerm_storage_account.terraform-backend_st_init_prod_gwc_01_FA9E216E.name}-lock",
+        "scope": "${azurerm_storage_account.terraform-backend_st_init_prod_gwc_01_FA9E216E.id}"
+      }
+    },
+    "azurerm_resource_group": {
+      "terraform-backend_rg_init_prod_gwc_01_A949A12D": {
+        "//": {
+          "metadata": {
+            "path": "terraform-backend/terraform-backend/rg_init_prod_gwc_01/rg_init_prod_gwc_01",
+            "uniqueId": "terraform-backend_rg_init_prod_gwc_01_A949A12D"
+          }
+        },
+        "location": "GERMANY_WEST_CENTRAL",
+        "name": "rg-init-prod-gwc-01"
+      }
+    },
+    "azurerm_storage_account": {
+      "terraform-backend_st_init_prod_gwc_01_FA9E216E": {
+        "//": {
+          "metadata": {
+            "path": "terraform-backend/terraform-backend/st_init_prod_gwc_01/st_init_prod_gwc_01",
+            "uniqueId": "terraform-backend_st_init_prod_gwc_01_FA9E216E"
+          }
+        },
+        "access_tier": "Hot",
+        "account_kind": "StorageV2",
+        "account_replication_type": "LRS",
+        "account_tier": "Standard",
+        "blob_properties": {
+          "delete_retention_policy": {
+            "days": 7
+          }
+        },
+        "cross_tenant_replication_enabled": false,
+        "infrastructure_encryption_enabled": true,
+        "is_hns_enabled": false,
+        "local_user_enabled": false,
+        "location": "germany west central",
+        "name": "stinitprodgwc01",
+        "public_network_access_enabled": true,
+        "resource_group_name": "${azurerm_resource_group.terraform-backend_rg_init_prod_gwc_01_A949A12D.name}",
+        "sftp_enabled": false,
+        "shared_access_key_enabled": false
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "init.tfstate"
+      }
+    },
+    "required_providers": {
+      "azurerm": {
+        "source": "azurerm",
+        "version": "4.14.0"
+      }
+    }
+  }
+}

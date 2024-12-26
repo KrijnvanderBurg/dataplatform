@@ -1,0 +1,16 @@
+{
+  "stacks": {
+    "terraform-backend": {
+      "annotations": [
+      ],
+      "constructPath": "terraform-backend",
+      "dependencies": [
+      ],
+      "name": "terraform-backend",
+      "stackMetadataPath": "stacks/terraform-backend/metadata.json",
+      "synthesizedStackPath": "stacks/terraform-backend/cdk.tf.json",
+      "workingDirectory": "stacks/terraform-backend"
+    }
+  },
+  "version": "0.20.10"
+}
