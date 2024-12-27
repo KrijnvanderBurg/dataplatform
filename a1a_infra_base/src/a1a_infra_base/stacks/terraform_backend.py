@@ -1,59 +1,125 @@
 """
-Module terraform_backend
+Module terraform_backend_stack
 
 This module defines the TerraformBackendStack class, which initializes the Terraform stack
-with a local backend and an Azure provider, and creates a TerraformBackendL2 construct.
+with a local backend, an Azure provider, and creates a resource group and a locked storage account.
 
 Classes:
     TerraformBackendStack: A Terraform stack that sets up the local backend, Azure provider,
-                           and TerraformBackendL2 construct.
+                           and creates a resource group and a locked storage account.
+    TerraformBackendStackConfig: A configuration class for TerraformBackendStack.
 """
+
+import logging
+from dataclasses import dataclass
+from typing import Any, Final, Self
 
 from cdktf import LocalBackend, TerraformStack
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
+
+from a1a_infra_base.backend import BackendLocalConfig
+from a1a_infra_base.constructs.level1.terraform_backend import TerraformBackendL1, TerraformBackendL1Config
+from a1a_infra_base.logger import setup_logger
+from a1a_infra_base.provider import ProviderAzurermConfig
+from a1a_infra_base.stacks.stack_abc import CombinedMeta, StackABC, StackConfigABC
 from constructs import Construct
 
-from a1a_infra_base.constants import AzureLocation
-from a1a_infra_base.constructs.level2.terraform_backend import TerraformBackendL2
+logger: logging.Logger = setup_logger(__name__)
+
+# Constants for dictionary keys
+BACKEND_KEY: Final[str] = "backend"
+PROVIDER_KEY: Final[str] = "provider"
+AZURERM_KEY: Final[str] = "azurerm"
+
+CONSTRUCTS_KEY: Final[str] = "constructs"
+TERRAFORM_BACKEND_L1_KEY: Final[str] = "terraform_backend_l1"
 
 
-class TerraformBackendStack(TerraformStack):
+@dataclass
+class TerraformBackendStackConfig(StackConfigABC):
     """
-    A Terraform stack that sets up the local backend, Azure provider, and TerraformBackendL2 construct.
+    A configuration class for TerraformBackendStack.
+
+    This class is responsible for unpacking parameters from a configuration dictionary.
 
     Attributes:
-        azure_provider (AzurermProvider): The Azure provider for Terraform.
-        resource_group (TerraformBackendL2): The TerraformBackendL2 construct.
+        backend_local_config (BackendLocalConfig): The configuration for the Terraform backend.
+        provider_azurerm_config (ProviderAzurermConfig): The configuration for the Terraform AzureRM provider.
+        constructs_config (TerraformBackendL1Config): The configuration for the Terraform backend L1 construct.
     """
 
-    def __init__(self, scope: Construct, id_: str) -> None:
+    backend_local_config: BackendLocalConfig
+    provider_azurerm_config: ProviderAzurermConfig
+    constructs_config: TerraformBackendL1Config
+
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Initializes the TerraformBackendStack.
+        Create a TerraformBackendStackConfig by unpacking parameters from a configuration dictionary.
+
+        Args:
+            dict_ (dict): A dictionary containing the stack configuration.
+
+        Returns:
+            TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
+        """
+        backend_local_config = BackendLocalConfig.from_dict(dict_[BACKEND_KEY])
+        provider_azurerm_config = ProviderAzurermConfig.from_dict(dict_[PROVIDER_KEY][AZURERM_KEY])
+        constructs_config = TerraformBackendL1Config.from_dict(dict_[CONSTRUCTS_KEY][TERRAFORM_BACKEND_L1_KEY])
+
+        return cls(
+            backend_local_config=backend_local_config,
+            provider_azurerm_config=provider_azurerm_config,
+            constructs_config=constructs_config,
+        )
+
+
+class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
+    """
+    A Terraform stack that sets up the local backend, Azure provider, and creates a resource group
+    and a locked storage account based on a given configuration dictionary.
+
+    Attributes:
+        terraform_backend_l0 (TerraformBackendL0): The Terraform backend L0 construct.
+    """
+
+    def __init__(
+        self,
+        scope: Construct,
+        id_: str = "TerraformBackendStack",
+        *,
+        env: str,
+        config: TerraformBackendStackConfig,
+    ) -> None:
+        """
+        Initializes the TerraformBackendStack construct.
 
         Args:
             scope (Construct): The scope in which this construct is defined.
-            id (str): The scoped construct ID.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            config (TerraformBackendStackConfig): The configuration for the Terraform backend stack.
         """
-        super().__init__(scope, id_)
+        TerraformStack.__init__(self, scope, id_)
 
-        LocalBackend(
-            self,
-            path="init.tfstate",
-        )
+        # Set up the local backend
+        LocalBackend(self, path=config.backend_local_config.path)
 
-        self._azure_provider = AzurermProvider(
+        # Set up the Azure provider
+        AzurermProvider(
             self,
-            "AzureResourceManagerProvider",
-            storage_use_azuread=True,
+            "AzureRM",
             features=[{}],
+            tenant_id=config.provider_azurerm_config.tenant_id,
+            subscription_id=config.provider_azurerm_config.subscription_id,
+            client_id=config.provider_azurerm_config.client_id,
+            client_secret=config.provider_azurerm_config.client_secret,
         )
 
-        self.resource_group = TerraformBackendL2(
+        # Initialize the TerraformBackendL0 construct
+        TerraformBackendL1(
             self,
-            id_,
-            resource_group_name="init",
-            storage_account_name="init",
-            env="prod",
-            location=AzureLocation.GERMANY_WEST_CENTRAL,
-            sequence_number="01",
+            "TerraformBackendL0",
+            env=env,
+            config=config.constructs_config,
         )

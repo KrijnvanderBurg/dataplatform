@@ -52,7 +52,7 @@
             "extensions": [
                 // Python
                 // Only necessary for some extensions to stop complaining, DevContainer image already has Python installed.
-                "ms-python.python", // https://marketplace.visualstudio.com/items?itemName=ms-python.python
+                // "ms-python.python", // https://marketplace.visualstudio.com/items?itemName=ms-python.python
                 "ms-python.vscode-pylance", // https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
                 // Linter
                 "charliermarsh.ruff", //https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
@@ -108,12 +108,13 @@
                 // 		"source.organizeImports": "explicit"
                 // 	}
                 // },
-                // "[python]": {
-                "editor.defaultFormatter": "charliermarsh.ruff",
-                "editor.formatOnSave": true,
-                "editor.codeActionsOnSave": {
-                    "source.fixAll": "explicit",
-                    "source.organizeImports": "explicit"
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll": "explicit",
+                        "source.organizeImports": "explicit"
+                    }
                 },
                 //
                 // Ruff - https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
@@ -126,6 +127,7 @@
                 ],
                 "ruff.organizeImports": true,
                 "ruff.fixAll": true,
+                "ruff.trace.server": "messages",
                 //
                 // Python/Pytest - https://code.visualstudio.com/docs/python/settings-reference
                 //
@@ -136,9 +138,10 @@
                 "python.testing.pytestArgs": [
                     "-c",
                     "${workspaceFolder}/../.tools/v1/configs/pytest.ini",
-                    "-o",
-                    "cache_dir=${workspaceFolder}/.pytest_cache",
-                    "-s",
+                    // "-o",
+                    // "cache_dir=${workspaceFolder}/.pytest_cache",
+                    // "-s", // disables print/log statements in output
+                    "--verbose",
                     "--cov=${workspaceFolder}/src/",
                     "--cov-report=xml:${workspaceFolder}/coverage.xml",
                     "--cov-config=${workspaceFolder}/../.tools/v1/configs/.coveragerc",
@@ -231,10 +234,13 @@
                     "version": "2.0.0",
                     "options": {
                         "env": {
-                            "PYTEST_ADDOPTS": "-vv --tb=native"
+                            "PYTEST_ADDOPTS": "--tb=native"
                         }
                     },
                     "tasks": [
+                        //
+                        // management / dependent tasks
+                        //
                         {
                             "label": "git clean",
                             "type": "shell",
@@ -249,15 +255,41 @@
                             "group": "environment",
                             "problemMatcher": []
                         },
+                        {
+                            "label": "coverage-gutters watch",
+                            "command": [
+                                "${command:coverage-gutters.watchCoverageAndVisibleEditors}"
+                            ],
+							"runOptions": {
+								"runOn": "folderOpen"
+							},
+                            "presentation": {
+                                "reveal": "never"
+                            },
+                            "problemMatcher": []
+                        },
+                        {
+							"label": "poetry to requirements",
+							"type": "shell",
+							"command": "${workspaceFolder}/../.tools/v1/commands/poetry_to_requirements.sh",
+							"args": [
+								"--pyproject_filepath=${workspaceFolder}/pyproject.toml",
+								"--requirements_filepath=${workspaceFolder}/$PROJECT_RUNTIME_DIR/requirements.txt"
+							],
+							"presentation": {
+                                "reveal": "OnProblem"
+                            },
+                            "problemMatcher": []
+						},
                         //
-                        // CICD akin task groups
+                        // all Task groups
                         //
                         {
-                            "label": "CICD",
+                            "label": "build & test",
                             "dependsOn": [
-                                "setup",
-                                "validate code",
-                                "test"
+                                "build",
+                                "test",
+                                "coverage-gutters watch"
                             ],
                             "dependsOrder": "sequence",
                             "runOptions": {
@@ -265,42 +297,21 @@
                             },
                             "problemMatcher": []
                         },
+                        //
+                        // build
+                        //
                         {
-                            "label": "setup",
+                            "label": "build",
                             "dependsOn": [
                                 "poetry install",
 								"sphinx build docs"
                             ],
-                            // "dependsOrder": "sequence",
+                            "group": {
+                                "kind": "build",
+                                "isDefault": true
+                            },
                             "problemMatcher": []
                         },
-                        {
-                            "label": "validate code",
-                            "dependsOn": [
-                                "ruff formatter",
-                                "ruff linter",
-                                "pylint",
-                                "flake8",
-                                "mypy",
-                                "pyre",
-                                "pyright",
-                                "trufflehog",
-                                "bandit",
-                                "vulture"
-                            ],
-                            "problemMatcher": []
-                        },
-                        {
-                            "label": "test",
-                            "dependsOn": [
-                                "pytest and coverage",
-                                "cdktf synth"
-                            ],
-                            "problemMatcher": []
-                        },
-                        //
-                        // Setup environment
-                        //
                         {
                             "label": "poetry lock",
                             "type": "shell",
@@ -308,9 +319,6 @@
                             "args": [
                                 "lock",
                                 "--no-update"
-                            ],
-                            "dependsOn": [
-                                "activate venv"
                             ],
                             "group": "install",
                             "presentation": {
@@ -328,6 +336,9 @@
                                 "--no-ansi",
                                 "--directory=./",
                                 "--with=test"
+                            ],
+                            "dependsOn": [
+                                "poetry lock"
                             ],
                             "presentation": {
                                 "panel": "shared"
@@ -348,8 +359,30 @@
 							}
 						},
                         //
-                        // Validate code
+                        // test
                         //
+                        {
+                            "label": "test",
+                            "dependsOn": [
+                                "ruff formatter",
+                                "ruff linter",
+                                "pylint",
+                                "flake8",
+                                "mypy",
+                                "pyre",
+                                "pyright",
+                                "trufflehog",
+                                "bandit",
+                                "vulture",
+                                "pytest and coverage",
+                                "cdktf synth"
+                            ],      
+                            "group": {
+                                "kind": "test",
+                                "isDefault": true
+                            },
+                            "problemMatcher": []
+                        },
                         {
                             "label": "ruff formatter",
                             "type": "shell",
@@ -361,7 +394,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "ruff linter",
@@ -374,7 +408,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "pylint",
@@ -387,7 +422,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "flake8",
@@ -400,7 +436,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "mypy",
@@ -413,7 +450,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
 							"label": "pyre",
@@ -426,7 +464,8 @@
 							"presentation": {
 								"panel": "dedicated",
 								"clear": true
-							}
+							},
+                            "problemMatcher": []
 						},
                         {
                             "label": "pyright",
@@ -439,7 +478,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "trufflehog",
@@ -452,7 +492,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "bandit",
@@ -465,7 +506,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "vulture",
@@ -478,11 +520,9 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
-                        //
-                        // Test
-                        //
                         {
                             "label": "pytest and coverage",
                             "type": "shell",
@@ -497,19 +537,21 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "cdktf synth",
                             "type": "shell",
                             "command": "${workspaceFolder}/../.tools/v1/commands/cdktf_synth.sh",
                             "args": [
-                                "--output_path=${workspaceFolder}/output/"
+                                "--output_path=${workspaceFolder}/dist/"
                             ],
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         }
                     ]
                 }

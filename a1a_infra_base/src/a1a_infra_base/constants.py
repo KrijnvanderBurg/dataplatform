@@ -9,6 +9,7 @@ Classes:
 """
 
 from enum import Enum
+from typing import Self
 
 
 class AzureLocation(Enum):
@@ -16,18 +17,19 @@ class AzureLocation(Enum):
     Enum representing Azure locations with their full names and abbreviations.
     """
 
-    GERMANY_WEST_CENTRAL = "germany west central", "gwc"
+    WEST_EUROPE = ("west europe", "we")
+    GERMANY_WEST_CENTRAL = ("germany west central", "gwc")
 
-    def __init__(self, full_name: str, abbreviation: str) -> None:
+    def __init__(self, full_name: str, abbr: str) -> None:
         """
-        Initialize the AzureLocation enum.
+        Initialize the AzureLocation enum with full name and abbreviation.
 
         Args:
             full_name (str): The full name of the Azure location.
-            abbreviation (str): The abbreviation of the Azure location.
+            abbr (str): The abbreviation of the Azure location.
         """
         self._full_name = full_name
-        self._abbr = abbreviation
+        self._abbr = abbr
 
     @property
     def full_name(self) -> str:
@@ -49,6 +51,25 @@ class AzureLocation(Enum):
         """
         return self._abbr
 
+    @classmethod
+    def from_full_name(cls, full_name: str) -> Self:
+        """
+        Get the AzureLocation enum member from the full name.
+
+        Args:
+            full_name (str): The full name of the Azure location.
+
+        Returns:
+            AzureLocation: The corresponding AzureLocation enum member.
+
+        Raises:
+            ValueError: If no matching AzureLocation is found.
+        """
+        location = next((loc for loc in cls if loc.full_name == full_name), None)
+        if location is None:
+            raise ValueError(f"No AzureLocation with full name '{full_name}' found.")
+        return location
+
 
 class AzureResource(Enum):
     """
@@ -56,19 +77,19 @@ class AzureResource(Enum):
     """
 
     RESOURCE_GROUP = "resource_group", "rg"
-    STORAGE_ACCOUNT = "storage_account", "st"
+    STORAGE_ACCOUNT = "storage_account", "sa"
     MANAGEMENT_LOCK = "management_lock", "lock"
 
-    def __init__(self, full_name: str, abbreviation: str) -> None:
+    def __init__(self, full_name: str, abbr: str) -> None:
         """
-        Initialize the AzureResource enum.
+        Initialize the AzureResource enum with full name and abbreviation.
 
         Args:
             full_name (str): The full name of the Azure resource.
-            abbreviation (str): The abbreviation of the Azure resource.
+            abbr (str): The abbreviation of the Azure resource.
         """
         self._full_name = full_name
-        self._abbr = abbreviation
+        self._abbr = abbr
 
     @property
     def full_name(self) -> str:
@@ -89,3 +110,22 @@ class AzureResource(Enum):
             str: The abbreviation of the Azure resource.
         """
         return self._abbr
+
+    @classmethod
+    def from_full_name(cls, full_name: str) -> Self:
+        """
+        Get the AzureResource enum member from the full name.
+
+        Args:
+            full_name (str): The full name of the Azure resource.
+
+        Returns:
+            AzureResource: The corresponding AzureResource enum member.
+
+        Raises:
+            ValueError: If no matching AzureResource is found.
+        """
+        location = next((loc for loc in cls if loc.full_name == full_name), None)
+        if location is None:
+            raise ValueError(f"No AzureResource with full name '{full_name}' found.")
+        return location

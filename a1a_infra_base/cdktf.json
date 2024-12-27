@@ -1,6 +1,6 @@
 {
   "language": "python",
-  "app": "poetry run python src/a1a_infra_base",
+  "app": "poetry run python src/a1a_infra_base --config-filepath=values/test.json",
   "projectId": "ed4398fa-13c2-4a52-9785-2c71ee94b31b",
   "sendCrashReports": "false",
   "terraformProviders": [],
