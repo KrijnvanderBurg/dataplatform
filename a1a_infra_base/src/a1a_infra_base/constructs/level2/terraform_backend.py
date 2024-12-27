@@ -1,119 +1,149 @@
 """
 Module terraform_backend
 
-This module defines the TerraformBackendL2 class, which is responsible for creating
-and managing Azure resource groups and storage accounts with specific configurations
-for use as a backend for Terraform state storage.
+This module defines the TerraformBackendStack class, which initializes the Terraform stack
+with a local backend, an Azure provider, and creates a resource group and a locked storage account.
 
 Classes:
-    TerraformBackendL2: A level 2 construct that creates and manages an Azure resource group
-                        and a locked storage account for Terraform state storage.
+    TerraformBackendStack: A Terraform stack that sets up the local backend, Azure provider,
+                           and creates a resource group and a locked storage account.
 """
 
+from typing import Final
+
+from cdktf import LocalBackend, TerraformStack
+from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from constructs import Construct
-from a1a_infra_base.constants import AzureLocation, AzureResource
+
+from a1a_infra_base.backend import BackendConfig
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 from a1a_infra_base.constructs.level1.storage_account_locked import StorageAccountLockedL1
 
+# Constants for dictionary keys
+TERRAFORM_BACKEND_KEY: Final[str] = "terraform_backend"
+BACKEND_KEY: Final[str] = "backend"
+RESOURCE_GROUP_KEY: Final[str] = "resource_group"
+STORAGE_ACCOUNT_KEY: Final[str] = "storage_account"
+ENV_KEY: Final[str] = "env"
 
-class TerraformBackendL2(Construct):
+
+class TerraformBackendStack(TerraformStack):
     """
-    A level 2 construct that creates and manages an Azure resource group and a locked storage account
-    for Terraform state storage.
+    A Terraform stack that sets up the local backend, Azure provider, and creates a resource group
+    and a locked storage account based on a given configuration dictionary.
 
-    Attributes:
-        resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
-        storage_account_locked_l1 (StorageAccountLockedL1): The storage account locked level 1 construct.
+    Example of a minimal config dictionary for this class:
+    {
+        "env": "prod",
+        "terraform_backend": {
+            "backend": {
+                "path": "init.tfstate"
+            },
+            "resource_group": {
+                "name": "init",
+                "location": "GERMANY_WEST_CENTRAL",
+                "sequence_number": "01"
+            },
+            "storage_account": {
+                "name": "init",
+                "location": "GERMANY_WEST_CENTRAL",
+                "sequence_number": "01",
+                "resource_group_name": "init",
+                "account_replication_type": "LRS",
+                "account_kind": "StorageV2",
+                "account_tier": "Standard",
+                "cross_tenant_replication_enabled": false,
+                "access_tier": "Hot",
+                "shared_access_key_enabled": false,
+                "public_network_access_enabled": true,
+                "is_hns_enabled": false,
+                "local_user_enabled": false,
+                "infrastructure_encryption_enabled": true,
+                "sftp_enabled": false,
+                "blob_properties": {
+                    "delete_retention_days": 7
+                }
+            },
+            "management_lock": {
+                "lock_level": "CanNotDelete"
+            }
+        }
+    }
     """
 
     def __init__(
         self,
         scope: Construct,
         id_: str,
-        *,
-        resource_group_name: str,
-        storage_account_name: str,
-        env: str,
-        location: AzureLocation,
-        sequence_number: str = "01",
-        account_replication_type: str = "LRS",
-        account_kind: str = "StorageV2",
-        account_tier: str = "Standard",
-        cross_tenant_replication_enabled: bool = False,
-        access_tier: str = "Hot",
-        shared_access_key_enabled: bool = False,
-        public_network_access_enabled: bool = True,
-        is_hns_enabled: bool = False,
-        local_user_enabled: bool = False,
-        infrastructure_encryption_enabled: bool = True,
-        sftp_enabled: bool = False,
-        delete_retention_days: int = 7,
+        backend_path: str,
+        resource_group: ResourceGroupL0,
+        storage_account: StorageAccountLockedL1,
     ) -> None:
         """
-        Initializes the TerraformBackendL2 construct.
+        Initializes the TerraformBackendStack using the supplied config dictionary.
 
         Args:
             scope (Construct): The scope in which this construct is defined.
-            id (str): The scoped construct ID.
-            resource_group_name (str): The name of the resource group.
-            storage_account_name (str): The name of the storage account.
-            env (str): The environment name.
-            location (AzureLocation): The Azure location.
-            sequence_number (str, optional): The sequence number. Defaults to "01".
-            account_replication_type (str, optional): The replication type of the storage account. Defaults to "LRS".
-            account_kind (str, optional): The kind of the storage account. Defaults to "StorageV2".
-            account_tier (str, optional): The tier of the storage account. Defaults to "Standard".
-            cross_tenant_replication_enabled (bool, optional): Whether cross-tenant replication is enabled.
-                Defaults to False.
-            access_tier (str, optional): The access tier of the storage account. Defaults to "Hot".
-            shared_access_key_enabled (bool, optional): Whether shared access key is enabled. Defaults to False.
-            public_network_access_enabled (bool, optional): Whether public network access is enabled. Defaults to True.
-            is_hns_enabled (bool, optional): Whether hierarchical namespace is enabled. Defaults to False.
-            local_user_enabled (bool, optional): Whether local user is enabled. Defaults to False.
-            infrastructure_encryption_enabled (bool, optional): Whether infrastructure encryption is enabled.
-                Defaults to True.
-            sftp_enabled (bool, optional): Whether SFTP is enabled. Defaults to False.
-            delete_retention_days (int, optional): The number of days to retain deleted items. Defaults to 7.
+            id_ (str): The scoped construct ID.
+            backend_path (str): The path for the local backend.
+            resource_group (ResourceGroupL0): The resource group level 0 construct.
+            storage_account (StorageAccountLockedL1): The storage account locked level 1 construct.
         """
         super().__init__(scope, id_)
 
-        self._resource_group_l0 = ResourceGroupL0(
+        LocalBackend(self, path=backend_path)
+
+        self._azure_provider = AzurermProvider(
             self,
-            f"{AzureResource.RESOURCE_GROUP.abbr}_{resource_group_name}_{env}_{location.abbr}_{sequence_number}",
-            name=resource_group_name,
-            env=env,
-            location=location,
-            sequence_number=sequence_number,
+            "AzureResourceManagerProvider",
+            storage_use_azuread=True,
+            features=[{}],
         )
 
-        self._storage_account_locked_l1 = StorageAccountLockedL1(
-            self,
-            f"{AzureResource.STORAGE_ACCOUNT.abbr}_{storage_account_name}_{env}_{location.abbr}_{sequence_number}",
-            name=storage_account_name,
+        self.resource_group = resource_group
+        self.storage_account = storage_account
+
+    @classmethod
+    def from_config(cls, scope: Construct, id_: str, config: dict) -> "TerraformBackendStack":
+        """
+        Create a TerraformBackendStack from a configuration dictionary.
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            config (dict): A configuration dictionary. Must include keys:
+                - env (string)
+                - terraform_backend
+                    - backend (dictionary with key 'path')
+                    - resource_group (dictionary with RG details)
+                    - storage_account (dictionary with SA details)
+
+        Returns:
+            TerraformBackendStack: A fully-initialized TerraformBackendStack.
+        """
+        env = config[ENV_KEY]
+        terraform_backend = config[TERRAFORM_BACKEND_KEY]
+
+        backend_cfg = terraform_backend[BACKEND_KEY]
+        resource_group_cfg = terraform_backend[RESOURCE_GROUP_KEY]
+        storage_account_cfg = terraform_backend[STORAGE_ACCOUNT_KEY]
+
+        backend = BackendConfig.from_config(config=backend_cfg)
+        resource_group = ResourceGroupL0.from_config(
+            scope=scope, id_="ResourceGroupConstruct", config=resource_group_cfg, env=env
+        )
+        storage_account = StorageAccountLockedL1.from_config(
+            scope=scope,
+            id_="StorageAccountConstruct",
+            config=storage_account_cfg,
             env=env,
-            location=location,
-            sequence_number=sequence_number,
-            resource_group_name=self.resource_group_l0.resource_group.name,
-            account_replication_type=account_replication_type,
-            account_kind=account_kind,
-            account_tier=account_tier,
-            cross_tenant_replication_enabled=cross_tenant_replication_enabled,
-            access_tier=access_tier,
-            shared_access_key_enabled=shared_access_key_enabled,
-            public_network_access_enabled=public_network_access_enabled,
-            is_hns_enabled=is_hns_enabled,
-            local_user_enabled=local_user_enabled,
-            infrastructure_encryption_enabled=infrastructure_encryption_enabled,
-            sftp_enabled=sftp_enabled,
-            delete_retention_days=delete_retention_days,
+            resource_group_l0=resource_group,
         )
 
-    @property
-    def resource_group_l0(self) -> ResourceGroupL0:
-        """Gets the resource group level 0 construct."""
-        return self._resource_group_l0
-
-    @property
-    def storage_account_locked_l1(self) -> StorageAccountLockedL1:
-        """Gets the storage account locked level 1 construct."""
-        return self._storage_account_locked_l1
+        return cls(
+            scope=scope,
+            id_=id_,
+            backend_path=backend.path,
+            resource_group=resource_group,
+            storage_account=storage_account,
+        )

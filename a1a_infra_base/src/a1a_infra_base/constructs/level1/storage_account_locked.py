@@ -8,15 +8,33 @@ Classes:
     StorageAccountLockedL1: A level 1 construct that creates and manages a locked Azure storage account.
 """
 
+from typing import Final
+
 from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
-from cdktf_cdktf_provider_azurerm.storage_account import (
-    StorageAccount,
-    StorageAccountBlobProperties,
-    StorageAccountBlobPropertiesDeleteRetentionPolicy,
-)
 from constructs import Construct
 
-from a1a_infra_base.constants import AzureLocation, AzureResource
+from a1a_infra_base.constants import AzureResource
+from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
+from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0
+
+# Constants for dictionary keys
+NAME_KEY: Final[str] = "name"
+LOCATION_KEY: Final[str] = "location"
+SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
+RESOURCE_GROUP_NAME_KEY: Final[str] = "resource_group_name"
+ACCOUNT_REPLICATION_TYPE_KEY: Final[str] = "account_replication_type"
+ACCOUNT_KIND_KEY: Final[str] = "account_kind"
+ACCOUNT_TIER_KEY: Final[str] = "account_tier"
+CROSS_TENANT_REPLICATION_ENABLED_KEY: Final[str] = "cross_tenant_replication_enabled"
+ACCESS_TIER_KEY: Final[str] = "access_tier"
+SHARED_ACCESS_KEY_ENABLED_KEY: Final[str] = "shared_access_key_enabled"
+PUBLIC_NETWORK_ACCESS_ENABLED_KEY: Final[str] = "public_network_access_enabled"
+IS_HNS_ENABLED_KEY: Final[str] = "is_hns_enabled"
+LOCAL_USER_ENABLED_KEY: Final[str] = "local_user_enabled"
+INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY: Final[str] = "infrastructure_encryption_enabled"
+SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
+BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
+LOCK_LEVEL_KEY: Final[str] = "lock_level"
 
 
 class StorageAccountLockedL1(Construct):
@@ -24,97 +42,44 @@ class StorageAccountLockedL1(Construct):
     A level 1 construct that creates and manages a locked Azure storage account.
 
     Attributes:
-        storage_account (StorageAccount): The Azure storage account.
+        storage_account (StorageAccountL0): The Azure storage account.
         management_lock (ManagementLock): The management lock applied to the storage account.
     """
 
     def __init__(
         self,
         scope: Construct,
-        id: str,
+        id_: str,
         *,
-        name: str,
-        env: str,
-        location: AzureLocation,
-        sequence_number: str,
-        resource_group_name: str,
-        account_replication_type: str = "LRS",
-        account_kind: str = "StorageV2",
-        account_tier: str = "Standard",
-        cross_tenant_replication_enabled: bool = False,
-        access_tier: str = "Hot",
-        shared_access_key_enabled: bool = False,
-        public_network_access_enabled: bool = True,
-        is_hns_enabled: bool = False,
-        local_user_enabled: bool = False,
-        infrastructure_encryption_enabled: bool = True,
-        sftp_enabled: bool = False,
-        delete_retention_days: int = 7,
+        _: str,  # env: str, unused thus _. Kept to maintain consistency and available for future use.
+        storage_account: StorageAccountL0,
+        lock_level: str,
     ) -> None:
         """
         Initializes the StorageAccountLockedL1 construct.
 
         Args:
             scope (Construct): The scope in which this construct is defined.
-            id (str): The scoped construct ID.
-            name (str): The name of the storage account.
+            id_ (str): The scoped construct ID.
             env (str): The environment name.
-            location (AzureLocation): The Azure location.
-            sequence_number (str): The sequence number.
-            resource_group_name (str): The name of the resource group.
-            account_replication_type (str, optional): The replication type of the storage account. Defaults to "LRS".
-            account_kind (str, optional): The kind of the storage account. Defaults to "StorageV2".
-            account_tier (str, optional): The tier of the storage account. Defaults to "Standard".
-            cross_tenant_replication_enabled (bool, optional): Whether cross-tenant replication is enabled.
-                Defaults to False.
-            access_tier (str, optional): The access tier of the storage account. Defaults to "Hot".
-            shared_access_key_enabled (bool, optional): Whether shared access key is enabled. Defaults to False.
-            public_network_access_enabled (bool, optional): Whether public network access is enabled. Defaults to True.
-            is_hns_enabled (bool, optional): Whether hierarchical namespace is enabled. Defaults to False.
-            local_user_enabled (bool, optional): Whether local user is enabled. Defaults to False.
-            infrastructure_encryption_enabled (bool, optional): Whether infrastructure encryption is enabled.
-                Defaults to True.
-            sftp_enabled (bool, optional): Whether SFTP is enabled. Defaults to False.
-            delete_retention_days (int, optional): The number of days to retain deleted items. Defaults to 7.
+            storage_account (StorageAccountL0): The storage account level 0 construct.
+            lock_level (str): The lock level for the management lock.
         """
-        super().__init__(scope, id)
+        super().__init__(scope, id_)
 
-        self._storage_account = StorageAccount(
-            self,
-            f"{AzureResource.STORAGE_ACCOUNT.abbr}_{name}_{env}_{location.abbr}_{sequence_number}",
-            name=f"{AzureResource.STORAGE_ACCOUNT.abbr}{name}{env}{location.abbr}{sequence_number}",
-            location=location.full_name,
-            resource_group_name=resource_group_name,
-            account_replication_type=account_replication_type,
-            account_kind=account_kind,
-            account_tier=account_tier,
-            cross_tenant_replication_enabled=cross_tenant_replication_enabled,
-            access_tier=access_tier,
-            shared_access_key_enabled=shared_access_key_enabled,
-            public_network_access_enabled=public_network_access_enabled,
-            is_hns_enabled=is_hns_enabled,
-            local_user_enabled=local_user_enabled,
-            infrastructure_encryption_enabled=infrastructure_encryption_enabled,
-            sftp_enabled=sftp_enabled,
-            blob_properties=StorageAccountBlobProperties(
-                delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
-                    days=delete_retention_days,
-                )
-            ),
-        )
+        self._storage_account = storage_account
 
         # Add a management lock to the storage account
         self._management_lock = ManagementLock(
             self,
-            f"{AzureResource.STORAGE_ACCOUNT.abbr}{name}{env}{location.abbr}{sequence_number}_"
-            f"{AzureResource.MANAGEMENT_LOCK.abbr}",
-            name=f"{self.storage_account.name}-{AzureResource.MANAGEMENT_LOCK.abbr}",
-            scope=self.storage_account.id,
-            lock_level="CanNotDelete",
+            f"{storage_account.storage_account.name}_{AzureResource.MANAGEMENT_LOCK.abbr}",
+            name=f"{self.storage_account.storage_account.name}-{AzureResource.MANAGEMENT_LOCK.abbr}",
+            scope=self.storage_account.storage_account.id,
+            lock_level=lock_level,
         )
 
     @property
-    def storage_account(self) -> StorageAccount:
+    def storage_account(self) -> StorageAccountL0:
         """Gets the Azure storage account."""
         return self._storage_account
 
@@ -122,3 +87,53 @@ class StorageAccountLockedL1(Construct):
     def management_lock(self) -> ManagementLock:
         """Gets the management lock applied to the storage account."""
         return self._management_lock
+
+    @classmethod
+    def from_config(
+        cls, scope: Construct, id_: str, env: str, config: dict, resource_group_l0: ResourceGroupL0
+    ) -> "StorageAccountLockedL1":
+        """
+        Create a StorageAccountLockedL1 construct by unpacking parameters from a configuration dictionary.
+
+        Expected format of 'config':
+        {
+            "name": "<storage account name>",
+            "location": "<AzureLocation enum value name>",
+            "sequence_number": "<sequence number>",
+            "resource_group_name": "<resource group name>",
+            "account_replication_type": "<replication type>",
+            "account_kind": "<account kind>",
+            "account_tier": "<account tier>",
+            "cross_tenant_replication_enabled": <bool>,
+            "access_tier": "<access tier>",
+            "shared_access_key_enabled": <bool>,
+            "public_network_access_enabled": <bool>,
+            "is_hns_enabled": <bool>,
+            "local_user_enabled": <bool>,
+            "infrastructure_encryption_enabled": <bool>,
+            "sftp_enabled": <bool>,
+            "blob_properties": {
+                "delete_retention_days": <int>
+            },
+            "management_lock": {
+                "lock_level": "<lock level>"
+            }
+        }
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            config (dict): A dictionary containing storage account configuration.
+            env (str): The environment name.
+            resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
+
+        Returns:
+            StorageAccountLockedL1: A fully-initialized StorageAccountLockedL1 construct.
+        """
+        storage_account = StorageAccountL0.from_config(
+            scope, "StorageAccountConstruct", config=config, env=env, resource_group_l0=resource_group_l0
+        )
+        lock_level = config["management_lock"][LOCK_LEVEL_KEY]
+
+        return cls(scope, id_, _=env, storage_account=storage_account, lock_level=lock_level)

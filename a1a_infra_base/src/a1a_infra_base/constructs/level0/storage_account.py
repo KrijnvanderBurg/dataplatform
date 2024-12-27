@@ -8,14 +8,67 @@ Classes:
     StorageAccountL0: A level 0 construct that creates and manages an Azure storage account.
 """
 
+from typing import Final
+
 from cdktf_cdktf_provider_azurerm.storage_account import (
     StorageAccount,
     StorageAccountBlobProperties,
     StorageAccountBlobPropertiesDeleteRetentionPolicy,
 )
 from constructs import Construct
+
 from a1a_infra_base.constants import AzureLocation, AzureResource
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
+
+NAME_KEY: Final[str] = "name"
+LOCATION_KEY: Final[str] = "location"
+SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
+RESOURCE_GROUP_NAME_KEY: Final[str] = "resource_group_name"
+ACCOUNT_REPLICATION_TYPE_KEY: Final[str] = "account_replication_type"
+ACCOUNT_KIND_KEY: Final[str] = "account_kind"
+ACCOUNT_TIER_KEY: Final[str] = "account_tier"
+CROSS_TENANT_REPLICATION_ENABLED_KEY: Final[str] = "cross_tenant_replication_enabled"
+ACCESS_TIER_KEY: Final[str] = "access_tier"
+SHARED_ACCESS_KEY_ENABLED_KEY: Final[str] = "shared_access_key_enabled"
+PUBLIC_NETWORK_ACCESS_ENABLED_KEY: Final[str] = "public_network_access_enabled"
+IS_HNS_ENABLED_KEY: Final[str] = "is_hns_enabled"
+LOCAL_USER_ENABLED_KEY: Final[str] = "local_user_enabled"
+INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY: Final[str] = "infrastructure_encryption_enabled"
+SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
+BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
+DELETE_RETENTION_DAYS_KEY: Final[str] = "delete_retention_days"
+
+
+class BlobProperties:
+    """
+    A class to represent the blob properties configuration.
+
+    Attributes:
+        delete_retention_days (int): The number of days to retain deleted items.
+    """
+
+    def __init__(self, delete_retention_days: int) -> None:
+        """
+        Initializes the BlobProperties.
+
+        Args:
+            delete_retention_days (int): The number of days to retain deleted items.
+        """
+        self.delete_retention_days = delete_retention_days
+
+    @classmethod
+    def from_config(cls, config: dict) -> "BlobProperties":
+        """
+        Create a BlobProperties instance from a configuration dictionary.
+
+        Args:
+            config (dict): A dictionary containing blob properties configuration.
+
+        Returns:
+            BlobProperties: A fully-initialized BlobProperties instance.
+        """
+        delete_retention_days = config[DELETE_RETENTION_DAYS_KEY]
+        return cls(delete_retention_days)
 
 
 class StorageAccountL0(Construct):
@@ -31,8 +84,8 @@ class StorageAccountL0(Construct):
         scope: Construct,
         id_: str,
         *,
-        name: str,
         env: str,
+        name: str,
         location: AzureLocation,
         sequence_number: str,
         resource_group_l0: ResourceGroupL0,
@@ -47,7 +100,7 @@ class StorageAccountL0(Construct):
         local_user_enabled: bool,
         infrastructure_encryption_enabled: bool,
         sftp_enabled: bool,
-        delete_retention_days: int,
+        blob_properties: BlobProperties,
     ) -> None:
         """
         Initializes the StorageAccountL0 construct.
@@ -55,8 +108,8 @@ class StorageAccountL0(Construct):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            name (str): The name of the storage account.
             env (str): The environment name.
+            name (str): The name of the storage account.
             location (AzureLocation): The Azure location.
             sequence_number (str): The sequence number.
             resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
@@ -71,7 +124,7 @@ class StorageAccountL0(Construct):
             local_user_enabled (bool): Whether local user is enabled.
             infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
             sftp_enabled (bool): Whether SFTP is enabled.
-            delete_retention_days (int): The number of days to retain deleted items.
+            blob_properties (BlobProperties): The blob properties configuration.
         """
         super().__init__(scope, id_)
         self._storage_account = StorageAccount(
@@ -93,7 +146,7 @@ class StorageAccountL0(Construct):
             sftp_enabled=sftp_enabled,
             blob_properties=StorageAccountBlobProperties(
                 delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
-                    days=delete_retention_days,
+                    days=blob_properties.delete_retention_days,
                 )
             ),
         )
@@ -102,3 +155,80 @@ class StorageAccountL0(Construct):
     def storage_account(self) -> StorageAccount:
         """Gets the Azure storage account."""
         return self._storage_account
+
+    @classmethod
+    def from_config(
+        cls, scope: Construct, id_: str, env: str, config: dict, resource_group_l0: ResourceGroupL0
+    ) -> "StorageAccountL0":
+        """
+        Create a StorageAccountL0 construct by unpacking parameters from a configuration dictionary.
+
+        Expected format of 'config':
+        {
+            "name": "<storage account name>",
+            "location": "<AzureLocation enum value name>",
+            "sequence_number": "<sequence number>",
+            "resource_group_name": "<resource group name>",
+            "account_replication_type": "<replication type>",
+            "account_kind": "<account kind>",
+            "account_tier": "<account tier>",
+            "cross_tenant_replication_enabled": <bool>,
+            "access_tier": "<access tier>",
+            "shared_access_key_enabled": <bool>,
+            "public_network_access_enabled": <bool>,
+            "is_hns_enabled": <bool>,
+            "local_user_enabled": <bool>,
+            "infrastructure_encryption_enabled": <bool>,
+            "sftp_enabled": <bool>,
+            "blob_properties": {
+                "delete_retention_days": <int>
+            }
+        }
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            config (dict): A dictionary containing storage account configuration.
+            resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
+
+        Returns:
+            StorageAccountL0: A fully-initialized StorageAccountL0 construct.
+        """
+        name = config[NAME_KEY]
+        location = AzureLocation(config[LOCATION_KEY])
+        sequence_number = config[SEQUENCE_NUMBER_KEY]
+        account_replication_type = config[ACCOUNT_REPLICATION_TYPE_KEY]
+        account_kind = config[ACCOUNT_KIND_KEY]
+        account_tier = config[ACCOUNT_TIER_KEY]
+        cross_tenant_replication_enabled = config[CROSS_TENANT_REPLICATION_ENABLED_KEY]
+        access_tier = config[ACCESS_TIER_KEY]
+        shared_access_key_enabled = config[SHARED_ACCESS_KEY_ENABLED_KEY]
+        public_network_access_enabled = config[PUBLIC_NETWORK_ACCESS_ENABLED_KEY]
+        is_hns_enabled = config[IS_HNS_ENABLED_KEY]
+        local_user_enabled = config[LOCAL_USER_ENABLED_KEY]
+        infrastructure_encryption_enabled = config[INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY]
+        sftp_enabled = config[SFTP_ENABLED_KEY]
+        blob_properties = BlobProperties.from_config(config[BLOB_PROPERTIES_KEY])
+
+        return cls(
+            scope,
+            id_,
+            env=env,
+            name=name,
+            location=location,
+            sequence_number=sequence_number,
+            resource_group_l0=resource_group_l0,
+            account_replication_type=account_replication_type,
+            account_kind=account_kind,
+            account_tier=account_tier,
+            cross_tenant_replication_enabled=cross_tenant_replication_enabled,
+            access_tier=access_tier,
+            shared_access_key_enabled=shared_access_key_enabled,
+            public_network_access_enabled=public_network_access_enabled,
+            is_hns_enabled=is_hns_enabled,
+            local_user_enabled=local_user_enabled,
+            infrastructure_encryption_enabled=infrastructure_encryption_enabled,
+            sftp_enabled=sftp_enabled,
+            blob_properties=blob_properties,
+        )
