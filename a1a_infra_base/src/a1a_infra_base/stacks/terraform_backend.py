@@ -53,6 +53,7 @@ Example of a config dictionary for this stack:
 }
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
@@ -60,11 +61,16 @@ from cdktf import LocalBackend, TerraformStack
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from constructs import Construct
 
+from a1a_infra_base.backend import BackendConfig
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
-from a1a_infra_base.constructs.level1.storage_account_locked import StorageAccountLockedL1, StorageAccountLockedL1Config
+from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
+from a1a_infra_base.logger import setup_logger
+
+logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 BACKEND_KEY: Final[str] = "backend"
+PATH: Final[str] = "path"
 RESOURCE_GROUP_KEY: Final[str] = "resource_group"
 STORAGE_ACCOUNT_KEY: Final[str] = "storage_account"
 
@@ -77,10 +83,9 @@ class TerraformBackendStackConfig:
     This class is responsible for unpacking parameters from a configuration dictionary.
     """
 
-    env: str
-    backend_path: str
+    backend_config: BackendConfig
     resource_group_config: ResourceGroupL0Config
-    storage_account_config: StorageAccountLockedL1Config
+    storage_account_config: StorageAccountL0Config
 
     @classmethod
     def from_config(cls, env: str, config: dict[str, Any]) -> Self:
@@ -89,22 +94,19 @@ class TerraformBackendStackConfig:
 
         Args:
             env (str): The environment name.
-            config (dict): A dictionary containing the stack configuration.
+            config (dict): A dictionary containing the configuration.
 
         Returns:
-            TerraformBackendStackConfig: An instance of TerraformBackendStackConfig.
+            TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
         """
-        backend_cfg = config[BACKEND_KEY]
-        resource_group_cfg = config[RESOURCE_GROUP_KEY]
-        storage_account_cfg = config[STORAGE_ACCOUNT_KEY]
 
-        backend_path = backend_cfg["path"]
-        resource_group_config = ResourceGroupL0Config.from_config(env=env, config=resource_group_cfg)
-        storage_account_config = StorageAccountLockedL1Config.from_config(env=env, config=storage_account_cfg)
+        backend_config = BackendConfig.from_config(config[BACKEND_KEY])
+
+        resource_group_config = ResourceGroupL0Config.from_config(env=env, config=config[RESOURCE_GROUP_KEY])
+        storage_account_config = StorageAccountL0Config.from_config(env=env, config=config[STORAGE_ACCOUNT_KEY])
 
         return cls(
-            env=env,
-            backend_path=backend_path,
+            backend_config=backend_config,
             resource_group_config=resource_group_config,
             storage_account_config=storage_account_config,
         )
@@ -167,32 +169,32 @@ class TerraformBackendStack(TerraformStack):
         config: TerraformBackendStackConfig,
     ) -> None:
         """
-        Initializes the TerraformBackendStack using the supplied config dictionary.
+        Initializes the TerraformBackendStack construct.
 
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            config (TerraformBackendStackConfig): The configuration for the stack.
+            config (TerraformBackendStackConfig): The configuration for the Terraform stack.
         """
         super().__init__(scope, id_)
 
-        LocalBackend(self, path=config.backend_path)
+        # Set up the local backend
+        LocalBackend(self, path=config.backend_config.path)
 
-        self._azure_provider = AzurermProvider(
-            self,
-            "AzureResourceManagerProvider",
-            storage_use_azuread=True,
-            features=[{}],
-        )
+        # Set up the Azure provider
+        AzurermProvider(self, "AzureRM", features=[{}])
 
-        self.resource_group = ResourceGroupL0(
+        # Create the resource group
+        resource_group = ResourceGroupL0(
             self,
             "ResourceGroupL0",
             config=config.resource_group_config,
         )
-        self.storage_account = StorageAccountLockedL1(
+
+        # Create the storage account with optional management lock
+        StorageAccountL0(
             self,
-            "StorageAccountLockedL1",
+            "StorageAccountL0",
             config=config.storage_account_config,
-            resource_group_l0=self.resource_group,
+            resource_group_l0=resource_group,
         )

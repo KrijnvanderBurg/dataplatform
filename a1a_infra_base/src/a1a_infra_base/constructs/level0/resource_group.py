@@ -9,6 +9,7 @@ Classes:
     ResourceGroupConfig: A configuration class for ResourceGroupL0.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
@@ -16,6 +17,9 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
+from a1a_infra_base.logger import setup_logger
+
+logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 NAME_KEY: Final[str] = "name"

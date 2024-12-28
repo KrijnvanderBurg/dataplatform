@@ -506,7 +506,7 @@
                             "type": "shell",
                             "command": "${workspaceFolder}/../.tools/v1/commands/cdktf_synth.sh",
                             "args": [
-                                "--output_path=${workspaceFolder}/output/"
+                                "--output_path=${workspaceFolder}/dist/"
                             ],
                             "presentation": {
                                 "panel": "dedicated",

@@ -9,6 +9,7 @@ Classes:
     StorageAccountConfig: A configuration class for StorageAccountL0.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
@@ -20,8 +21,12 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
+from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
+from a1a_infra_base.logger import setup_logger
+
+logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 NAME_KEY: Final[str] = "name"
@@ -42,6 +47,7 @@ BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
 DELETE_RETENTION_POLICY_KEY: Final[str] = "delete_retention_policy"
 DELETE_RETENTION_DAYS_KEY: Final[str] = "delete_retention_days"
 CONTAINERS_KEY: Final[str] = "containers"
+MANAGEMENT_LOCK_KEY: Final[str] = "management_lock"
 
 
 @dataclass
@@ -118,7 +124,8 @@ class StorageAccountL0Config:
         infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
         sftp_enabled (bool): Whether SFTP is enabled.
         blob_properties (BlobProperties): The blob properties configuration.
-        containers (StorageContainerL0Config): The list of storage containers configuration.
+        containers (list[StorageContainerL0Config]): The list of storage containers configuration.
+        management_lock_config (ManagementLockL0Config): The management lock configuration.
     """
 
     env: str
@@ -138,6 +145,7 @@ class StorageAccountL0Config:
     sftp_enabled: bool
     blob_properties: BlobProperties
     containers: list[StorageContainerL0Config]
+    management_lock_config: ManagementLockL0Config | None
 
     @property
     def full_name(self) -> str:
@@ -174,7 +182,11 @@ class StorageAccountL0Config:
                 {
                     "name": "<container name>",
                 }
-            ]
+            ],
+            "management_lock": {
+                "lock_level": "<lock level>",
+                "notes": "<notes>"
+            }
         }
 
         Args:
@@ -201,8 +213,14 @@ class StorageAccountL0Config:
         blob_properties = BlobProperties.from_config(config[BLOB_PROPERTIES_KEY])
 
         containers = []
-        for container in config[CONTAINERS_KEY]:
-            containers.append(StorageContainerL0Config.from_config(config=container))
+        for container_config in config.get(CONTAINERS_KEY, []):
+            containers.append(StorageContainerL0Config.from_config(container_config))
+
+        management_lock = config.get(MANAGEMENT_LOCK_KEY, None)
+        if management_lock:
+            management_lock = ManagementLockL0Config.from_config(
+                env=env, name=f"{name}{env}{location.abbr}{sequence_number}", config=config[MANAGEMENT_LOCK_KEY]
+            )
 
         return cls(
             env=env,
@@ -222,6 +240,7 @@ class StorageAccountL0Config:
             sftp_enabled=sftp_enabled,
             blob_properties=blob_properties,
             containers=containers,
+            management_lock_config=management_lock,
         )
 
 
@@ -231,6 +250,7 @@ class StorageAccountL0(Construct):
 
     Attributes:
         storage_account (StorageAccount): The Azure storage account.
+        management_lock (ManagementLockL0): The management lock applied to the storage account.
     """
 
     def __init__(
@@ -283,7 +303,22 @@ class StorageAccountL0(Construct):
                 storage_account_id=self.storage_account.id,
             )
 
+        if config.management_lock_config:
+            self._management_lock = ManagementLockL0(
+                self,
+                "ManagementLockL0",
+                config=config.management_lock_config,
+                resource_id=self.storage_account.id,
+            )
+        else:
+            self._management_lock = None
+
     @property
     def storage_account(self) -> StorageAccount:
         """Gets the Azure storage account."""
         return self._storage_account
+
+    @property
+    def management_lock(self) -> ManagementLockL0 | None:
+        """Gets the management lock applied to the storage account."""
+        return self._management_lock

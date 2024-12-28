@@ -21,6 +21,8 @@ ENV: Final[str] = "env"
 STACKS: Final[str] = "stacks"
 
 TERRAFORM_BACKEND_KEY: Final[str] = "terraform_backend"
+
+NAME: Final[str] = "name"
 ENABLED_KEY: Final[str] = "enabled"
 
 if __name__ == "__main__":
@@ -54,14 +56,14 @@ if __name__ == "__main__":
     stacks: list[dict[str, Any]] = config[STACKS]
 
     for stack in stacks:
-        if TERRAFORM_BACKEND_KEY in stack:
-            stack_terraform_backend: dict[str, Any] = stack[TERRAFORM_BACKEND_KEY]
-            enabled_cfg: bool = stack_terraform_backend[ENABLED_KEY]
+        if stack[NAME] == TERRAFORM_BACKEND_KEY:
+            name_cfg: str = stack[NAME]
+            enabled_cfg: bool = stack[ENABLED_KEY]
             if not enabled_cfg:
                 logger.info("Terraform backend stack is disabled.")
                 break
 
-            stack_config = TerraformBackendStackConfig.from_config(env=env, config=stack_terraform_backend)
+            stack_config = TerraformBackendStackConfig.from_config(env=env, config=stack)
             TerraformBackendStack(app, "terraform-backend", config=stack_config)
 
     app.synth()

@@ -9,6 +9,7 @@ Classes:
     ManagementLockL0Config: A configuration class for ManagementLockL0.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
@@ -16,6 +17,9 @@ from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureResource
+from a1a_infra_base.logger import setup_logger
+
+logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 LOCK_LEVEL_KEY: Final[str] = "lock_level"
