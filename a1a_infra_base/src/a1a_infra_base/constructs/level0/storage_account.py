@@ -1,13 +1,15 @@
 """
 Module storage_account
 
-This module defines the StorageAccountL0 class, which is responsible for creating
-and managing an Azure storage account with specific configurations.
+This module defines the StorageAccountL0 class and the StorageAccountConfig class,
+which are responsible for creating and managing an Azure storage account with specific configurations.
 
 Classes:
     StorageAccountL0: A level 0 construct that creates and manages an Azure storage account.
+    StorageAccountConfig: A configuration class for StorageAccountL0.
 """
 
+from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.storage_account import (
@@ -24,7 +26,6 @@ from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 NAME_KEY: Final[str] = "name"
 LOCATION_KEY: Final[str] = "location"
 SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
-RESOURCE_GROUP_NAME_KEY: Final[str] = "resource_group_name"
 ACCOUNT_REPLICATION_TYPE_KEY: Final[str] = "account_replication_type"
 ACCOUNT_KIND_KEY: Final[str] = "account_kind"
 ACCOUNT_TIER_KEY: Final[str] = "account_tier"
@@ -39,8 +40,10 @@ SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
 BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
 DELETE_RETENTION_POLICY_KEY: Final[str] = "delete_retention_policy"
 DELETE_RETENTION_DAYS_KEY: Final[str] = "delete_retention_days"
+ENV_KEY: Final[str] = "env"
 
 
+@dataclass
 class DeleteRetentionPolicy:
     """
     A class to represent the delete retention policy configuration.
@@ -49,22 +52,10 @@ class DeleteRetentionPolicy:
         days (int): The number of days to retain deleted items.
     """
 
-    def __init__(self, days: int) -> None:
-        """
-        Initializes the DeleteRetentionPolicy.
-
-        Args:
-            days (int): The number of days to retain deleted items.
-        """
-        self._days = days
-
-    @property
-    def days(self) -> int:
-        """Gets the number of days to retain deleted items."""
-        return self._days
+    days: int
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Self:
+    def from_config(cls, config: dict[str, Any]) -> "DeleteRetentionPolicy":
         """
         Create a DeleteRetentionPolicy instance from a configuration dictionary.
 
@@ -78,6 +69,7 @@ class DeleteRetentionPolicy:
         return cls(days)
 
 
+@dataclass
 class BlobProperties:
     """
     A class to represent the blob properties configuration.
@@ -86,22 +78,10 @@ class BlobProperties:
         delete_retention_policy (DeleteRetentionPolicy): The delete retention policy configuration.
     """
 
-    def __init__(self, delete_retention_policy: DeleteRetentionPolicy) -> None:
-        """
-        Initializes the BlobProperties.
-
-        Args:
-            delete_retention_policy (DeleteRetentionPolicy): The delete retention policy configuration.
-        """
-        self._delete_retention_policy = delete_retention_policy
-
-    @property
-    def delete_retention_policy(self) -> DeleteRetentionPolicy:
-        """Gets the delete retention policy configuration."""
-        return self._delete_retention_policy
+    delete_retention_policy: DeleteRetentionPolicy
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Self:
+    def from_config(cls, config: dict[str, Any]) -> "BlobProperties":
         """
         Create a BlobProperties instance from a configuration dictionary.
 
@@ -115,104 +95,62 @@ class BlobProperties:
         return cls(delete_retention_policy)
 
 
-class StorageAccountL0(Construct):
+@dataclass
+class StorageAccountL0Config:
     """
-    A level 0 construct that creates and manages an Azure storage account.
+    A configuration class for StorageAccountL0.
 
     Attributes:
-        storage_account (StorageAccount): The Azure storage account.
+        env (str): The environment name.
+        name (str): The name of the storage account.
+        location (AzureLocation): The Azure location.
+        sequence_number (str): The sequence number.
+        account_replication_type (str): The replication type of the storage account.
+        account_kind (str): The kind of the storage account.
+        account_tier (str): The tier of the storage account.
+        cross_tenant_replication_enabled (bool): Whether cross-tenant replication is enabled.
+        access_tier (str): The access tier of the storage account.
+        shared_access_key_enabled (bool): Whether shared access key is enabled.
+        public_network_access_enabled (bool): Whether public network access is enabled.
+        is_hns_enabled (bool): Whether hierarchical namespace is enabled.
+        local_user_enabled (bool): Whether local user is enabled.
+        infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
+        sftp_enabled (bool): Whether SFTP is enabled.
+        blob_properties (BlobProperties): The blob properties configuration.
     """
 
-    def __init__(
-        self,
-        scope: Construct,
-        id_: str,
-        *,
-        env: str,
-        name: str,
-        location: AzureLocation,
-        sequence_number: str,
-        resource_group_l0: ResourceGroupL0,
-        account_replication_type: str,
-        account_kind: str,
-        account_tier: str,
-        cross_tenant_replication_enabled: bool,
-        access_tier: str,
-        shared_access_key_enabled: bool,
-        public_network_access_enabled: bool,
-        is_hns_enabled: bool,
-        local_user_enabled: bool,
-        infrastructure_encryption_enabled: bool,
-        sftp_enabled: bool,
-        blob_properties: BlobProperties,
-    ) -> None:
-        """
-        Initializes the StorageAccountL0 construct.
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            name (str): The name of the storage account.
-            location (AzureLocation): The Azure location.
-            sequence_number (str): The sequence number.
-            resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
-            account_replication_type (str): The replication type of the storage account.
-            account_kind (str): The kind of the storage account.
-            account_tier (str): The tier of the storage account.
-            cross_tenant_replication_enabled (bool): Whether cross-tenant replication is enabled.
-            access_tier (str): The access tier of the storage account.
-            shared_access_key_enabled (bool): Whether shared access key is enabled.
-            public_network_access_enabled (bool): Whether public network access is enabled.
-            is_hns_enabled (bool): Whether hierarchical namespace is enabled.
-            local_user_enabled (bool): Whether local user is enabled.
-            infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
-            sftp_enabled (bool): Whether SFTP is enabled.
-            blob_properties (BlobProperties): The blob properties configuration.
-        """
-        super().__init__(scope, id_)
-        self._storage_account = StorageAccount(
-            self,
-            f"{AzureResource.STORAGE_ACCOUNT.abbr}_{name}_{env}_{location.abbr}_{sequence_number}",
-            name=f"{AzureResource.STORAGE_ACCOUNT.abbr}-{name}-{env}-{location.abbr}-{sequence_number}",
-            location=location.name,
-            resource_group_name=resource_group_l0.resource_group.name,
-            account_replication_type=account_replication_type,
-            account_kind=account_kind,
-            account_tier=account_tier,
-            cross_tenant_replication_enabled=cross_tenant_replication_enabled,
-            access_tier=access_tier,
-            shared_access_key_enabled=shared_access_key_enabled,
-            public_network_access_enabled=public_network_access_enabled,
-            is_hns_enabled=is_hns_enabled,
-            local_user_enabled=local_user_enabled,
-            infrastructure_encryption_enabled=infrastructure_encryption_enabled,
-            sftp_enabled=sftp_enabled,
-            blob_properties=StorageAccountBlobProperties(
-                delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
-                    days=blob_properties.delete_retention_policy.days,
-                )
-            ),
-        )
+    env: str
+    name: str
+    location: AzureLocation
+    sequence_number: str
+    account_replication_type: str
+    account_kind: str
+    account_tier: str
+    cross_tenant_replication_enabled: bool
+    access_tier: str
+    shared_access_key_enabled: bool
+    public_network_access_enabled: bool
+    is_hns_enabled: bool
+    local_user_enabled: bool
+    infrastructure_encryption_enabled: bool
+    sftp_enabled: bool
+    blob_properties: BlobProperties
 
     @property
-    def storage_account(self) -> StorageAccount:
-        """Gets the Azure storage account."""
-        return self._storage_account
+    def full_name(self) -> str:
+        """Generates the full name for the storage account."""
+        return f"{AzureResource.STORAGE_ACCOUNT.abbr}{self.name}{self.env}{self.location.abbr}{self.sequence_number}"
 
     @classmethod
-    def from_config(
-        cls, scope: Construct, id_: str, env: str, config: dict[str, Any], resource_group_l0: ResourceGroupL0
-    ) -> Self:
+    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
         """
-        Create a StorageAccountL0 construct by unpacking parameters from a configuration dictionary.
+        Create a StorageAccountConfig by unpacking parameters from a configuration dictionary.
 
         Expected format of 'config':
         {
             "name": "<storage account name>",
             "location": "<AzureLocation enum value name>",
             "sequence_number": "<sequence number>",
-            "resource_group_name": "<resource group name>",
             "account_replication_type": "<replication type>",
             "account_kind": "<account kind>",
             "account_tier": "<account tier>",
@@ -232,14 +170,11 @@ class StorageAccountL0(Construct):
         }
 
         Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
             env (str): The environment name.
             config (dict): A dictionary containing storage account configuration.
-            resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
 
         Returns:
-            StorageAccountL0: A fully-initialized StorageAccountL0 construct.
+            StorageAccountConfig: A fully-initialized StorageAccountConfig.
         """
         name = config[NAME_KEY]
         location = AzureLocation.from_full_name(config[LOCATION_KEY])
@@ -258,13 +193,10 @@ class StorageAccountL0(Construct):
         blob_properties = BlobProperties.from_config(config[BLOB_PROPERTIES_KEY])
 
         return cls(
-            scope,
-            id_,
             env=env,
             name=name,
             location=location,
             sequence_number=sequence_number,
-            resource_group_l0=resource_group_l0,
             account_replication_type=account_replication_type,
             account_kind=account_kind,
             account_tier=account_tier,
@@ -278,3 +210,59 @@ class StorageAccountL0(Construct):
             sftp_enabled=sftp_enabled,
             blob_properties=blob_properties,
         )
+
+
+class StorageAccountL0(Construct):
+    """
+    A level 0 construct that creates and manages an Azure storage account.
+
+    Attributes:
+        storage_account (StorageAccount): The Azure storage account.
+    """
+
+    def __init__(
+        self,
+        scope: Construct,
+        id_: str,
+        *,
+        config: StorageAccountL0Config,
+        resource_group_l0: ResourceGroupL0,
+    ) -> None:
+        """
+        Initializes the StorageAccountL0 construct.
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            config (StorageAccountConfig): The configuration for the storage account.
+            resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
+        """
+        super().__init__(scope, id_)
+        self._storage_account = StorageAccount(
+            self,
+            config.full_name,
+            name=config.full_name,
+            location=config.location.name,
+            resource_group_name=resource_group_l0.resource_group.name,
+            account_replication_type=config.account_replication_type,
+            account_kind=config.account_kind,
+            account_tier=config.account_tier,
+            cross_tenant_replication_enabled=config.cross_tenant_replication_enabled,
+            access_tier=config.access_tier,
+            shared_access_key_enabled=config.shared_access_key_enabled,
+            public_network_access_enabled=config.public_network_access_enabled,
+            is_hns_enabled=config.is_hns_enabled,
+            local_user_enabled=config.local_user_enabled,
+            infrastructure_encryption_enabled=config.infrastructure_encryption_enabled,
+            sftp_enabled=config.sftp_enabled,
+            blob_properties=StorageAccountBlobProperties(
+                delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
+                    days=config.blob_properties.delete_retention_policy.days,
+                )
+            ),
+        )
+
+    @property
+    def storage_account(self) -> StorageAccount:
+        """Gets the Azure storage account."""
+        return self._storage_account

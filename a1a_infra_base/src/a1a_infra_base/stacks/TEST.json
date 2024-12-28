@@ -35,7 +35,8 @@
                         }
                     },
                     "management_lock": {
-                        "lock_level": "CanNotDelete"
+                        "lock_level": "CanNotDelete",
+                        "notes": "Required for Terraform deployments."
                     }
                 }
             }

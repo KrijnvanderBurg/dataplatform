@@ -13,7 +13,7 @@ from typing import Any, Final
 from cdktf import App
 
 from a1a_infra_base.logger import setup_logger
-from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack
+from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack, TerraformBackendStackConfig
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -61,7 +61,8 @@ if __name__ == "__main__":
                 logger.info("Terraform backend stack is disabled.")
                 break
 
-            TerraformBackendStack.from_config(app, "terraform-backend", env=env, config=stack_terraform_backend)
+            stack_config = TerraformBackendStackConfig.from_config(env=env, config=stack_terraform_backend)
+            TerraformBackendStack(app, "terraform-backend", config=stack_config)
 
     app.synth()
     logger.info("Application finished.")

@@ -1,13 +1,15 @@
 """
 Module management_lock
 
-This module defines the ManagementLockL0 class, which is responsible for creating
-and managing a management lock for Azure resources.
+This module defines the ManagementLockL0 class and the ManagementLockL0Config class,
+which are responsible for creating and managing a management lock for Azure resources.
 
 Classes:
     ManagementLockL0: A level 0 construct that creates and manages a management lock.
+    ManagementLockL0Config: A configuration class for ManagementLockL0.
 """
 
+from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
@@ -18,6 +20,52 @@ from a1a_infra_base.constants import AzureResource
 # Constants for dictionary keys
 LOCK_LEVEL_KEY: Final[str] = "lock_level"
 NOTES_KEY: Final[str] = "notes"
+
+
+@dataclass
+class ManagementLockL0Config:
+    """
+    A configuration class for ManagementLockL0.
+
+    Attributes:
+        env (str): The environment name.
+        name (str): The name of the resource to which the lock is applied.
+        lock_level (str): The lock level for the management lock.
+        notes (str): Notes for the management lock.
+    """
+
+    env: str
+    name: str
+    lock_level: str
+    notes: str
+
+    @property
+    def full_name(self) -> str:
+        """Generates the full name for the management lock."""
+        return f"{self.name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+
+    @classmethod
+    def from_config(cls, env: str, name: str, config: dict[str, Any]) -> Self:
+        """
+        Create a ManagementLockL0Config by unpacking parameters from a configuration dictionary.
+
+        Expected format of 'config':
+        {
+            "lock_level": "<lock level>",
+            "notes": "<notes>"
+        }
+
+        Args:
+            env (str): The environment name.
+            name (str): The name of the resource to which the lock is applied.
+            config (dict): A dictionary containing management lock configuration.
+
+        Returns:
+            ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
+        """
+        lock_level = config[LOCK_LEVEL_KEY]
+        notes = config[NOTES_KEY]
+        return cls(env=env, name=name, lock_level=lock_level, notes=notes)
 
 
 class ManagementLockL0(Construct):
@@ -34,8 +82,7 @@ class ManagementLockL0(Construct):
         id_: str,
         *,
         resource_id: str,
-        lock_level: str,
-        notes: str,
+        config: ManagementLockL0Config,
     ) -> None:
         """
         Initializes the ManagementLockL0 construct.
@@ -44,46 +91,20 @@ class ManagementLockL0(Construct):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             resource_id (str): The ID of the resource to which the lock is applied.
-            lock_level (str): The lock level for the management lock.
-            notes (str): Notes for the management lock.
+            config (ManagementLockL0Config): The configuration for the management lock.
         """
         super().__init__(scope, id_)
 
         self._management_lock = ManagementLock(
             self,
-            f"{resource_id}_{AzureResource.MANAGEMENT_LOCK.abbr}",
-            name=f"{resource_id}-{AzureResource.MANAGEMENT_LOCK.abbr}",
+            config.full_name,
+            name=config.full_name,
             scope=resource_id,
-            lock_level=lock_level,
-            notes=notes,
+            lock_level=config.lock_level,
+            notes=config.notes,
         )
 
     @property
     def management_lock(self) -> ManagementLock:
         """Gets the management lock applied to the resource."""
         return self._management_lock
-
-    @classmethod
-    def from_config(cls, scope: Construct, id_: str, config: dict[str, Any], resource_id: str) -> Self:
-        """
-        Create a ManagementLockL0 construct by unpacking parameters from a configuration dictionary.
-
-        Expected format of 'config':
-        {
-            "lock_level": "<lock level>",
-            "notes": "<notes>"
-        }
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            config (dict): A dictionary containing management lock configuration.
-            resource_id (str): The ID of the resource to which the lock is applied.
-
-        Returns:
-            ManagementLockL0: A fully-initialized ManagementLockL0 construct.
-        """
-        lock_level = config[LOCK_LEVEL_KEY]
-        notes = config.get(NOTES_KEY, "")
-
-        return cls(scope=scope, id_=id_, resource_id=resource_id, lock_level=lock_level, notes=notes)

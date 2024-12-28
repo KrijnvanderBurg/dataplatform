@@ -21,36 +21,37 @@
   },
   "resource": {
     "azurerm_management_lock": {
-      "terraform-backend_st_init_prod_gwc_01_stinitprodgwc01_lock_8A4A0554": {
+      "StorageAccountLockedL1_ManagementLockL0_stinitprodgwc01-lock_44EA0513": {
         "//": {
           "metadata": {
-            "path": "terraform-backend/terraform-backend/st_init_prod_gwc_01/stinitprodgwc01_lock",
-            "uniqueId": "terraform-backend_st_init_prod_gwc_01_stinitprodgwc01_lock_8A4A0554"
+            "path": "terraform-backend/StorageAccountLockedL1/ManagementLockL0/stinitprodgwc01-lock",
+            "uniqueId": "StorageAccountLockedL1_ManagementLockL0_stinitprodgwc01-lock_44EA0513"
           }
         },
         "lock_level": "CanNotDelete",
-        "name": "${azurerm_storage_account.terraform-backend_st_init_prod_gwc_01_FA9E216E.name}-lock",
-        "scope": "${azurerm_storage_account.terraform-backend_st_init_prod_gwc_01_FA9E216E.id}"
+        "name": "stinitprodgwc01-lock",
+        "notes": "Required for Terraform deployments.",
+        "scope": "${azurerm_storage_account.StorageAccountLockedL1_StorageAccountL0_stinitprodgwc01_EBC579B9.id}"
       }
     },
     "azurerm_resource_group": {
-      "terraform-backend_rg_init_prod_gwc_01_A949A12D": {
+      "ResourceGroupL0_ResourceGroup_rg-init-prod-gwc-01_C6B4F5A4": {
         "//": {
           "metadata": {
-            "path": "terraform-backend/terraform-backend/rg_init_prod_gwc_01/rg_init_prod_gwc_01",
-            "uniqueId": "terraform-backend_rg_init_prod_gwc_01_A949A12D"
+            "path": "terraform-backend/ResourceGroupL0/ResourceGroup_rg-init-prod-gwc-01",
+            "uniqueId": "ResourceGroupL0_ResourceGroup_rg-init-prod-gwc-01_C6B4F5A4"
           }
         },
-        "location": "GERMANY_WEST_CENTRAL",
+        "location": "germany west central",
         "name": "rg-init-prod-gwc-01"
       }
     },
     "azurerm_storage_account": {
-      "terraform-backend_st_init_prod_gwc_01_FA9E216E": {
+      "StorageAccountLockedL1_StorageAccountL0_stinitprodgwc01_EBC579B9": {
         "//": {
           "metadata": {
-            "path": "terraform-backend/terraform-backend/st_init_prod_gwc_01/st_init_prod_gwc_01",
-            "uniqueId": "terraform-backend_st_init_prod_gwc_01_FA9E216E"
+            "path": "terraform-backend/StorageAccountLockedL1/StorageAccountL0/stinitprodgwc01",
+            "uniqueId": "StorageAccountLockedL1_StorageAccountL0_stinitprodgwc01_EBC579B9"
           }
         },
         "access_tier": "Hot",
@@ -66,10 +67,10 @@
         "infrastructure_encryption_enabled": true,
         "is_hns_enabled": false,
         "local_user_enabled": false,
-        "location": "germany west central",
+        "location": "GERMANY_WEST_CENTRAL",
         "name": "stinitprodgwc01",
         "public_network_access_enabled": true,
-        "resource_group_name": "${azurerm_resource_group.terraform-backend_rg_init_prod_gwc_01_A949A12D.name}",
+        "resource_group_name": "${azurerm_resource_group.ResourceGroupL0_ResourceGroup_rg-init-prod-gwc-01_C6B4F5A4.name}",
         "sftp_enabled": false,
         "shared_access_key_enabled": false
       }
