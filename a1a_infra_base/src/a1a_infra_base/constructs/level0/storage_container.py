@@ -15,11 +15,8 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
 
-from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0
-
 # Constants for dictionary keys
 NAME_KEY: Final[str] = "name"
-CONTAINER_ACCESS_TYPE_KEY: Final[str] = "container_access_type"
 
 
 @dataclass
@@ -28,14 +25,11 @@ class StorageContainerL0Config:
     A configuration class for StorageContainerL0.
 
     Attributes:
-        env (str): The environment name.
         name (str): The name of the storage container.
         container_access_type (str): The access type of the storage container.
     """
 
-    env: str
     name: str
-    container_access_type: str
 
     @property
     def full_name(self) -> str:
@@ -43,7 +37,7 @@ class StorageContainerL0Config:
         return f"{self.name}"
 
     @classmethod
-    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
+    def from_config(cls, config: dict[str, Any]) -> Self:
         """
         Create a StorageContainerL0Config by unpacking parameters from a configuration dictionary.
 
@@ -54,15 +48,13 @@ class StorageContainerL0Config:
         }
 
         Args:
-            env (str): The environment name.
             config (dict): A dictionary containing storage container configuration.
 
         Returns:
             StorageContainerL0Config: A fully-initialized StorageContainerL0Config.
         """
         name = config[NAME_KEY]
-        container_access_type = config[CONTAINER_ACCESS_TYPE_KEY]
-        return cls(env=env, name=name, container_access_type=container_access_type)
+        return cls(name=name)
 
 
 class StorageContainerL0(Construct):
@@ -79,7 +71,7 @@ class StorageContainerL0(Construct):
         id_: str,
         *,
         config: StorageContainerL0Config,
-        storage_account_l0: StorageAccountL0,
+        storage_account_id: str,
     ) -> None:
         """
         Initializes the StorageContainerL0 construct.
@@ -95,8 +87,7 @@ class StorageContainerL0(Construct):
             self,
             f"StorageContainer_{config.full_name}",
             name=config.name,
-            storage_account_id=storage_account_l0.storage_account.id,
-            container_access_type=config.container_access_type,
+            storage_account_id=storage_account_id,
         )
 
     @property

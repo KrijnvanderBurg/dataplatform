@@ -21,6 +21,7 @@ from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
+from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
 
 # Constants for dictionary keys
 NAME_KEY: Final[str] = "name"
@@ -40,7 +41,7 @@ SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
 BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
 DELETE_RETENTION_POLICY_KEY: Final[str] = "delete_retention_policy"
 DELETE_RETENTION_DAYS_KEY: Final[str] = "delete_retention_days"
-ENV_KEY: Final[str] = "env"
+CONTAINERS_KEY: Final[str] = "containers"
 
 
 @dataclass
@@ -55,7 +56,7 @@ class DeleteRetentionPolicy:
     days: int
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> "DeleteRetentionPolicy":
+    def from_config(cls, config: dict[str, Any]) -> Self:
         """
         Create a DeleteRetentionPolicy instance from a configuration dictionary.
 
@@ -81,7 +82,7 @@ class BlobProperties:
     delete_retention_policy: DeleteRetentionPolicy
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> "BlobProperties":
+    def from_config(cls, config: dict[str, Any]) -> Self:
         """
         Create a BlobProperties instance from a configuration dictionary.
 
@@ -117,6 +118,7 @@ class StorageAccountL0Config:
         infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
         sftp_enabled (bool): Whether SFTP is enabled.
         blob_properties (BlobProperties): The blob properties configuration.
+        containers (StorageContainerL0Config): The list of storage containers configuration.
     """
 
     env: str
@@ -135,6 +137,7 @@ class StorageAccountL0Config:
     infrastructure_encryption_enabled: bool
     sftp_enabled: bool
     blob_properties: BlobProperties
+    containers: list[StorageContainerL0Config]
 
     @property
     def full_name(self) -> str:
@@ -166,7 +169,12 @@ class StorageAccountL0Config:
                 "delete_retention_policy": {
                     "delete_retention_days": <int>
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "<container name>",
+                }
+            ]
         }
 
         Args:
@@ -192,6 +200,10 @@ class StorageAccountL0Config:
         sftp_enabled = config[SFTP_ENABLED_KEY]
         blob_properties = BlobProperties.from_config(config[BLOB_PROPERTIES_KEY])
 
+        containers = []
+        for container in config[CONTAINERS_KEY]:
+            containers.append(StorageContainerL0Config.from_config(config=container))
+
         return cls(
             env=env,
             name=name,
@@ -209,6 +221,7 @@ class StorageAccountL0Config:
             infrastructure_encryption_enabled=infrastructure_encryption_enabled,
             sftp_enabled=sftp_enabled,
             blob_properties=blob_properties,
+            containers=containers,
         )
 
 
@@ -261,6 +274,14 @@ class StorageAccountL0(Construct):
                 )
             ),
         )
+
+        for container in config.containers:
+            StorageContainerL0(
+                self,
+                f"StorageContainer_{container.full_name}",
+                config=container,
+                storage_account_id=self.storage_account.id,
+            )
 
     @property
     def storage_account(self) -> StorageAccount:
