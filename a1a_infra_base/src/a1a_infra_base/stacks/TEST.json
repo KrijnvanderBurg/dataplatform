@@ -1,0 +1,44 @@
+{
+    "env": "prod",
+    "stacks": [
+        {
+            "terraform_backend": {
+                "enabled": true,
+                "backend": {
+                    "type": "local",
+                    "path": "init.tfstate"
+                },
+                "resource_group": {
+                    "name": "init",
+                    "location": "germany west central",
+                    "sequence_number": "01"
+                },
+                "storage_account": {
+                    "name": "init",
+                    "location": "germany west central",
+                    "sequence_number": "01",
+                    "resource_group_name": "init",
+                    "account_replication_type": "LRS",
+                    "account_kind": "StorageV2",
+                    "account_tier": "Standard",
+                    "cross_tenant_replication_enabled": false,
+                    "access_tier": "Hot",
+                    "shared_access_key_enabled": false,
+                    "public_network_access_enabled": true,
+                    "is_hns_enabled": false,
+                    "local_user_enabled": false,
+                    "infrastructure_encryption_enabled": true,
+                    "sftp_enabled": false,
+                    "blob_properties": {
+                        "delete_retention_policy": {
+                            "delete_retention_days": 7
+                        }
+                    },
+                    "management_lock": {
+                        "lock_level": "CanNotDelete"
+                    }
+                }
+            }
+        }
+    ]
+}

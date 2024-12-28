@@ -8,7 +8,7 @@ Classes:
     ResourceGroupL0: A level 0 construct that creates and manages an Azure resource group.
 """
 
-from typing import Final
+from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
@@ -48,7 +48,7 @@ class ResourceGroupL0(Construct):
             self,
             f"{AzureResource.RESOURCE_GROUP.abbr}_{name}_{env}_{location.abbr}_{sequence_number}",
             name=f"{AzureResource.RESOURCE_GROUP.abbr}-{name}-{env}-{location.abbr}-{sequence_number}",
-            location=location.name,
+            location=location.full_name,
         )
 
     @property
@@ -57,7 +57,7 @@ class ResourceGroupL0(Construct):
         return self._resource_group
 
     @classmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, config: dict) -> "ResourceGroupL0":
+    def from_config(cls, scope: Construct, id_: str, env: str, config: dict[str, Any]) -> Self:
         """
         Create a ResourceGroupL0 construct by unpacking parameters from a configuration dictionary.
 
@@ -78,7 +78,7 @@ class ResourceGroupL0(Construct):
             ResourceGroupL0: A fully-initialized ResourceGroupL0 construct.
         """
         name = config[NAME_KEY]
-        location = AzureLocation(config[LOCATION_KEY])
+        location = AzureLocation.from_full_name(config[LOCATION_KEY])
         sequence_number = config[SEQUENCE_NUMBER_KEY]
 
         return cls(scope, id_, name=name, env=env, location=location, sequence_number=sequence_number)

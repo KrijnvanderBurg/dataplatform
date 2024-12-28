@@ -8,7 +8,7 @@ Classes:
     BackendConfig: A class to represent the backend configuration.
 """
 
-from typing import Final
+from typing import Any, Final, Self
 
 # Constants for dictionary keys
 PATH_KEY: Final[str] = "path"
@@ -32,7 +32,7 @@ class BackendConfig:
         self.path = path
 
     @classmethod
-    def from_config(cls, config: dict) -> "BackendConfig":
+    def from_config(cls, config: dict[str, Any]) -> Self:
         """
         Create a BackendConfig instance from a configuration dictionary.
 

@@ -8,7 +8,7 @@ Classes:
     StorageAccountL0: A level 0 construct that creates and manages an Azure storage account.
 """
 
-from typing import Final
+from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.storage_account import (
     StorageAccount,
@@ -20,6 +20,7 @@ from constructs import Construct
 from a1a_infra_base.constants import AzureLocation, AzureResource
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 
+# Constants for dictionary keys
 NAME_KEY: Final[str] = "name"
 LOCATION_KEY: Final[str] = "location"
 SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
@@ -36,7 +37,45 @@ LOCAL_USER_ENABLED_KEY: Final[str] = "local_user_enabled"
 INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY: Final[str] = "infrastructure_encryption_enabled"
 SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
 BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
+DELETE_RETENTION_POLICY_KEY: Final[str] = "delete_retention_policy"
 DELETE_RETENTION_DAYS_KEY: Final[str] = "delete_retention_days"
+
+
+class DeleteRetentionPolicy:
+    """
+    A class to represent the delete retention policy configuration.
+
+    Attributes:
+        days (int): The number of days to retain deleted items.
+    """
+
+    def __init__(self, days: int) -> None:
+        """
+        Initializes the DeleteRetentionPolicy.
+
+        Args:
+            days (int): The number of days to retain deleted items.
+        """
+        self._days = days
+
+    @property
+    def days(self) -> int:
+        """Gets the number of days to retain deleted items."""
+        return self._days
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> Self:
+        """
+        Create a DeleteRetentionPolicy instance from a configuration dictionary.
+
+        Args:
+            config (dict): A dictionary containing delete retention policy configuration.
+
+        Returns:
+            DeleteRetentionPolicy: A fully-initialized DeleteRetentionPolicy instance.
+        """
+        days = config[DELETE_RETENTION_DAYS_KEY]
+        return cls(days)
 
 
 class BlobProperties:
@@ -44,20 +83,25 @@ class BlobProperties:
     A class to represent the blob properties configuration.
 
     Attributes:
-        delete_retention_days (int): The number of days to retain deleted items.
+        delete_retention_policy (DeleteRetentionPolicy): The delete retention policy configuration.
     """
 
-    def __init__(self, delete_retention_days: int) -> None:
+    def __init__(self, delete_retention_policy: DeleteRetentionPolicy) -> None:
         """
         Initializes the BlobProperties.
 
         Args:
-            delete_retention_days (int): The number of days to retain deleted items.
+            delete_retention_policy (DeleteRetentionPolicy): The delete retention policy configuration.
         """
-        self.delete_retention_days = delete_retention_days
+        self._delete_retention_policy = delete_retention_policy
+
+    @property
+    def delete_retention_policy(self) -> DeleteRetentionPolicy:
+        """Gets the delete retention policy configuration."""
+        return self._delete_retention_policy
 
     @classmethod
-    def from_config(cls, config: dict) -> "BlobProperties":
+    def from_config(cls, config: dict[str, Any]) -> Self:
         """
         Create a BlobProperties instance from a configuration dictionary.
 
@@ -67,8 +111,8 @@ class BlobProperties:
         Returns:
             BlobProperties: A fully-initialized BlobProperties instance.
         """
-        delete_retention_days = config[DELETE_RETENTION_DAYS_KEY]
-        return cls(delete_retention_days)
+        delete_retention_policy = DeleteRetentionPolicy.from_config(config[DELETE_RETENTION_POLICY_KEY])
+        return cls(delete_retention_policy)
 
 
 class StorageAccountL0(Construct):
@@ -146,7 +190,7 @@ class StorageAccountL0(Construct):
             sftp_enabled=sftp_enabled,
             blob_properties=StorageAccountBlobProperties(
                 delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
-                    days=blob_properties.delete_retention_days,
+                    days=blob_properties.delete_retention_policy.days,
                 )
             ),
         )
@@ -158,8 +202,8 @@ class StorageAccountL0(Construct):
 
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, config: dict, resource_group_l0: ResourceGroupL0
-    ) -> "StorageAccountL0":
+        cls, scope: Construct, id_: str, env: str, config: dict[str, Any], resource_group_l0: ResourceGroupL0
+    ) -> Self:
         """
         Create a StorageAccountL0 construct by unpacking parameters from a configuration dictionary.
 
@@ -181,7 +225,9 @@ class StorageAccountL0(Construct):
             "infrastructure_encryption_enabled": <bool>,
             "sftp_enabled": <bool>,
             "blob_properties": {
-                "delete_retention_days": <int>
+                "delete_retention_policy": {
+                    "delete_retention_days": <int>
+                }
             }
         }
 
@@ -196,7 +242,7 @@ class StorageAccountL0(Construct):
             StorageAccountL0: A fully-initialized StorageAccountL0 construct.
         """
         name = config[NAME_KEY]
-        location = AzureLocation(config[LOCATION_KEY])
+        location = AzureLocation.from_full_name(config[LOCATION_KEY])
         sequence_number = config[SEQUENCE_NUMBER_KEY]
         account_replication_type = config[ACCOUNT_REPLICATION_TYPE_KEY]
         account_kind = config[ACCOUNT_KIND_KEY]

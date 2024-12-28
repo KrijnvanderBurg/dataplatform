@@ -45,7 +45,7 @@ fail-on=
 
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifiers separated by comma (,)
-disable=R0903,W0246,R0913,R6103,C0411,C0201,W0012,R0902,R0914
+disable=R0903,W0246,R0913,R6103,C0411,C0201,W0012,R0902,R0914,R0917
 # R0913 = too many argument (5)
 # R6103 consider-using-assignment-expr (walrus operator)
 # C0411 wrong-import-order, conflicts with isort
@@ -53,6 +53,7 @@ disable=R0903,W0246,R0913,R6103,C0411,C0201,W0012,R0902,R0914
 # W0012 unknown-option-value
 # R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
 # R0914:too-many-locals
+# R0917: Too many positional arguments
 
 [FORMAT]
 

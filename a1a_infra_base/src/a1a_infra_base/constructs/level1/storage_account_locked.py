@@ -8,12 +8,11 @@ Classes:
     StorageAccountLockedL1: A level 1 construct that creates and manages a locked Azure storage account.
 """
 
-from typing import Final
+from typing import Any, Final, Self
 
-from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from constructs import Construct
 
-from a1a_infra_base.constants import AzureResource
+from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0
 
@@ -35,6 +34,7 @@ INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY: Final[str] = "infrastructure_encryption_e
 SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
 BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
 LOCK_LEVEL_KEY: Final[str] = "lock_level"
+MANAGEMENT_LOCK_KEY: Final[str] = "management_lock"
 
 
 class StorageAccountLockedL1(Construct):
@@ -43,7 +43,7 @@ class StorageAccountLockedL1(Construct):
 
     Attributes:
         storage_account (StorageAccountL0): The Azure storage account.
-        management_lock (ManagementLock): The management lock applied to the storage account.
+        management_lock (ManagementLockL0): The management lock applied to the storage account.
     """
 
     def __init__(
@@ -51,9 +51,8 @@ class StorageAccountLockedL1(Construct):
         scope: Construct,
         id_: str,
         *,
-        _: str,  # env: str, unused thus _. Kept to maintain consistency and available for future use.
         storage_account: StorageAccountL0,
-        lock_level: str,
+        management_lock: ManagementLockL0,
     ) -> None:
         """
         Initializes the StorageAccountLockedL1 construct.
@@ -61,22 +60,13 @@ class StorageAccountLockedL1(Construct):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            env (str): The environment name.
             storage_account (StorageAccountL0): The storage account level 0 construct.
-            lock_level (str): The lock level for the management lock.
+            management_lock (ManagementLockL0): The management lock level 0 construct.
         """
         super().__init__(scope, id_)
 
         self._storage_account = storage_account
-
-        # Add a management lock to the storage account
-        self._management_lock = ManagementLock(
-            self,
-            f"{storage_account.storage_account.name}_{AzureResource.MANAGEMENT_LOCK.abbr}",
-            name=f"{self.storage_account.storage_account.name}-{AzureResource.MANAGEMENT_LOCK.abbr}",
-            scope=self.storage_account.storage_account.id,
-            lock_level=lock_level,
-        )
+        self._management_lock = management_lock
 
     @property
     def storage_account(self) -> StorageAccountL0:
@@ -84,14 +74,14 @@ class StorageAccountLockedL1(Construct):
         return self._storage_account
 
     @property
-    def management_lock(self) -> ManagementLock:
+    def management_lock(self) -> ManagementLockL0:
         """Gets the management lock applied to the storage account."""
         return self._management_lock
 
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, config: dict, resource_group_l0: ResourceGroupL0
-    ) -> "StorageAccountLockedL1":
+        cls, scope: Construct, id_: str, env: str, config: dict[str, Any], resource_group_l0: ResourceGroupL0
+    ) -> Self:
         """
         Create a StorageAccountLockedL1 construct by unpacking parameters from a configuration dictionary.
 
@@ -113,10 +103,13 @@ class StorageAccountLockedL1(Construct):
             "infrastructure_encryption_enabled": <bool>,
             "sftp_enabled": <bool>,
             "blob_properties": {
-                "delete_retention_days": <int>
+                "delete_retention_policy": {
+                    "delete_retention_days": <int>
+                }
             },
             "management_lock": {
                 "lock_level": "<lock level>"
+                "notes": "<notes>"
             }
         }
 
@@ -125,7 +118,6 @@ class StorageAccountLockedL1(Construct):
             id_ (str): The scoped construct ID.
             env (str): The environment name.
             config (dict): A dictionary containing storage account configuration.
-            env (str): The environment name.
             resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
 
         Returns:
@@ -134,6 +126,11 @@ class StorageAccountLockedL1(Construct):
         storage_account = StorageAccountL0.from_config(
             scope, "StorageAccountConstruct", config=config, env=env, resource_group_l0=resource_group_l0
         )
-        lock_level = config["management_lock"][LOCK_LEVEL_KEY]
+        management_lock = ManagementLockL0.from_config(
+            scope,
+            "ManagementLockConstruct",
+            config=config[MANAGEMENT_LOCK_KEY],
+            resource_id=storage_account.storage_account.id,
+        )
 
-        return cls(scope, id_, _=env, storage_account=storage_account, lock_level=lock_level)
+        return cls(scope=scope, id_=id_, storage_account=storage_account, management_lock=management_lock)

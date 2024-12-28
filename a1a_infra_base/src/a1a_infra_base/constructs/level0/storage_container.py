@@ -8,7 +8,7 @@ Classes:
     StorageContainerL0: A level 0 construct that creates and manages an Azure storage container.
 """
 
-from typing import Final
+from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
@@ -34,7 +34,8 @@ class StorageContainerL0(Construct):
         scope: Construct,
         id_: str,
         *,
-        _: str,  # env: str, unused thus _. Kept to maintain consistency and available for future use.
+        # env: str, unused thus _. Kept to maintain consistency and available for future use.
+        _: str,
         name: str,
         storage_account_l0: StorageAccountL0,
         container_access_type: str,
@@ -66,8 +67,8 @@ class StorageContainerL0(Construct):
 
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, config: dict, storage_account_l0: StorageAccountL0
-    ) -> "StorageContainerL0":
+        cls, scope: Construct, id_: str, env: str, config: dict[str, Any], storage_account_l0: StorageAccountL0
+    ) -> Self:
         """
         Create a StorageContainerL0 construct by unpacking parameters from a configuration dictionary.
 

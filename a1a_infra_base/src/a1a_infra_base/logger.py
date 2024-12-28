@@ -17,8 +17,7 @@ from logging.handlers import RotatingFileHandler
 from sys import stdout
 
 # Log format
-FORMATTER = logging.Formatter(
-    "%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 
 
 def setup_logger(name: str, filename: str = "ingestion.log", level: int = logging.INFO) -> logging.Logger:
