@@ -25,6 +25,11 @@ TERRAFORM_BACKEND_KEY: Final[str] = "terraform_backend"
 NAME: Final[str] = "name"
 ENABLED_KEY: Final[str] = "enabled"
 
+
+MAPPING_STACKS: Final[dict[str, Any]] = {
+    TERRAFORM_BACKEND_KEY: (TerraformBackendStackConfig, TerraformBackendStack),
+}
+
 if __name__ == "__main__":
     logger.info("Starting application...")
 
@@ -56,15 +61,16 @@ if __name__ == "__main__":
     stacks: list[dict[str, Any]] = config[STACKS]
 
     for stack in stacks:
-        if stack[NAME] == TERRAFORM_BACKEND_KEY:
-            name_cfg: str = stack[NAME]
+        name_cfg: str = stack[NAME]
+        if name_cfg in MAPPING_STACKS:
+            stack_config_cls, stack_cls = MAPPING_STACKS[name_cfg]
             enabled_cfg: bool = stack[ENABLED_KEY]
             if not enabled_cfg:
-                logger.info("Terraform backend stack is disabled.")
-                break
+                logger.info("Stack %s is disabled.", name_cfg)
+                continue
 
-            stack_config = TerraformBackendStackConfig.from_config(env=env, config=stack)
-            TerraformBackendStack(app, "terraform-backend", config=stack_config)
+            stack_config = stack_config_cls.from_config(env=env, config=stack)
+            stack_cls(app, name_cfg, config=stack_config)
 
     app.synth()
     logger.info("Application finished.")

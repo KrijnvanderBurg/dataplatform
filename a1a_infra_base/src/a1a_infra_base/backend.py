@@ -8,12 +8,14 @@ Classes:
     BackendConfig: A class to represent the backend configuration.
 """
 
-from typing import Any, Final, Self
+from dataclasses import dataclass
+from typing import Any, Final
 
 # Constants for dictionary keys
 PATH_KEY: Final[str] = "path"
 
 
+@dataclass
 class BackendConfig:
     """
     A class to represent the backend configuration.
@@ -22,17 +24,10 @@ class BackendConfig:
         path (str): The path for the local backend.
     """
 
-    def __init__(self, path: str) -> None:
-        """
-        Initializes the BackendConfig.
-
-        Args:
-            path (str): The path for the local backend.
-        """
-        self.path = path
+    path: str
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Self:
+    def from_config(cls, config: dict[str, Any]) -> "BackendConfig":
         """
         Create a BackendConfig instance from a configuration dictionary.
 

@@ -70,25 +70,6 @@ class AzureLocation(Enum):
             raise ValueError(f"No AzureLocation with full name '{full_name}' found.")
         return location
 
-    @classmethod
-    def from_abbr(cls, abbr: str) -> Self:
-        """
-        Get the AzureLocation enum member from the abbreviation.
-
-        Args:
-            abbr (str): The abbreviation of the Azure location.
-
-        Returns:
-            AzureLocation: The corresponding AzureLocation enum member.
-
-        Raises:
-            ValueError: If no matching AzureLocation is found.
-        """
-        location = next((loc for loc in cls if loc.abbr == abbr), None)
-        if location is None:
-            raise ValueError(f"No AzureLocation with abbreviation '{abbr}' found.")
-        return location
-
 
 class AzureResource(Enum):
     """
@@ -147,23 +128,4 @@ class AzureResource(Enum):
         location = next((loc for loc in cls if loc.full_name == full_name), None)
         if location is None:
             raise ValueError(f"No AzureResource with full name '{full_name}' found.")
-        return location
-
-    @classmethod
-    def from_abbr(cls, abbr: str) -> Self:
-        """
-        Get the AzureResource enum member from the abbreviation.
-
-        Args:
-            abbr (str): The abbreviation of the Azure resource.
-
-        Returns:
-            AzureResource: The corresponding AzureResource enum member.
-
-        Raises:
-            ValueError: If no matching AzureResource is found.
-        """
-        location = next((loc for loc in cls if loc.abbr == abbr), None)
-        if location is None:
-            raise ValueError(f"No AzureResource with abbreviation '{abbr}' found.")
         return location

@@ -145,7 +145,7 @@ class StorageAccountL0Config:
     sftp_enabled: bool
     blob_properties: BlobProperties
     containers: list[StorageContainerL0Config]
-    management_lock_config: ManagementLockL0Config | None
+    management_lock: ManagementLockL0Config | None = None
 
     @property
     def full_name(self) -> str:
@@ -240,7 +240,7 @@ class StorageAccountL0Config:
             sftp_enabled=sftp_enabled,
             blob_properties=blob_properties,
             containers=containers,
-            management_lock_config=management_lock,
+            management_lock=management_lock,
         )
 
 
@@ -303,11 +303,11 @@ class StorageAccountL0(Construct):
                 storage_account_id=self.storage_account.id,
             )
 
-        if config.management_lock_config:
+        if config.management_lock:
             self._management_lock = ManagementLockL0(
                 self,
                 "ManagementLockL0",
-                config=config.management_lock_config,
+                config=config.management_lock,
                 resource_id=self.storage_account.id,
             )
         else:

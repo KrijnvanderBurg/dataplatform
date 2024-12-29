@@ -17,6 +17,7 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
+from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -26,6 +27,7 @@ NAME_KEY: Final[str] = "name"
 LOCATION_KEY: Final[str] = "location"
 SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
 ENV_KEY: Final[str] = "env"
+MANAGEMENT_LOCK_KEY: Final[str] = "management_lock"
 
 
 @dataclass
@@ -38,16 +40,23 @@ class ResourceGroupL0Config:
         name (str): The name of the resource group.
         location (AzureLocation): The Azure location.
         sequence_number (str): The sequence number.
+        management_lock (ManagementLockL0Config | None): The management lock configuration.
     """
 
     env: str
     name: str
     location: AzureLocation
     sequence_number: str
+    management_lock: ManagementLockL0Config | None = None
 
     @property
     def full_name(self) -> str:
-        """Generates the full name for the resource group."""
+        """
+        Generates the full name for the resource group.
+
+        Returns:
+            str: The full name of the resource group.
+        """
         return f"{AzureResource.RESOURCE_GROUP.abbr}-{self.name}-{self.env}-{self.location.abbr}-{self.sequence_number}"
 
     @classmethod
@@ -59,7 +68,11 @@ class ResourceGroupL0Config:
         {
             "name": "<resource group name>",
             "location": "<AzureLocation enum value name>",
-            "sequence_number": "<sequence number>"
+            "sequence_number": "<sequence number>",
+            "management_lock": {
+                "lock_level": "<lock level>",
+                "notes": "<notes>"
+            }
         }
 
         Args:
@@ -73,7 +86,19 @@ class ResourceGroupL0Config:
         location = AzureLocation.from_full_name(config[LOCATION_KEY])
         sequence_number = config[SEQUENCE_NUMBER_KEY]
 
-        return cls(env=env, name=name, location=location, sequence_number=sequence_number)
+        management_lock = config.get(MANAGEMENT_LOCK_KEY, None)
+        if management_lock:
+            management_lock = ManagementLockL0Config.from_config(
+                env=env, name=f"{name}{env}{location.abbr}{sequence_number}", config=config[MANAGEMENT_LOCK_KEY]
+            )
+
+        return cls(
+            env=env,
+            name=name,
+            location=location,
+            sequence_number=sequence_number,
+            management_lock=management_lock,
+        )
 
 
 class ResourceGroupL0(Construct):
@@ -82,6 +107,7 @@ class ResourceGroupL0(Construct):
 
     Attributes:
         resource_group (ResourceGroup): The Azure resource group.
+        management_lock (ManagementLockL0 | None): The management lock applied to the resource group.
     """
 
     def __init__(self, scope: Construct, id_: str, *, config: ResourceGroupL0Config) -> None:
@@ -101,7 +127,22 @@ class ResourceGroupL0(Construct):
             location=config.location.full_name,
         )
 
+        if config.management_lock:
+            self._management_lock = ManagementLockL0(
+                self,
+                "ManagementLockL0",
+                config=config.management_lock,
+                resource_id=self.resource_group.id,
+            )
+        else:
+            self._management_lock = None
+
     @property
     def resource_group(self) -> ResourceGroup:
         """Gets the Azure resource group."""
         return self._resource_group
+
+    @property
+    def management_lock(self) -> ManagementLockL0 | None:
+        """Gets the management lock applied to the resource group."""
+        return self._management_lock
