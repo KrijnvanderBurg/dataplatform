@@ -302,7 +302,7 @@ class StorageAccountL0(Construct):
                 storage_account_id=self.storage_account.id,
             )
         if config.management_lock:
-            self._management_lock = ManagementLockL0(
+            self._management_lock: ManagementLockL0 | None = ManagementLockL0(
                 self,
                 "ManagementLockL0",
                 name=config.full_name,
