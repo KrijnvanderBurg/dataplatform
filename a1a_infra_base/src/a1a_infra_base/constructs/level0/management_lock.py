@@ -17,6 +17,7 @@ from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureResource
+from a1a_infra_base.constructs.construct_abc import ConstructL0ABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -27,29 +28,27 @@ NOTES_KEY: Final[str] = "notes"
 
 
 @dataclass
-class ManagementLockL0Config:
+class ManagementLockL0Config(ConstructL0ABC):
     """
     A configuration class for ManagementLockL0.
 
     Attributes:
         env (str): The environment name.
-        name (str): The name of the resource to which the lock is applied.
         lock_level (str): The lock level for the management lock.
         notes (str): Notes for the management lock.
     """
 
     env: str
-    name: str
     lock_level: str
     notes: str
 
     @property
     def full_name(self) -> str:
         """Generates the full name for the management lock."""
-        return f"{self.name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+        return f"-{AzureResource.MANAGEMENT_LOCK.abbr}"
 
     @classmethod
-    def from_config(cls, env: str, name: str, config: dict[str, Any]) -> Self:
+    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
         """
         Create a ManagementLockL0Config by unpacking parameters from a configuration dictionary.
 
@@ -61,7 +60,6 @@ class ManagementLockL0Config:
 
         Args:
             env (str): The environment name.
-            name (str): The name of the resource to which the lock is applied.
             config (dict): A dictionary containing management lock configuration.
 
         Returns:
@@ -69,7 +67,7 @@ class ManagementLockL0Config:
         """
         lock_level = config[LOCK_LEVEL_KEY]
         notes = config[NOTES_KEY]
-        return cls(env=env, name=name, lock_level=lock_level, notes=notes)
+        return cls(env=env, lock_level=lock_level, notes=notes)
 
 
 class ManagementLockL0(Construct):
@@ -85,6 +83,7 @@ class ManagementLockL0(Construct):
         scope: Construct,
         id_: str,
         *,
+        name: str,
         resource_id: str,
         config: ManagementLockL0Config,
     ) -> None:
@@ -94,6 +93,7 @@ class ManagementLockL0(Construct):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
+            name (str): The name of the resource to which the lock is applied.
             resource_id (str): The ID of the resource to which the lock is applied.
             config (ManagementLockL0Config): The configuration for the management lock.
         """
@@ -102,7 +102,7 @@ class ManagementLockL0(Construct):
         self._management_lock = ManagementLock(
             self,
             config.full_name,
-            name=config.full_name,
+            name=f"{name}{config.full_name}",
             scope=resource_id,
             lock_level=config.lock_level,
             notes=config.notes,

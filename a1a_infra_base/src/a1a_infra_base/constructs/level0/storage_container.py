@@ -16,6 +16,7 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
 
+from a1a_infra_base.constructs.construct_abc import ConstructL0ABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -25,7 +26,7 @@ NAME_KEY: Final[str] = "name"
 
 
 @dataclass
-class StorageContainerL0Config:
+class StorageContainerL0Config(ConstructL0ABC):
     """
     A configuration class for StorageContainerL0.
 
@@ -34,6 +35,7 @@ class StorageContainerL0Config:
         container_access_type (str): The access type of the storage container.
     """
 
+    env: str
     name: str
 
     @property
@@ -42,7 +44,7 @@ class StorageContainerL0Config:
         return f"{self.name}"
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Self:
+    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
         """
         Create a StorageContainerL0Config by unpacking parameters from a configuration dictionary.
 
@@ -53,13 +55,14 @@ class StorageContainerL0Config:
         }
 
         Args:
+            env (str): The environment name.
             config (dict): A dictionary containing storage container configuration.
 
         Returns:
             StorageContainerL0Config: A fully-initialized StorageContainerL0Config.
         """
         name = config[NAME_KEY]
-        return cls(name=name)
+        return cls(env=env, name=name)
 
 
 class StorageContainerL0(Construct):

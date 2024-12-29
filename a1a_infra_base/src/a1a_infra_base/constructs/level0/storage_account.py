@@ -21,6 +21,7 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
+from a1a_infra_base.constructs.construct_abc import ConstructL0ABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
@@ -103,7 +104,7 @@ class BlobProperties:
 
 
 @dataclass
-class StorageAccountL0Config:
+class StorageAccountL0Config(ConstructL0ABC):
     """
     A configuration class for StorageAccountL0.
 
@@ -214,13 +215,11 @@ class StorageAccountL0Config:
 
         containers = []
         for container_config in config.get(CONTAINERS_KEY, []):
-            containers.append(StorageContainerL0Config.from_config(container_config))
+            containers.append(StorageContainerL0Config.from_config(env=env, config=container_config))
 
         management_lock = config.get(MANAGEMENT_LOCK_KEY, None)
         if management_lock:
-            management_lock = ManagementLockL0Config.from_config(
-                env=env, name=f"{name}{env}{location.abbr}{sequence_number}", config=config[MANAGEMENT_LOCK_KEY]
-            )
+            management_lock = ManagementLockL0Config.from_config(env=env, config=config[MANAGEMENT_LOCK_KEY])
 
         return cls(
             env=env,
@@ -302,11 +301,11 @@ class StorageAccountL0(Construct):
                 config=container,
                 storage_account_id=self.storage_account.id,
             )
-
         if config.management_lock:
             self._management_lock = ManagementLockL0(
                 self,
                 "ManagementLockL0",
+                name=config.full_name,
                 config=config.management_lock,
                 resource_id=self.storage_account.id,
             )

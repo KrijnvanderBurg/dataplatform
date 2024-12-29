@@ -17,6 +17,7 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
+from a1a_infra_base.constructs.construct_abc import ConstructL0ABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
 
@@ -31,7 +32,7 @@ MANAGEMENT_LOCK_KEY: Final[str] = "management_lock"
 
 
 @dataclass
-class ResourceGroupL0Config:
+class ResourceGroupL0Config(ConstructL0ABC):
     """
     A configuration class for ResourceGroupL0.
 
@@ -88,9 +89,7 @@ class ResourceGroupL0Config:
 
         management_lock = config.get(MANAGEMENT_LOCK_KEY, None)
         if management_lock:
-            management_lock = ManagementLockL0Config.from_config(
-                env=env, name=f"{name}{env}{location.abbr}{sequence_number}", config=config[MANAGEMENT_LOCK_KEY]
-            )
+            management_lock = ManagementLockL0Config.from_config(env=env, config=config[MANAGEMENT_LOCK_KEY])
 
         return cls(
             env=env,
@@ -131,6 +130,7 @@ class ResourceGroupL0(Construct):
             self._management_lock = ManagementLockL0(
                 self,
                 "ManagementLockL0",
+                name=config.full_name,
                 config=config.management_lock,
                 resource_id=self.resource_group.id,
             )
