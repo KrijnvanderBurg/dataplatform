@@ -88,22 +88,20 @@ class TerraformBackendStackConfig:
     storage_account_config: StorageAccountL0Config
 
     @classmethod
-    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
+    def from_dict(cls, config: dict[str, Any]) -> Self:
         """
         Create a TerraformBackendStackConfig by unpacking parameters from a configuration dictionary.
 
         Args:
-            env (str): The environment name.
             config (dict): A dictionary containing the configuration.
 
         Returns:
             TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
         """
 
-        backend_config = BackendConfig.from_config(config[BACKEND_KEY])
-
-        resource_group_config = ResourceGroupL0Config.from_config(env=env, config=config[RESOURCE_GROUP_KEY])
-        storage_account_config = StorageAccountL0Config.from_config(env=env, config=config[STORAGE_ACCOUNT_KEY])
+        backend_config = BackendConfig.from_dict(config[BACKEND_KEY])
+        resource_group_config = ResourceGroupL0Config.from_dict(config=config[RESOURCE_GROUP_KEY])
+        storage_account_config = StorageAccountL0Config.from_dict(config=config[STORAGE_ACCOUNT_KEY])
 
         return cls(
             backend_config=backend_config,
@@ -166,7 +164,10 @@ class TerraformBackendStack(TerraformStack):
         scope: Construct,
         id_: str,
         *,
-        config: TerraformBackendStackConfig,
+        env: str,
+        backend_config: BackendConfig,
+        resource_group_config: ResourceGroupL0Config,
+        storage_account_config: StorageAccountL0Config,
     ) -> None:
         """
         Initializes the TerraformBackendStack construct.
@@ -174,27 +175,55 @@ class TerraformBackendStack(TerraformStack):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            config (TerraformBackendStackConfig): The configuration for the Terraform stack.
+            env (str): The environment name.
+            backend_config (BackendConfig): The configuration for the backend.
+            resource_group_config (ResourceGroupL0Config): The configuration for the resource group.
+            storage_account_config (StorageAccountL0Config): The configuration for the storage account.
         """
         super().__init__(scope, id_)
 
         # Set up the local backend
-        LocalBackend(self, path=config.backend_config.path)
+        LocalBackend(self, path=backend_config.path)
 
         # Set up the Azure provider
         AzurermProvider(self, "AzureRM", features=[{}])
 
         # Create the resource group
-        resource_group = ResourceGroupL0(
+        resource_group = ResourceGroupL0.from_config(
             self,
             "ResourceGroupL0",
-            config=config.resource_group_config,
+            env=env,
+            config=resource_group_config,
         )
 
-        # Create the storage account with optional management lock
-        StorageAccountL0(
+        # Create the storage account
+        StorageAccountL0.from_config(
             self,
             "StorageAccountL0",
-            config=config.storage_account_config,
+            env=env,
+            config=storage_account_config,
             resource_group_l0=resource_group,
+        )
+
+    @classmethod
+    def from_config(cls, scope: Construct, id_: str, env: str, construct: TerraformBackendStackConfig) -> Self:
+        """
+        Create a TerraformBackendStack instance from a TerraformBackendStackConfig object.
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            construct (TerraformBackendStackConfig): The configuration object for the Terraform stack.
+
+        Returns:
+            TerraformBackendStack: A fully-initialized TerraformBackendStack instance.
+        """
+        return cls(
+            scope,
+            id_,
+            env=env,
+            backend_config=construct.backend_config,
+            resource_group_config=construct.resource_group_config,
+            storage_account_config=construct.storage_account_config,
         )

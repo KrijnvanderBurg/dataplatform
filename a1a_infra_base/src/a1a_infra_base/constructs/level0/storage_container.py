@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
 
-from a1a_infra_base.constructs.construct_abc import ConstructL0ABC
+from a1a_infra_base.constructs.construct_abc import ConstructABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -26,16 +26,14 @@ NAME_KEY: Final[str] = "name"
 
 
 @dataclass
-class StorageContainerL0Config(ConstructL0ABC):
+class StorageContainerL0Config(ConstructABC):
     """
     A configuration class for StorageContainerL0.
 
     Attributes:
         name (str): The name of the storage container.
-        container_access_type (str): The access type of the storage container.
     """
 
-    env: str
     name: str
 
     @property
@@ -44,25 +42,23 @@ class StorageContainerL0Config(ConstructL0ABC):
         return f"{self.name}"
 
     @classmethod
-    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
+    def from_dict(cls, config: dict[str, Any]) -> Self:
         """
         Create a StorageContainerL0Config by unpacking parameters from a configuration dictionary.
 
         Expected format of 'config':
         {
-            "name": "<storage container name>",
-            "container_access_type": "<access type>"
+            "name": "<storage container name>"
         }
 
         Args:
-            env (str): The environment name.
             config (dict): A dictionary containing storage container configuration.
 
         Returns:
             StorageContainerL0Config: A fully-initialized StorageContainerL0Config.
         """
         name = config[NAME_KEY]
-        return cls(env=env, name=name)
+        return cls(name=name)
 
 
 class StorageContainerL0(Construct):
@@ -77,8 +73,8 @@ class StorageContainerL0(Construct):
         self,
         scope: Construct,
         id_: str,
-        *,
-        config: StorageContainerL0Config,
+        env: str,
+        name: str,
         storage_account_id: str,
     ) -> None:
         """
@@ -87,14 +83,16 @@ class StorageContainerL0(Construct):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            config (StorageContainerL0Config): The configuration for the storage container.
-            storage_account_l0 (StorageAccountL0): The storage account level 0 construct.
+            env (str): The environment name.
+            name (str): The name of the storage container.
+            storage_account_id (str): The ID of the storage account.
         """
         super().__init__(scope, id_)
+        self._full_name = f"{env}{name}"
         self._storage_container = StorageContainer(
             self,
-            f"StorageContainer_{config.full_name}",
-            name=config.name,
+            f"StorageContainer_{name}",
+            name=name,
             storage_account_id=storage_account_id,
         )
 
@@ -102,3 +100,45 @@ class StorageContainerL0(Construct):
     def storage_container(self) -> StorageContainer:
         """Gets the Azure storage container."""
         return self._storage_container
+
+    @property
+    def full_name(self) -> str:
+        """Gets the full name for the storage container."""
+        return self._full_name
+
+    @full_name.setter
+    def full_name(self, value: str) -> None:
+        """
+        Sets the full name for the storage container.
+
+        Args:
+            value (str): The full name to set.
+        """
+        self._full_name = value
+
+    @classmethod
+    def from_config(
+        cls, scope: Construct, id_: str, env: str, config: StorageContainerL0Config, storage_account_id: str
+    ) -> Self:
+        """
+        Create a StorageContainerL0 instance from a StorageContainerL0Config object.
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            config (StorageContainerL0Config): The configuration object for the storage container.
+            storage_account_id (str): The ID of the storage account.
+
+        Returns:
+            StorageContainerL0: A fully-initialized StorageContainerL0 instance.
+        """
+        instance = cls(
+            scope,
+            id_,
+            env=env,
+            name=config.name,
+            storage_account_id=storage_account_id,
+        )
+        instance.full_name = f"{env}{config.name}"
+        return instance

@@ -8,8 +8,9 @@ packages = [{include = "a1a_infra_base", from="src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-cdktf-cdktf-provider-azurerm = "^13.14.0"
 cdktf = "^0.20.10"
+cdktf-cdktf-provider-azurerm = "^13.14.0"
+cdktf-cdktf-provider-databricks = "^13.27.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.2"

@@ -27,7 +27,7 @@ class BackendConfig:
     path: str
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> "BackendConfig":
+    def from_dict(cls, config: dict[str, Any]) -> "BackendConfig":
         """
         Create a BackendConfig instance from a configuration dictionary.
 

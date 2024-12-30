@@ -10,17 +10,16 @@ Classes:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Final, Self
+from typing import Any, Self
+
+from constructs import Construct
 
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
 
-# Constants for dictionary keys
-NAME_KEY: Final[str] = "name"
 
-
-class ConstructABC(ABC):
+class ConstructConfigABC(ABC):
     """
     Abstract base class for configuration classes.
 
@@ -30,12 +29,11 @@ class ConstructABC(ABC):
 
     @classmethod
     @abstractmethod
-    def from_config(cls, env: str, config: dict[str, Any]) -> Self:
+    def from_dict(cls, config: dict[str, Any]) -> Self:
         """
         Create a configuration instance by unpacking parameters from a configuration dictionary.
 
         Args:
-            env (str): The environment name.
             config (dict): A dictionary containing management lock configuration.
 
         Returns:
@@ -43,7 +41,7 @@ class ConstructABC(ABC):
         """
 
 
-class ConstructL0ABC(ConstructABC, ABC):
+class ConstructABC(ABC):
     """
     Abstract base class for level 0 constructs.
 
@@ -55,3 +53,19 @@ class ConstructL0ABC(ConstructABC, ABC):
     @abstractmethod
     def full_name(self) -> str:
         """Generates the full name for the configuration."""
+
+    @classmethod
+    @abstractmethod
+    def from_config(cls, scope: Construct, id_: str, env: str, config: dict) -> Self:
+        """
+        Abstract method to create a construct from a configuration dictionary.
+
+        Args:
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            config (dict): The configuration dictionary.
+
+        Returns:
+            Self: A fully-initialized construct instance.
+        """
