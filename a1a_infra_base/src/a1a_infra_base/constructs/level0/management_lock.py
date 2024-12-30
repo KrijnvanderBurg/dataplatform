@@ -110,7 +110,7 @@ class ManagementLockL0(Construct, AttachedConstructABC[ManagementLockL0Config], 
 
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, resource_id: str, config: ManagementLockL0Config
+        cls, scope: Construct, id_: str, env: str, attach_to_resource_id: str, config: ManagementLockL0Config
     ) -> Self:
         """
         Create a ManagementLockL0 instance from a ManagementLockL0Config object.
@@ -119,10 +119,10 @@ class ManagementLockL0(Construct, AttachedConstructABC[ManagementLockL0Config], 
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            resource_id (str): The resource ID to attach to.
+            attach_to_resource_id (str): The resource ID to attach to.
             config (ManagementLockL0Config): The configuration object for the management lock.
 
         Returns:
             ManagementLockL0: A fully-initialized ManagementLockL0 instance.
         """
-        return cls(scope, id_, _=env, resource_id=resource_id, config=config)
+        return cls(scope, id_, _=env, resource_id=attach_to_resource_id, config=config)

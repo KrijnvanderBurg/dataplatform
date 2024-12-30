@@ -115,7 +115,7 @@ class AttachedConstructABC(ConstructABC, Generic[T]):
 
     @classmethod
     @abstractmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, resource_id: str, config: T) -> Self:
+    def from_config(cls, scope: Construct, id_: str, env: str, attach_to_resource_id: str, config: T) -> Self:
         """
         Abstract method to create a construct from a configuration dictionary.
 
@@ -123,7 +123,7 @@ class AttachedConstructABC(ConstructABC, Generic[T]):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            resource_id (str): The resource ID to attach to.
+            attach_to_resource_id (str): The resource ID to attach to.
             config (T): The configuration object.
 
         Returns:

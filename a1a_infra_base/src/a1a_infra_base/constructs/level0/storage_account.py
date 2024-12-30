@@ -326,7 +326,7 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
                 self,
                 f"StorageContainerL0_{container.full_name}",
                 env=env,
-                resource_id=self.storage_account.id,
+                attach_to_resource_id=self.storage_account.id,
                 config=container,
             )
         if management_lock:
@@ -334,7 +334,7 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
                 self,
                 "ManagementLockL0",
                 env=env,
-                resource_id=self.storage_account.id,
+                attach_to_resource_id=self.storage_account.id,
                 config=management_lock,
             )
         else:

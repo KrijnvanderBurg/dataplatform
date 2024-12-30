@@ -131,7 +131,7 @@ class ResourceGroupL0(Construct, DetachedConstructABC[ResourceGroupL0Config], me
                 self,
                 "ManagementLockL0",
                 env=env,
-                resource_id=self._resource_group.id,
+                attach_to_resource_id=self._resource_group.id,
                 config=management_lock,
             )
         else:
