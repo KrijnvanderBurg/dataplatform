@@ -17,12 +17,12 @@ from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack, Terra
 
 logger: logging.Logger = setup_logger(__name__)
 
-ENV: Final[str] = "env"
-STACKS: Final[str] = "stacks"
+ENV_KEY: Final[str] = "env"
+STACKS_KEY: Final[str] = "stacks"
 
 TERRAFORM_BACKEND_KEY: Final[str] = "terraform_backend"
 
-NAME: Final[str] = "name"
+NAME_KEY: Final[str] = "name"
 ENABLED_KEY: Final[str] = "enabled"
 
 
@@ -57,20 +57,22 @@ if __name__ == "__main__":
 
     app = App()
 
-    env: str = config[ENV]
-    stacks: list[dict[str, Any]] = config[STACKS]
+    env: str = config[ENV_KEY]
+    stacks: list[dict[str, Any]] = config[STACKS_KEY]
 
     for stack in stacks:
-        name_cfg: str = stack[NAME]
-        if name_cfg in MAPPING_STACKS:
-            stack_config_cls, stack_cls = MAPPING_STACKS[name_cfg]
-            enabled_cfg: bool = stack[ENABLED_KEY]
-            if not enabled_cfg:
-                logger.info("Stack %s is disabled.", name_cfg)
-                continue
+        name_cfg: str = stack[NAME_KEY]
+        if name_cfg not in MAPPING_STACKS:
+            raise ValueError(f"Unknown stack name: {name_cfg}")
 
-            stack_config = stack_config_cls.from_dict(config=stack)
-            stack_cls.from_config(app, name_cfg, env=env, config=stack_config)
+        stack_config_cls, stack_cls = MAPPING_STACKS[name_cfg]
+        enabled_cfg: bool = stack[ENABLED_KEY]
+        if not enabled_cfg:
+            logger.info("Stack %s is disabled.", name_cfg)
+            break
+
+        stack_config = stack_config_cls.from_dict(config=stack)
+        stack_cls.from_dict(app, name_cfg, env=env, config=stack_config)
 
     app.synth()
     logger.info("Application finished.")

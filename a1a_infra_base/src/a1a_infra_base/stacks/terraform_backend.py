@@ -65,18 +65,22 @@ from a1a_infra_base.backend import BackendConfig
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
 from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
 from a1a_infra_base.logger import setup_logger
+from a1a_infra_base.provider import ProviderConfigABC, ProviderConfigFactory
+from a1a_infra_base.stacks.stack_abc import StackConfigABC
 
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 BACKEND_KEY: Final[str] = "backend"
-PATH: Final[str] = "path"
+PROVIDER_KEY: Final[str] = "provider"
+CONSTRUCTS_KEY: Final[str] = "constructs"
+
 RESOURCE_GROUP_KEY: Final[str] = "resource_group"
 STORAGE_ACCOUNT_KEY: Final[str] = "storage_account"
 
 
 @dataclass
-class TerraformBackendStackConfig:
+class TerraformBackendStackConfig(StackConfigABC):
     """
     A configuration class for TerraformBackendStack.
 
@@ -84,6 +88,7 @@ class TerraformBackendStackConfig:
     """
 
     backend_config: BackendConfig
+    provider_configs: list[ProviderConfigABC]
     resource_group_config: ResourceGroupL0Config
     storage_account_config: StorageAccountL0Config
 
@@ -93,18 +98,21 @@ class TerraformBackendStackConfig:
         Create a TerraformBackendStackConfig by unpacking parameters from a configuration dictionary.
 
         Args:
-            config (dict): A dictionary containing the configuration.
+            dict_ (dict): A dictionary containing the stack configuration.
 
         Returns:
             TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
         """
-
         backend_config = BackendConfig.from_dict(dict_[BACKEND_KEY])
-        resource_group_config = ResourceGroupL0Config.from_dict(dict_=dict_[RESOURCE_GROUP_KEY])
-        storage_account_config = StorageAccountL0Config.from_dict(dict_=dict_[STORAGE_ACCOUNT_KEY])
+        provider_configs = ProviderConfigFactory.from_dicts(dict_[PROVIDER_KEY])
+        constructs_config = dict_[CONSTRUCTS_KEY]
+
+        resource_group_config = ResourceGroupL0Config.from_dict(dict_=constructs_config[RESOURCE_GROUP_KEY])
+        storage_account_config = StorageAccountL0Config.from_dict(dict_=constructs_config[STORAGE_ACCOUNT_KEY])
 
         return cls(
             backend_config=backend_config,
+            provider_configs=provider_configs,
             resource_group_config=resource_group_config,
             storage_account_config=storage_account_config,
         )
@@ -166,6 +174,7 @@ class TerraformBackendStack(TerraformStack):
         *,
         env: str,
         backend_config: BackendConfig,
+        provider_configs: list[ProviderConfigABC],
         resource_group_config: ResourceGroupL0Config,
         storage_account_config: StorageAccountL0Config,
     ) -> None:
@@ -176,7 +185,8 @@ class TerraformBackendStack(TerraformStack):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            backend_config (BackendConfig): The configuration for the backend.
+            backend_config (BackendConfig): The configuration for the Terraform backend.
+            provider_configs (list[ProviderConfigABC]): The configurations for the Terraform provider.
             resource_group_config (ResourceGroupL0Config): The configuration for the resource group.
             storage_account_config (StorageAccountL0Config): The configuration for the storage account.
         """
@@ -185,7 +195,10 @@ class TerraformBackendStack(TerraformStack):
         # Set up the local backend
         LocalBackend(self, path=backend_config.path)
 
-        # Set up the Azure provider
+        ProviderFactory.from_config(self, config=provider)
+
+        #     AzurermProvider(self, "AzureRM", features=[{}])
+        # # Set up the Azure provider
         AzurermProvider(self, "AzureRM", features=[{}])
 
         # Create the resource group

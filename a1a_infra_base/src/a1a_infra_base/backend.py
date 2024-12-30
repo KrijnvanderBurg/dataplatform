@@ -9,7 +9,7 @@ Classes:
 """
 
 from dataclasses import dataclass
-from typing import Any, Final
+from typing import Any, Final, Self
 
 # Constants for dictionary keys
 PATH_KEY: Final[str] = "path"
@@ -27,15 +27,15 @@ class BackendConfig:
     path: str
 
     @classmethod
-    def from_dict(cls, config: dict[str, Any]) -> "BackendConfig":
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a BackendConfig instance from a configuration dictionary.
 
         Args:
-            config (dict): A dictionary containing backend configuration.
+            dict_ (dict): A dictionary containing backend configuration.
 
         Returns:
             BackendConfig: A fully-initialized BackendConfig instance.
         """
-        path = config[PATH_KEY]
+        path = dict_[PATH_KEY]
         return cls(path=path)
