@@ -21,7 +21,7 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import ConstructABC
+from a1a_infra_base.constructs.construct_abc import ConstructConfigABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
@@ -104,7 +104,7 @@ class BlobProperties:
 
 
 @dataclass
-class StorageAccountL0Config(ConstructABC):
+class StorageAccountL0Config(ConstructConfigABC):
     """
     A configuration class for StorageAccountL0.
 
@@ -242,6 +242,8 @@ class StorageAccountL0(Construct):
         storage_account (StorageAccount): The Azure storage account.
         management_lock (ManagementLockL0): The management lock applied to the storage account.
     """
+
+    __slots__ = ("full_name", "_resource_group_l0", "_storage_account", "_management_lock")
 
     def __init__(
         self,

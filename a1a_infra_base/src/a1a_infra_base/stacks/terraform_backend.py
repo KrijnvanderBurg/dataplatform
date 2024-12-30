@@ -206,7 +206,7 @@ class TerraformBackendStack(TerraformStack):
         )
 
     @classmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, construct: TerraformBackendStackConfig) -> Self:
+    def from_config(cls, scope: Construct, id_: str, env: str, config: TerraformBackendStackConfig) -> Self:
         """
         Create a TerraformBackendStack instance from a TerraformBackendStackConfig object.
 
@@ -214,7 +214,7 @@ class TerraformBackendStack(TerraformStack):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            construct (TerraformBackendStackConfig): The configuration object for the Terraform stack.
+            config (TerraformBackendStackConfig): The configuration object for the Terraform stack.
 
         Returns:
             TerraformBackendStack: A fully-initialized TerraformBackendStack instance.
@@ -223,7 +223,7 @@ class TerraformBackendStack(TerraformStack):
             scope,
             id_,
             env=env,
-            backend_config=construct.backend_config,
-            resource_group_config=construct.resource_group_config,
-            storage_account_config=construct.storage_account_config,
+            backend_config=config.backend_config,
+            resource_group_config=config.resource_group_config,
+            storage_account_config=config.storage_account_config,
         )

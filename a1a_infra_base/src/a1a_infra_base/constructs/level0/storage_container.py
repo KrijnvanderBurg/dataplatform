@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
 
-from a1a_infra_base.constructs.construct_abc import ConstructABC
+from a1a_infra_base.constructs.construct_abc import ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -26,7 +26,7 @@ NAME_KEY: Final[str] = "name"
 
 
 @dataclass
-class StorageContainerL0Config(ConstructABC):
+class StorageContainerL0Config(ConstructConfigABC):
     """
     A configuration class for StorageContainerL0.
 
