@@ -17,7 +17,7 @@ from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureResource
-from a1a_infra_base.constructs.construct_abc import ConstructConfigABC
+from a1a_infra_base.constructs.construct_abc import AttachedConstructABC, CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -41,28 +41,28 @@ class ManagementLockL0Config(ConstructConfigABC):
     notes: str
 
     @classmethod
-    def from_dict(cls, config: dict[str, Any]) -> Self:
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a ManagementLockL0Config by unpacking parameters from a configuration dictionary.
 
-        Expected format of 'config':
+        Expected format of 'dict_':
         {
             "lock_level": "<lock level>",
             "notes": "<notes>"
         }
 
         Args:
-            config (dict): A dictionary containing management lock configuration.
+            dict_ (dict): A dictionary containing management lock configuration.
 
         Returns:
             ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
         """
-        lock_level = config[LOCK_LEVEL_KEY]
-        notes = config[NOTES_KEY]
+        lock_level = dict_[LOCK_LEVEL_KEY]
+        notes = dict_[NOTES_KEY]
         return cls(lock_level=lock_level, notes=notes)
 
 
-class ManagementLockL0(Construct):
+class ManagementLockL0(Construct, AttachedConstructABC[ManagementLockL0Config], metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages a management lock for Azure resources.
 
@@ -76,7 +76,6 @@ class ManagementLockL0(Construct):
         id_: str,
         *,
         _: str,  # unused env parameter; only present for consistency and to match signature
-        name: str,
         resource_id: str,
         config: ManagementLockL0Config,
     ) -> None:
@@ -87,13 +86,12 @@ class ManagementLockL0(Construct):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            name (str): The name of the resource to which the lock is applied.
-            resource_id (str): The ID of the resource to which the lock is applied.
+            resource_id (str): The resource ID to attach to.
             config (ManagementLockL0Config): The configuration for the management lock.
         """
         super().__init__(scope, id_)
 
-        self.full_name = f"{name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+        self.full_name = f"{self.full_name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
         self._management_lock = ManagementLock(
             self,
             self.full_name,
@@ -108,24 +106,11 @@ class ManagementLockL0(Construct):
         """Gets the management lock applied to the resource."""
         return self._management_lock
 
-    @property
-    def full_name(self) -> str:
-        """Gets the full name for the management lock."""
-        return self._full_name
-
-    @full_name.setter
-    def full_name(self, value: str) -> None:
-        """
-        Sets the full name for the management lock.
-
-        Args:
-            value (str): The full name to set.
-        """
-        self._full_name = value
+        # Explicitly attached after from_dict is called
 
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, name: str, resource_id: str, config: ManagementLockL0Config
+        cls, scope: Construct, id_: str, env: str, resource_id: str, config: ManagementLockL0Config
     ) -> Self:
         """
         Create a ManagementLockL0 instance from a ManagementLockL0Config object.
@@ -134,11 +119,10 @@ class ManagementLockL0(Construct):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            name (str): The name of the resource to which the lock is applied.
-            resource_id (str): The ID of the resource to which the lock is applied.
+            resource_id (str): The resource ID to attach to.
             config (ManagementLockL0Config): The configuration object for the management lock.
 
         Returns:
             ManagementLockL0: A fully-initialized ManagementLockL0 instance.
         """
-        return cls(scope, id_, _=env, name=name, resource_id=resource_id, config=config)
+        return cls(scope, id_, _=env, resource_id=resource_id, config=config)

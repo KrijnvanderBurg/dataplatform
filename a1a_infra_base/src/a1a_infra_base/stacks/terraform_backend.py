@@ -88,7 +88,7 @@ class TerraformBackendStackConfig:
     storage_account_config: StorageAccountL0Config
 
     @classmethod
-    def from_dict(cls, config: dict[str, Any]) -> Self:
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a TerraformBackendStackConfig by unpacking parameters from a configuration dictionary.
 
@@ -99,9 +99,9 @@ class TerraformBackendStackConfig:
             TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
         """
 
-        backend_config = BackendConfig.from_dict(config[BACKEND_KEY])
-        resource_group_config = ResourceGroupL0Config.from_dict(config=config[RESOURCE_GROUP_KEY])
-        storage_account_config = StorageAccountL0Config.from_dict(config=config[STORAGE_ACCOUNT_KEY])
+        backend_config = BackendConfig.from_dict(dict_[BACKEND_KEY])
+        resource_group_config = ResourceGroupL0Config.from_dict(dict_=dict_[RESOURCE_GROUP_KEY])
+        storage_account_config = StorageAccountL0Config.from_dict(dict_=dict_[STORAGE_ACCOUNT_KEY])
 
         return cls(
             backend_config=backend_config,
@@ -201,8 +201,8 @@ class TerraformBackendStack(TerraformStack):
             self,
             "StorageAccountL0",
             env=env,
+            resource_id=resource_group.resource_group.id,
             config=storage_account_config,
-            resource_group_l0=resource_group,
         )
 
     @classmethod

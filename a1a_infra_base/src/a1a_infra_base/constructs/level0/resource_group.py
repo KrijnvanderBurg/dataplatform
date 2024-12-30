@@ -17,7 +17,7 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import ConstructConfigABC
+from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC, DetachedConstructABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
 
@@ -48,11 +48,11 @@ class ResourceGroupL0Config(ConstructConfigABC):
     management_lock: ManagementLockL0Config | None = None
 
     @classmethod
-    def from_dict(cls, config: dict[str, Any]) -> Self:
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a ResourceGroupConfig by unpacking parameters from a configuration dictionary.
 
-        Expected format of 'config':
+        Expected format of 'dict_':
         {
             "name": "<resource group name>",
             "location": "<AzureLocation enum value name>",
@@ -64,18 +64,18 @@ class ResourceGroupL0Config(ConstructConfigABC):
         }
 
         Args:
-            config (dict): A dictionary containing resource group configuration.
+            dict_ (dict): A dictionary containing resource group configuration.
 
         Returns:
             ResourceGroupConfig: A fully-initialized ResourceGroupConfig.
         """
-        name = config[NAME_KEY]
-        location = AzureLocation.from_full_name(config[LOCATION_KEY])
-        sequence_number = config[SEQUENCE_NUMBER_KEY]
+        name = dict_[NAME_KEY]
+        location = AzureLocation.from_full_name(dict_[LOCATION_KEY])
+        sequence_number = dict_[SEQUENCE_NUMBER_KEY]
 
-        management_lock = config.get(MANAGEMENT_LOCK_KEY, None)
+        management_lock = dict_.get(MANAGEMENT_LOCK_KEY, None)
         if management_lock:
-            management_lock = ManagementLockL0Config.from_dict(config=config[MANAGEMENT_LOCK_KEY])
+            management_lock = ManagementLockL0Config.from_dict(dict_=dict_[MANAGEMENT_LOCK_KEY])
 
         return cls(
             name=name,
@@ -85,7 +85,7 @@ class ResourceGroupL0Config(ConstructConfigABC):
         )
 
 
-class ResourceGroupL0(Construct):
+class ResourceGroupL0(Construct, DetachedConstructABC[ResourceGroupL0Config], metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure resource group.
 
@@ -131,9 +131,8 @@ class ResourceGroupL0(Construct):
                 self,
                 "ManagementLockL0",
                 env=env,
-                name=self._full_name,
+                resource_id=self._resource_group.id,
                 config=management_lock,
-                resource_id=self.resource_group.id,
             )
         else:
             self._management_lock = None
@@ -147,21 +146,6 @@ class ResourceGroupL0(Construct):
     def management_lock(self) -> ManagementLockL0 | None:
         """Gets the management lock applied to the resource group."""
         return self._management_lock
-
-    @property
-    def full_name(self) -> str:
-        """Gets the full name for the resource group."""
-        return self._full_name
-
-    @full_name.setter
-    def full_name(self, value: str) -> None:
-        """
-        Sets the full name for the resource group.
-
-        Args:
-            value (str): The full name to set.
-        """
-        self._full_name = value
 
     @classmethod
     def from_config(cls, scope: Construct, id_: str, env: str, config: ResourceGroupL0Config) -> Self:

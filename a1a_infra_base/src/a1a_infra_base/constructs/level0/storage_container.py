@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
 
-from a1a_infra_base.constructs.construct_abc import ConstructConfigABC
+from a1a_infra_base.constructs.construct_abc import AttachedConstructABC, CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -42,7 +42,7 @@ class StorageContainerL0Config(ConstructConfigABC):
         return f"{self.name}"
 
     @classmethod
-    def from_dict(cls, config: dict[str, Any]) -> Self:
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a StorageContainerL0Config by unpacking parameters from a configuration dictionary.
 
@@ -52,16 +52,16 @@ class StorageContainerL0Config(ConstructConfigABC):
         }
 
         Args:
-            config (dict): A dictionary containing storage container configuration.
+            dict_ (dict): A dictionary containing storage container configuration.
 
         Returns:
             StorageContainerL0Config: A fully-initialized StorageContainerL0Config.
         """
-        name = config[NAME_KEY]
+        name = dict_[NAME_KEY]
         return cls(name=name)
 
 
-class StorageContainerL0(Construct):
+class StorageContainerL0(Construct, AttachedConstructABC[StorageContainerL0Config], metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure storage container.
 
@@ -102,24 +102,9 @@ class StorageContainerL0(Construct):
         """Gets the Azure storage container."""
         return self._storage_container
 
-    @property
-    def full_name(self) -> str:
-        """Gets the full name for the storage container."""
-        return self._full_name
-
-    @full_name.setter
-    def full_name(self, value: str) -> None:
-        """
-        Sets the full name for the storage container.
-
-        Args:
-            value (str): The full name to set.
-        """
-        self._full_name = value
-
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, config: StorageContainerL0Config, storage_account_id: str
+        cls, scope: Construct, id_: str, env: str, resource_id: str, config: StorageContainerL0Config
     ) -> Self:
         """
         Create a StorageContainerL0 instance from a StorageContainerL0Config object.
@@ -128,8 +113,8 @@ class StorageContainerL0(Construct):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
+            resource_id (str): The resource ID to attach to.
             config (StorageContainerL0Config): The configuration object for the storage container.
-            storage_account_id (str): The ID of the storage account.
 
         Returns:
             StorageContainerL0: A fully-initialized StorageContainerL0 instance.
@@ -139,5 +124,5 @@ class StorageContainerL0(Construct):
             id_,
             _=env,
             name=config.name,
-            storage_account_id=storage_account_id,
+            storage_account_id=resource_id,
         )
