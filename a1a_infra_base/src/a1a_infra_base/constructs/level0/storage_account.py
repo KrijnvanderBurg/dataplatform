@@ -352,7 +352,7 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
 
     @classmethod
     def from_config(
-        cls, scope: Construct, id_: str, env: str, resource_id: str, config: StorageAccountL0Config
+        cls, scope: Construct, id_: str, env: str, attach_to_resource_id: str, config: StorageAccountL0Config
     ) -> Self:
         """
         Create a StorageAccountL0 instance from a StorageAccountL0Config object.
@@ -361,7 +361,7 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            resource_id (str): The resource ID to attach to.
+            attach_to_resource_id (str): The resource ID to attach to.
             config (StorageAccountL0Config): The configuration object for the storage account.
 
         Returns:
@@ -371,7 +371,7 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
             scope,
             id_,
             env=env,
-            resource_id=resource_id,
+            resource_id=attach_to_resource_id,
             name=config.name,
             location=config.location,
             sequence_number=config.sequence_number,

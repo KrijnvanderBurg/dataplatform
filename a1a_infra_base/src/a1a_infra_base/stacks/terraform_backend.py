@@ -201,7 +201,7 @@ class TerraformBackendStack(TerraformStack):
             self,
             "StorageAccountL0",
             env=env,
-            resource_id=resource_group.resource_group.id,
+            attach_to_resource_id=resource_group.resource_group.id,
             config=storage_account_config,
         )
 
