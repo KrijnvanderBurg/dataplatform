@@ -93,11 +93,11 @@ class ManagementLockL0(Construct):
         """
         super().__init__(scope, id_)
 
-        self._full_name = f"{name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+        self.full_name = f"{name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
         self._management_lock = ManagementLock(
             self,
-            self._full_name,
-            name=self._full_name,
+            self.full_name,
+            name=self.full_name,
             scope=resource_id,
             lock_level=config.lock_level,
             notes=config.notes,
