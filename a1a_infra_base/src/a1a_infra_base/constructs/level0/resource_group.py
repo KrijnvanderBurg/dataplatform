@@ -98,6 +98,7 @@ class ResourceGroupL0(Construct):
         self,
         scope: Construct,
         id_: str,
+        *,
         env: str,
         name: str,
         location: AzureLocation,

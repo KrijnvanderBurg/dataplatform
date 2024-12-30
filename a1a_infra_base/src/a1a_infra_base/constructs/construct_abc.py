@@ -56,7 +56,7 @@ class ConstructABC(ABC):
 
     @classmethod
     @abstractmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, config: dict) -> Self:
+    def from_config(cls, scope: Construct, id_: str, env: str, config: dict[str, Any]) -> Self:
         """
         Abstract method to create a construct from a configuration dictionary.
 

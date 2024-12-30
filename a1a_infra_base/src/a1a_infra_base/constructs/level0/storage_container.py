@@ -73,7 +73,8 @@ class StorageContainerL0(Construct):
         self,
         scope: Construct,
         id_: str,
-        env: str,
+        *,
+        _: str,  # unused env parameter; only present for consistency and to match signature
         name: str,
         storage_account_id: str,
     ) -> None:
@@ -88,7 +89,7 @@ class StorageContainerL0(Construct):
             storage_account_id (str): The ID of the storage account.
         """
         super().__init__(scope, id_)
-        self._full_name = f"{env}{name}"
+        self.full_name = f"{name}"
         self._storage_container = StorageContainer(
             self,
             f"StorageContainer_{name}",
@@ -136,7 +137,7 @@ class StorageContainerL0(Construct):
         instance = cls(
             scope,
             id_,
-            env=env,
+            _=env,
             name=config.name,
             storage_account_id=storage_account_id,
         )

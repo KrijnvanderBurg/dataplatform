@@ -184,7 +184,6 @@ class StorageAccountL0Config(ConstructABC):
         }
 
         Args:
-            env (str): The environment name.
             config (dict): A dictionary containing storage account configuration.
 
         Returns:
