@@ -243,8 +243,6 @@ class StorageAccountL0(Construct):
         management_lock (ManagementLockL0): The management lock applied to the storage account.
     """
 
-    __slots__ = ("full_name", "_resource_group_l0", "_storage_account", "_management_lock")
-
     def __init__(
         self,
         scope: Construct,

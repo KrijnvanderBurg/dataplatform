@@ -177,7 +177,7 @@ class ResourceGroupL0(Construct):
         Returns:
             ResourceGroupL0: A fully-initialized ResourceGroupL0 instance.
         """
-        instance = cls(
+        return cls(
             scope,
             id_,
             env=env,
@@ -186,7 +186,3 @@ class ResourceGroupL0(Construct):
             sequence_number=config.sequence_number,
             management_lock=config.management_lock,
         )
-        instance.full_name = (
-            f"{AzureResource.RESOURCE_GROUP.abbr}-{config.name}-{env}-{config.location.abbr}-{config.sequence_number}"
-        )
-        return instance

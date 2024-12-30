@@ -134,12 +134,10 @@ class StorageContainerL0(Construct):
         Returns:
             StorageContainerL0: A fully-initialized StorageContainerL0 instance.
         """
-        instance = cls(
+        return cls(
             scope,
             id_,
             _=env,
             name=config.name,
             storage_account_id=storage_account_id,
         )
-        instance.full_name = f"{env}{config.name}"
-        return instance
