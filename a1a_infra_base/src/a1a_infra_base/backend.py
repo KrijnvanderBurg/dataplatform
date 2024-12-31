@@ -8,6 +8,7 @@ Classes:
     BackendConfig: A class to represent the backend configuration.
 """
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
@@ -16,7 +17,30 @@ PATH_KEY: Final[str] = "path"
 
 
 @dataclass
-class BackendLocalConfig:
+class BackendConfigABC(ABC):
+    """
+    Abstract base class for backend configuration classes.
+
+    Methods:
+        from_dict: Create a configuration instance by unpacking parameters from a backend configuration dictionary.
+    """
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
+        """
+        Create a backend configuration instance by unpacking parameters from a backend configuration dictionary.
+
+        Args:
+            dict_ (dict): A dictionary containing backend configuration.
+
+        Returns:
+            backendConfigABC: A fully-initialized backend configuration instance.
+        """
+
+
+@dataclass
+class BackendLocalConfig(BackendConfigABC):
     """
     A class to represent the local backend configuration.
 
