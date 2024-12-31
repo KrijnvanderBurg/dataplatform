@@ -13,9 +13,8 @@ Classes:
 
 import logging
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Any, Generic, Self, TypeVar
+from typing import Any, Self
 
-from constructs import Construct
 from jsii import JSIIMeta
 
 from a1a_infra_base.logger import setup_logger
@@ -60,41 +59,3 @@ class ConstructABC(ABC):
     Properties:
         full_name: Generates the full name for the configuration.
     """
-
-
-T = TypeVar("T", bound=ConstructConfigABC)
-
-
-class DetachedConstructABC(ConstructABC, Generic[T]):
-    """
-    Abstract base class for constructs without dynamically attached resources.
-
-    Methods:
-        from_config: Create a construct from a configuration dictionary.
-    """
-
-
-class AttachedConstructABC(ConstructABC, Generic[T]):
-    """
-    Abstract base class for constructs with dynamically attached resources.
-
-    Methods:
-        from_config: Create a construct from a configuration dictionary.
-    """
-
-    @classmethod
-    @abstractmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, attach_to_resource_id: str, config: T) -> Self:
-        """
-        Abstract method to create a construct from a configuration dictionary.
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            attach_to_resource_id (str): The resource ID to attach to.
-            config (T): The configuration object.
-
-        Returns:
-            Self: A fully-initialized construct instance.
-        """

@@ -8,7 +8,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Type
 
 from cdktf import App
 
@@ -26,7 +26,7 @@ NAME_KEY: Final[str] = "name"
 ENABLED_KEY: Final[str] = "enabled"
 
 
-MAPPING_STACKS: Final[dict[str, Any]] = {
+MAPPING_STACKS: Final[dict[str, tuple[Type[TerraformBackendStackConfig], Type[TerraformBackendStack]]]] = {
     TERRAFORM_BACKEND_KEY: (TerraformBackendStackConfig, TerraformBackendStack),
 }
 
@@ -69,10 +69,10 @@ if __name__ == "__main__":
         enabled_cfg: bool = stack[ENABLED_KEY]
         if not enabled_cfg:
             logger.info("Stack %s is disabled.", name_cfg)
-            break
+            continue
 
         stack_config = stack_config_cls.from_dict(dict_=stack)
-        stack_cls.from_config(app, name_cfg, env=env, config=stack_config)
+        stack_cls(app, name_cfg, env=env, config=stack_config)
 
     app.synth()
     logger.info("Application finished.")
