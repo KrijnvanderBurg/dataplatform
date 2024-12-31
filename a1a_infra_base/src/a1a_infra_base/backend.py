@@ -16,9 +16,9 @@ PATH_KEY: Final[str] = "path"
 
 
 @dataclass
-class BackendConfig:
+class BackendLocalConfig:
     """
-    A class to represent the backend configuration.
+    A class to represent the local backend configuration.
 
     Attributes:
         path (str): The path for the local backend.

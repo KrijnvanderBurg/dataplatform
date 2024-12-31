@@ -61,20 +61,22 @@ from cdktf import LocalBackend, TerraformStack
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from constructs import Construct
 
-from a1a_infra_base.backend import BackendConfig
+from a1a_infra_base.backend import BackendLocalConfig
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
 from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
 from a1a_infra_base.logger import setup_logger
-from a1a_infra_base.provider import ProviderConfigABC, ProviderConfigFactory
+from a1a_infra_base.provider import ProviderAzurermConfig
 from a1a_infra_base.stacks.stack_abc import StackConfigABC
 
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 BACKEND_KEY: Final[str] = "backend"
-PROVIDER_KEY: Final[str] = "provider"
-CONSTRUCTS_KEY: Final[str] = "constructs"
 
+PROVIDER_KEY: Final[str] = "provider"
+AZURERM_KEY: Final[str] = "azurerm"
+
+CONSTRUCTS_KEY: Final[str] = "constructs"
 RESOURCE_GROUP_KEY: Final[str] = "resource_group"
 STORAGE_ACCOUNT_KEY: Final[str] = "storage_account"
 
@@ -87,8 +89,9 @@ class TerraformBackendStackConfig(StackConfigABC):
     This class is responsible for unpacking parameters from a configuration dictionary.
     """
 
-    backend_config: BackendConfig
-    provider_configs: list[ProviderConfigABC]
+    backend_local_config: BackendLocalConfig
+    provider_azurerm_config: ProviderAzurermConfig
+
     resource_group_config: ResourceGroupL0Config
     storage_account_config: StorageAccountL0Config
 
@@ -103,16 +106,16 @@ class TerraformBackendStackConfig(StackConfigABC):
         Returns:
             TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
         """
-        backend_config = BackendConfig.from_dict(dict_[BACKEND_KEY])
-        provider_configs = ProviderConfigFactory.from_dicts(dict_[PROVIDER_KEY])
-        constructs_config = dict_[CONSTRUCTS_KEY]
+        backend_local_config = BackendLocalConfig.from_dict(dict_[BACKEND_KEY])
+        provider_azurerm_config = ProviderAzurermConfig.from_dict(dict_[PROVIDER_KEY][AZURERM_KEY])
 
+        constructs_config = dict_[CONSTRUCTS_KEY]
         resource_group_config = ResourceGroupL0Config.from_dict(dict_=constructs_config[RESOURCE_GROUP_KEY])
         storage_account_config = StorageAccountL0Config.from_dict(dict_=constructs_config[STORAGE_ACCOUNT_KEY])
 
         return cls(
-            backend_config=backend_config,
-            provider_configs=provider_configs,
+            backend_local_config=backend_local_config,
+            provider_azurerm_config=provider_azurerm_config,
             resource_group_config=resource_group_config,
             storage_account_config=storage_account_config,
         )
@@ -173,8 +176,8 @@ class TerraformBackendStack(TerraformStack):
         id_: str,
         *,
         env: str,
-        backend_config: BackendConfig,
-        provider_configs: list[ProviderConfigABC],
+        backend_local_config: BackendLocalConfig,
+        provider_azurerm_config: ProviderAzurermConfig,
         resource_group_config: ResourceGroupL0Config,
         storage_account_config: StorageAccountL0Config,
     ) -> None:
@@ -185,21 +188,26 @@ class TerraformBackendStack(TerraformStack):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            backend_config (BackendConfig): The configuration for the Terraform backend.
-            provider_configs (list[ProviderConfigABC]): The configurations for the Terraform provider.
+            backend_local_config (BackendLocalConfig): The configuration for the Terraform backend.
+            provider_azurerm_config (ProviderAzurermConfig): The configuration for the Terraform AzureRM provider.
             resource_group_config (ResourceGroupL0Config): The configuration for the resource group.
             storage_account_config (StorageAccountL0Config): The configuration for the storage account.
         """
         super().__init__(scope, id_)
 
         # Set up the local backend
-        LocalBackend(self, path=backend_config.path)
+        LocalBackend(self, path=backend_local_config.path)
 
-        ProviderFactory.from_config(self, config=provider)
-
-        #     AzurermProvider(self, "AzureRM", features=[{}])
-        # # Set up the Azure provider
-        AzurermProvider(self, "AzureRM", features=[{}])
+        # Set up the Azure provider
+        AzurermProvider(
+            self,
+            "AzureRM",
+            features=[{}],
+            tenant_id=provider_azurerm_config.tenant_id,
+            subscription_id=provider_azurerm_config.subscription_id,
+            client_id=provider_azurerm_config.client_id,
+            client_secret=provider_azurerm_config.client_secret,
+        )
 
         # Create the resource group
         resource_group = ResourceGroupL0.from_config(
@@ -236,7 +244,8 @@ class TerraformBackendStack(TerraformStack):
             scope,
             id_,
             env=env,
-            backend_config=config.backend_config,
+            backend_local_config=config.backend_local_config,
+            provider_azurerm_config=config.provider_azurerm_config,
             resource_group_config=config.resource_group_config,
             storage_account_config=config.storage_account_config,
         )

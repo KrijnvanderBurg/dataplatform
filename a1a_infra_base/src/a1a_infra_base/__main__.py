@@ -71,8 +71,8 @@ if __name__ == "__main__":
             logger.info("Stack %s is disabled.", name_cfg)
             break
 
-        stack_config = stack_config_cls.from_dict(config=stack)
-        stack_cls.from_dict(app, name_cfg, env=env, config=stack_config)
+        stack_config = stack_config_cls.from_dict(dict_=stack)
+        stack_cls.from_config(app, name_cfg, env=env, config=stack_config)
 
     app.synth()
     logger.info("Application finished.")

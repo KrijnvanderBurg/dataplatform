@@ -7,27 +7,15 @@ Classes:
     ProviderConfig: A class to represent the provider configuration.
 """
 
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from cdktf import TerraformStack
-from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
-from constructs import Construct
-from jsii import JSIIMeta
-
 # Constants for dictionary keys
-NAME_KEY: Final[str] = "name"
-
-PROVIDER_AZURERM: Final[str] = "azurerm"
-
-
-class CombinedMeta(JSIIMeta, ABCMeta):
-    """
-    Meta class combining CDKTF.Construct and ABCMeta.
-
-    This class is used to combine the Construct super class with the a1a_infra_base.ConstructABC.
-    """
+TENANT_ID: Final[str] = "tenant_id"
+SUBSCRIPTION_ID: Final[str] = "subscription_id"
+CLIENT_ID: Final[str] = "client_id"
+CLIENT_SECRET: Final[str] = "client_secret"
 
 
 @dataclass
@@ -54,7 +42,7 @@ class ProviderConfigABC(ABC):
 
 
 @dataclass
-class ProviderAzurermConfig(TerraformStack, ProviderConfigABC, metaclass=CombinedMeta):
+class ProviderAzurermConfig(ProviderConfigABC):
     """
     A class to represent the Azurerm provider configuration.
 
@@ -62,7 +50,10 @@ class ProviderAzurermConfig(TerraformStack, ProviderConfigABC, metaclass=Combine
         path (str): The path for the local provider.
     """
 
-    name: str
+    tenant_id: str
+    subscription_id: str
+    client_id: str
+    client_secret: str
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -75,69 +66,10 @@ class ProviderAzurermConfig(TerraformStack, ProviderConfigABC, metaclass=Combine
         Returns:
             AzurermProviderConfig: A fully-initialized AzurermProviderConfig instance.
         """
-        name = dict_[NAME_KEY]
-        return cls(name=name)
-
-
-class ProviderAzurerm:
-    """TODO"""
-
-    def __init__(self, scope: Construct, *, name: str) -> None:
-        AzurermProvider(scope, name, features=[{}])
-
-    @classmethod
-    def from_config(cls, scope: Construct, *, config: ProviderAzurermConfig) -> Self:
-        """TODO"""
-        return cls(scope, name=config.name)
-
-
-MAPPING_PROVIDERS: Final[dict[str, Any]] = {PROVIDER_AZURERM: (ProviderAzurermConfig, ProviderAzurerm),}
-
-
-@dataclass
-class ProviderConfigFactory:
-    """TODO
-    """
-
-    @staticmethod
-    def from_dicts(dict_: dict[str, Any]) -> list[ProviderConfigABC]:
-        """
-        Create a ProviderConfig instance from a configuration dictionary.
-
-        Args:
-            dict_ (dict[str, Any]): A dictionary containing provider configurations.
-
-        Returns:
-            list[ProviderConfigABC]: A list of ProviderConfig instances.
-        """
-        providers: list[ProviderConfigABC] = []
-
-        for key in dict_.keys():
-            if key not in MAPPING_PROVIDERS:
-                raise ValueError(f"Unknown provider name: {key}")
-
-            provider_config_cls, _ = MAPPING_PROVIDERS[key]
-            providers.append(provider_config_cls.from_dict(dict_=dict_[key]))
-        return providers
-
-
-@dataclass
-class ProviderFactory:
-    """TODO
-    """
-
-    @staticmethod
-    def from_configs(scope: Construct, configs: list[ProviderConfigABC]) -> None:
-        """
-        Create a ProviderConfig instance from a configuration dictionary.
-
-        Args:
-            configs (list[ProviderConfigABC]): A list of provider configs.
-        """
-
-
-        if configs. not in MAPPING_PROVIDERS:
-            raise ValueError(f"Unknown provider name: {key}")
-
-        provider_cls, _ = MAPPING_PROVIDERS[key]
-        provider_cls.from_config(scope, config=configs)
+        tenant_id: str = dict_[TENANT_ID]
+        subscription_id: str = dict_[SUBSCRIPTION_ID]
+        client_id: str = dict_[CLIENT_ID]
+        client_secret: str = dict_[CLIENT_SECRET]
+        return cls(
+            tenant_id=tenant_id, subscription_id=subscription_id, client_id=client_id, client_secret=client_secret
+        )
