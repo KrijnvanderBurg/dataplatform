@@ -23,6 +23,7 @@ from a1a_infra_base.logger import setup_logger
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
+NAME_KEY: Final[str] = "name"
 LOCK_LEVEL_KEY: Final[str] = "lock_level"
 NOTES_KEY: Final[str] = "notes"
 
@@ -37,6 +38,7 @@ class ManagementLockL0Config(ConstructConfigABC):
         notes (str): Notes for the management lock.
     """
 
+    name: str
     lock_level: str
     notes: str
 
@@ -57,9 +59,10 @@ class ManagementLockL0Config(ConstructConfigABC):
         Returns:
             ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
         """
+        name = dict_[NAME_KEY]
         lock_level = dict_[LOCK_LEVEL_KEY]
         notes = dict_[NOTES_KEY]
-        return cls(lock_level=lock_level, notes=notes)
+        return cls(name=name, lock_level=lock_level, notes=notes)
 
 
 class ManagementLockL0(Construct, AttachedConstructABC[ManagementLockL0Config], metaclass=CombinedMeta):
@@ -91,7 +94,7 @@ class ManagementLockL0(Construct, AttachedConstructABC[ManagementLockL0Config], 
         """
         super().__init__(scope, id_)
 
-        self.full_name = f"{self.full_name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+        self.full_name = f"{config.name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
         self._management_lock = ManagementLock(
             self,
             self.full_name,
@@ -105,8 +108,6 @@ class ManagementLockL0(Construct, AttachedConstructABC[ManagementLockL0Config], 
     def management_lock(self) -> ManagementLock:
         """Gets the management lock applied to the resource."""
         return self._management_lock
-
-        # Explicitly attached after from_dict is called
 
     @classmethod
     def from_config(

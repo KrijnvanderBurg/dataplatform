@@ -61,28 +61,6 @@ class ConstructABC(ABC):
         full_name: Generates the full name for the configuration.
     """
 
-    def __init__(self) -> None:
-        self._full_name: str = ""
-
-    @property
-    def full_name(self) -> str:
-        """Generates the full name for the configuration.
-
-        Returns:
-            str: The full name for the construct.
-        """
-        return self._full_name
-
-    @full_name.setter
-    def full_name(self, value: str) -> None:
-        """
-        Sets the full name for the resource group.
-
-        Args:
-            value (str): The full name to set.
-        """
-        self._full_name = value
-
 
 T = TypeVar("T", bound=ConstructConfigABC)
 
