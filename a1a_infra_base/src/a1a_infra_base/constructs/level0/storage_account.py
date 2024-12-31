@@ -21,7 +21,7 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import AttachedConstructABC, CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
 from a1a_infra_base.logger import setup_logger
@@ -62,18 +62,18 @@ class DeleteRetentionPolicy:
     days: int
 
     @classmethod
-    def from_config(cls, dict_: dict[str, Any]) -> Self:
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a DeleteRetentionPolicy instance from a configuration dictionary.
+        Create a DeleteRetentionPolicy by unpacking parameters from a configuration dictionary.
 
         Args:
             dict_ (dict): A dictionary containing delete retention policy configuration.
 
         Returns:
-            DeleteRetentionPolicy: A fully-initialized DeleteRetentionPolicy instance.
+            DeleteRetentionPolicy: A fully-initialized DeleteRetentionPolicy.
         """
         days = dict_[DELETE_RETENTION_DAYS_KEY]
-        return cls(days)
+        return cls(days=days)
 
 
 @dataclass
@@ -88,18 +88,18 @@ class BlobProperties:
     delete_retention_policy: DeleteRetentionPolicy
 
     @classmethod
-    def from_config(cls, dict_: dict[str, Any]) -> Self:
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a BlobProperties instance from a configuration dictionary.
+        Create a BlobProperties by unpacking parameters from a configuration dictionary.
 
         Args:
             dict_ (dict): A dictionary containing blob properties configuration.
 
         Returns:
-            BlobProperties: A fully-initialized BlobProperties instance.
+            BlobProperties: A fully-initialized BlobProperties.
         """
-        delete_retention_policy = DeleteRetentionPolicy.from_config(dict_[DELETE_RETENTION_POLICY_KEY])
-        return cls(delete_retention_policy)
+        delete_retention_policy = DeleteRetentionPolicy.from_dict(dict_[DELETE_RETENTION_POLICY_KEY])
+        return cls(delete_retention_policy=delete_retention_policy)
 
 
 @dataclass
@@ -202,7 +202,7 @@ class StorageAccountL0Config(ConstructConfigABC):
         local_user_enabled = dict_[LOCAL_USER_ENABLED_KEY]
         infrastructure_encryption_enabled = dict_[INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY]
         sftp_enabled = dict_[SFTP_ENABLED_KEY]
-        blob_properties = BlobProperties.from_config(dict_[BLOB_PROPERTIES_KEY])
+        blob_properties = BlobProperties.from_dict(dict_[BLOB_PROPERTIES_KEY])
 
         containers = []
         for container_dict in dict_.get(CONTAINERS_KEY, []):
@@ -233,7 +233,7 @@ class StorageAccountL0Config(ConstructConfigABC):
         )
 
 
-class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], metaclass=CombinedMeta):
+class StorageAccountL0(Construct, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure storage account.
 
@@ -249,8 +249,8 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
         *,
         env: str,
         name: str,
-        resource_id: str,
         location: AzureLocation,
+        resource_group_name: str,
         sequence_number: str,
         account_replication_type: str,
         account_kind: str,
@@ -274,9 +274,9 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            resource_id (str): The resource ID to attach to.
             name (str): The name of the storage account.
             location (AzureLocation): The Azure location.
+            resource_group_name (str): The name of the resource group.
             sequence_number (str): The sequence number.
             account_replication_type (str): The replication type of the storage account.
             account_kind (str): The kind of the storage account.
@@ -292,7 +292,6 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
             blob_properties (BlobProperties): The blob properties configuration.
             containers (list[StorageContainerL0Config]): The list of storage containers configuration.
             management_lock (ManagementLockL0Config | None): The management lock configuration.
-            resource_group_l0 (ResourceGroupL0): The resource group level 0 construct.
         """
         super().__init__(scope, id_)
 
@@ -302,7 +301,7 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
             f"StorageAccount_{self.full_name}",
             name=self.full_name,
             location=location.name,
-            resource_group_name=resource_id,
+            resource_group_name=resource_group_name,
             account_replication_type=account_replication_type,
             account_kind=account_kind,
             account_tier=account_tier,
@@ -322,20 +321,23 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
         )
 
         for container in containers:
-            StorageContainerL0.from_config(
+            StorageContainerL0(
                 self,
-                f"StorageContainerL0_{container.full_name}",
-                env=env,
-                attach_to_resource_id=self.storage_account.id,
-                config=container,
+                f"StorageContainerL0_{container.name}",
+                _=env,
+                name=container.name,
+                storage_account_id=self.storage_account.id,
             )
+
         if management_lock:
-            self._management_lock: ManagementLockL0 | None = ManagementLockL0.from_config(
+            self._management_lock: ManagementLockL0 | None = ManagementLockL0(
                 self,
                 "ManagementLockL0",
-                env=env,
-                attach_to_resource_id=self.storage_account.id,
-                config=management_lock,
+                _=env,
+                resource_id=self.storage_account.id,
+                name=management_lock.name,
+                lock_level=management_lock.lock_level,
+                notes=management_lock.notes,
             )
         else:
             self._management_lock = None
@@ -349,44 +351,3 @@ class StorageAccountL0(Construct, AttachedConstructABC[StorageAccountL0Config], 
     def management_lock(self) -> ManagementLockL0 | None:
         """Gets the management lock applied to the storage account."""
         return self._management_lock
-
-    @classmethod
-    def from_config(
-        cls, scope: Construct, id_: str, env: str, attach_to_resource_id: str, config: StorageAccountL0Config
-    ) -> Self:
-        """
-        Create a StorageAccountL0 instance from a StorageAccountL0Config object.
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            attach_to_resource_id (str): The resource ID to attach to.
-            config (StorageAccountL0Config): The configuration object for the storage account.
-
-        Returns:
-            StorageAccountL0: A fully-initialized StorageAccountL0 instance.
-        """
-        return cls(
-            scope,
-            id_,
-            env=env,
-            resource_id=attach_to_resource_id,
-            name=config.name,
-            location=config.location,
-            sequence_number=config.sequence_number,
-            account_replication_type=config.account_replication_type,
-            account_kind=config.account_kind,
-            account_tier=config.account_tier,
-            cross_tenant_replication_enabled=config.cross_tenant_replication_enabled,
-            access_tier=config.access_tier,
-            shared_access_key_enabled=config.shared_access_key_enabled,
-            public_network_access_enabled=config.public_network_access_enabled,
-            is_hns_enabled=config.is_hns_enabled,
-            local_user_enabled=config.local_user_enabled,
-            infrastructure_encryption_enabled=config.infrastructure_encryption_enabled,
-            sftp_enabled=config.sftp_enabled,
-            blob_properties=config.blob_properties,
-            containers=config.containers,
-            management_lock=config.management_lock,
-        )

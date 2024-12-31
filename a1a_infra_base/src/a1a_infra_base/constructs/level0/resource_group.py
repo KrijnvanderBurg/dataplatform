@@ -17,7 +17,7 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC, DetachedConstructABC
+from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
 
@@ -85,7 +85,7 @@ class ResourceGroupL0Config(ConstructConfigABC):
         )
 
 
-class ResourceGroupL0(Construct, DetachedConstructABC[ResourceGroupL0Config], metaclass=CombinedMeta):
+class ResourceGroupL0(Construct, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure resource group.
 
@@ -127,12 +127,14 @@ class ResourceGroupL0(Construct, DetachedConstructABC[ResourceGroupL0Config], me
         )
 
         if management_lock:
-            self._management_lock: ManagementLockL0 | None = ManagementLockL0.from_config(
+            self._management_lock: ManagementLockL0 | None = ManagementLockL0(
                 self,
                 "ManagementLockL0",
-                env=env,
-                attach_to_resource_id=self._resource_group.id,
-                config=management_lock,
+                _=env,
+                resource_id=self._resource_group.id,
+                name=management_lock.name,
+                lock_level=management_lock.lock_level,
+                notes=management_lock.notes,
             )
         else:
             self._management_lock = None
@@ -146,27 +148,3 @@ class ResourceGroupL0(Construct, DetachedConstructABC[ResourceGroupL0Config], me
     def management_lock(self) -> ManagementLockL0 | None:
         """Gets the management lock applied to the resource group."""
         return self._management_lock
-
-    @classmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, config: ResourceGroupL0Config) -> Self:
-        """
-        Create a ResourceGroupL0 instance from a ResourceGroupL0Config object.
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            config (ResourceGroupL0Config): The configuration object for the resource group.
-
-        Returns:
-            ResourceGroupL0: A fully-initialized ResourceGroupL0 instance.
-        """
-        return cls(
-            scope,
-            id_,
-            env=env,
-            name=config.name,
-            location=config.location,
-            sequence_number=config.sequence_number,
-            management_lock=config.management_lock,
-        )

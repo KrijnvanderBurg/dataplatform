@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from constructs import Construct
 
-from a1a_infra_base.constructs.construct_abc import AttachedConstructABC, CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 
 logger: logging.Logger = setup_logger(__name__)
@@ -61,7 +61,7 @@ class StorageContainerL0Config(ConstructConfigABC):
         return cls(name=name)
 
 
-class StorageContainerL0(Construct, AttachedConstructABC[StorageContainerL0Config], metaclass=CombinedMeta):
+class StorageContainerL0(Construct, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure storage container.
 
@@ -101,28 +101,3 @@ class StorageContainerL0(Construct, AttachedConstructABC[StorageContainerL0Confi
     def storage_container(self) -> StorageContainer:
         """Gets the Azure storage container."""
         return self._storage_container
-
-    @classmethod
-    def from_config(
-        cls, scope: Construct, id_: str, env: str, attach_to_resource_id: str, config: StorageContainerL0Config
-    ) -> Self:
-        """
-        Create a StorageContainerL0 instance from a StorageContainerL0Config object.
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            attach_to_resource_id (str): The resource ID to attach to.
-            config (StorageContainerL0Config): The configuration object for the storage container.
-
-        Returns:
-            StorageContainerL0: A fully-initialized StorageContainerL0 instance.
-        """
-        return cls(
-            scope,
-            id_,
-            _=env,
-            name=config.name,
-            storage_account_id=attach_to_resource_id,
-        )

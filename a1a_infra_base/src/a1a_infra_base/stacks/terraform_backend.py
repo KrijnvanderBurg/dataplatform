@@ -210,20 +210,39 @@ class TerraformBackendStack(TerraformStack):
         )
 
         # Create the resource group
-        resource_group = ResourceGroupL0.from_config(
+        self.resource_group_l0 = ResourceGroupL0(
             self,
             "ResourceGroupL0",
             env=env,
-            config=resource_group_config,
+            name=resource_group_config.name,
+            location=resource_group_config.location,
+            sequence_number=resource_group_config.sequence_number,
+            management_lock=resource_group_config.management_lock,
         )
 
         # Create the storage account
-        StorageAccountL0.from_config(
+        self.storage_account_l0 = StorageAccountL0(
             self,
             "StorageAccountL0",
             env=env,
-            attach_to_resource_id=resource_group.resource_group.id,
-            config=storage_account_config,
+            name=storage_account_config.name,
+            location=storage_account_config.location,
+            resource_group_name=self.resource_group_l0.resource_group.name,
+            sequence_number=storage_account_config.sequence_number,
+            account_replication_type=storage_account_config.account_replication_type,
+            account_kind=storage_account_config.account_kind,
+            account_tier=storage_account_config.account_tier,
+            cross_tenant_replication_enabled=storage_account_config.cross_tenant_replication_enabled,
+            access_tier=storage_account_config.access_tier,
+            shared_access_key_enabled=storage_account_config.shared_access_key_enabled,
+            public_network_access_enabled=storage_account_config.public_network_access_enabled,
+            is_hns_enabled=storage_account_config.is_hns_enabled,
+            local_user_enabled=storage_account_config.local_user_enabled,
+            infrastructure_encryption_enabled=storage_account_config.infrastructure_encryption_enabled,
+            sftp_enabled=storage_account_config.sftp_enabled,
+            blob_properties=storage_account_config.blob_properties,
+            containers=storage_account_config.containers,
+            management_lock=storage_account_config.management_lock,
         )
 
     @classmethod

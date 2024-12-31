@@ -73,22 +73,6 @@ class DetachedConstructABC(ConstructABC, Generic[T]):
         from_config: Create a construct from a configuration dictionary.
     """
 
-    @classmethod
-    @abstractmethod
-    def from_config(cls, scope: Construct, id_: str, env: str, config: T) -> Self:
-        """
-        Abstract method to create a construct from a configuration dictionary.
-
-        Args:
-            scope (Construct): The scope in which this construct is defined.
-            id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            config (T): The configuration object.
-
-        Returns:
-            Self: A fully-initialized construct instance.
-        """
-
 
 class AttachedConstructABC(ConstructABC, Generic[T]):
     """
