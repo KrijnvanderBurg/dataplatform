@@ -14,7 +14,7 @@
             },
             "backend": {
                 "type": "local",
-                "path": "init.tfstate"
+                "path": "tfstate/init.tfstate"
             },
             "constructs": {
                 "resource_group": {
