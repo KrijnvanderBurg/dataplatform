@@ -46,7 +46,7 @@ class StorageContainerL0Config(ConstructConfigABC):
         """
         Create a StorageContainerL0Config by unpacking parameters from a configuration dictionary.
 
-        Expected format of 'config':
+        Expected format of 'dict_':
         {
             "name": "<storage container name>"
         }

@@ -34,6 +34,7 @@ class ManagementLockL0Config(ConstructConfigABC):
     A configuration class for ManagementLockL0.
 
     Attributes:
+        name (str): The name of the management lock.
         lock_level (str): The lock level for the management lock.
         notes (str): Notes for the management lock.
     """

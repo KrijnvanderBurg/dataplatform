@@ -50,14 +50,15 @@ class ResourceGroupL0Config(ConstructConfigABC):
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a ResourceGroupConfig by unpacking parameters from a configuration dictionary.
+        Create a ResourceGroupL0Config instance by unpacking parameters from a configuration dictionary.
 
-        Expected format of 'dict_':
+        The expected format of 'dict_' is:
         {
             "name": "<resource group name>",
             "location": "<AzureLocation enum value name>",
             "sequence_number": "<sequence number>",
             "management_lock": {
+                "name": "<lock name>",
                 "lock_level": "<lock level>",
                 "notes": "<notes>"
             }
@@ -67,7 +68,7 @@ class ResourceGroupL0Config(ConstructConfigABC):
             dict_ (dict): A dictionary containing resource group configuration.
 
         Returns:
-            ResourceGroupConfig: A fully-initialized ResourceGroupConfig.
+            ResourceGroupL0Config: A fully-initialized ResourceGroupL0Config instance.
         """
         name = dict_[NAME_KEY]
         location = AzureLocation.from_full_name(dict_[LOCATION_KEY])

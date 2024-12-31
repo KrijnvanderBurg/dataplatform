@@ -1,12 +1,12 @@
 """
 Module storage_account
 
-This module defines the StorageAccountL0 class and the StorageAccountConfig class,
+This module defines the StorageAccountL0 class and the StorageAccountL0Config class,
 which are responsible for creating and managing an Azure storage account with specific configurations.
 
 Classes:
     StorageAccountL0: A level 0 construct that creates and manages an Azure storage account.
-    StorageAccountConfig: A configuration class for StorageAccountL0.
+    StorageAccountL0Config: A configuration class for StorageAccountL0.
 """
 
 import logging
@@ -148,7 +148,7 @@ class StorageAccountL0Config(ConstructConfigABC):
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a StorageAccountConfig by unpacking parameters from a configuration dictionary.
+        Create a StorageAccountL0Config by unpacking parameters from a configuration dictionary.
 
         Expected format of 'dict_':
         {
@@ -173,7 +173,7 @@ class StorageAccountL0Config(ConstructConfigABC):
             },
             "containers": [
                 {
-                    "name": "<container name>",
+                    "name": "<container name>"
                 }
             ],
             "management_lock": {
@@ -186,7 +186,7 @@ class StorageAccountL0Config(ConstructConfigABC):
             dict_ (dict): A dictionary containing storage account configuration.
 
         Returns:
-            StorageAccountConfig: A fully-initialized StorageAccountConfig.
+            StorageAccountL0Config: A fully-initialized StorageAccountL0Config.
         """
         name = dict_[NAME_KEY]
         location = AzureLocation.from_full_name(dict_[LOCATION_KEY])

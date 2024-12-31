@@ -8,49 +8,6 @@ Classes:
     TerraformBackendStack: A Terraform stack that sets up the local backend, Azure provider,
                            and creates a resource group and a locked storage account.
     TerraformBackendStackConfig: A configuration class for TerraformBackendStack.
-
-Example of a config dictionary for this stack:
-{
-    "env": "dev",
-    "terraform_backend": {
-        "enabled": true,
-        "backend": {
-            "type": "local",
-            "path": "init.tfstate"
-        },
-        "resource_group": {
-            "name": "init",
-            "location": "germany west central",
-            "sequence_number": "01"
-        },
-        "storage_account": {
-            "name": "init",
-            "location": "germany west central",
-            "sequence_number": "01",
-            "resource_group_name": "init",
-            "account_replication_type": "LRS",
-            "account_kind": "StorageV2",
-            "account_tier": "Standard",
-            "cross_tenant_replication_enabled": false,
-            "access_tier": "Hot",
-            "shared_access_key_enabled": false,
-            "public_network_access_enabled": true,
-            "is_hns_enabled": false,
-            "local_user_enabled": false,
-            "infrastructure_encryption_enabled": true,
-            "sftp_enabled": false,
-            "blob_properties": {
-                "delete_retention_policy": {
-                    "delete_retention_days": 7
-                }
-            },
-            "management_lock": {
-                "lock_level": "CanNotDelete",
-                "notes": "Necessary for Terraform deployments"
-            }
-        }
-    }
-}
 """
 
 import logging
@@ -87,11 +44,16 @@ class TerraformBackendStackConfig(StackConfigABC):
     A configuration class for TerraformBackendStack.
 
     This class is responsible for unpacking parameters from a configuration dictionary.
+
+    Attributes:
+        backend_local_config (BackendLocalConfig): The configuration for the Terraform backend.
+        provider_azurerm_config (ProviderAzurermConfig): The configuration for the Terraform AzureRM provider.
+        resource_group_config (ResourceGroupL0Config): The configuration for the resource group.
+        storage_account_config (StorageAccountL0Config): The configuration for the storage account.
     """
 
     backend_local_config: BackendLocalConfig
     provider_azurerm_config: ProviderAzurermConfig
-
     resource_group_config: ResourceGroupL0Config
     storage_account_config: StorageAccountL0Config
 
@@ -99,6 +61,68 @@ class TerraformBackendStackConfig(StackConfigABC):
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a TerraformBackendStackConfig by unpacking parameters from a configuration dictionary.
+
+        Expected format of 'dict_':
+        {
+            "env": "prod",
+            "stacks": [
+                {
+                    "name": "terraform_backend",
+                    "enabled": true,
+                    "provider": {
+                        "azurerm": {
+                            "tenant_id": "00000000-0000-0000-0000-000000000000",
+                            "subscription_id": "00000000-0000-0000-0000-000000000000",
+                            "client_id": "00000000-0000-0000-0000-000000000000",
+                            "client_secret": "00000000-0000-0000-0000-000000000000"
+                        }
+                    },
+                    "backend": {
+                        "type": "local",
+                        "path": "tfstate/init.tfstate"
+                    },
+                    "constructs": {
+                        "resource_group": {
+                            "name": "init",
+                            "location": "germany west central",
+                            "sequence_number": "01"
+                        },
+                        "storage_account": {
+                            "name": "init",
+                            "location": "germany west central",
+                            "sequence_number": "01",
+                            "resource_group_name": "init",
+                            "account_replication_type": "LRS",
+                            "account_kind": "StorageV2",
+                            "account_tier": "Standard",
+                            "cross_tenant_replication_enabled": false,
+                            "access_tier": "Hot",
+                            "shared_access_key_enabled": false,
+                            "public_network_access_enabled": true,
+                            "is_hns_enabled": false,
+                            "local_user_enabled": false,
+                            "infrastructure_encryption_enabled": true,
+                            "sftp_enabled": false,
+                            "blob_properties": {
+                                "delete_retention_policy": {
+                                    "delete_retention_days": 7
+                                }
+                            },
+                            "containers": [
+                                {
+                                    "name": "terraform"
+                                }
+                            ],
+                            "management_lock": {
+                                "name": "init",
+                                "lock_level": "CanNotDelete",
+                                "notes": "Required for Terraform deployments."
+                            }
+                        }
+                    }
+                }
+            ]
+        }
 
         Args:
             dict_ (dict): A dictionary containing the stack configuration.
@@ -126,48 +150,9 @@ class TerraformBackendStack(TerraformStack):
     A Terraform stack that sets up the local backend, Azure provider, and creates a resource group
     and a locked storage account based on a given configuration dictionary.
 
-    Expected format of 'config':
-    {
-        "env": "<environment name>",
-        "terraform_backend": {
-            "enabled": <bool>,
-            "backend": {
-                "type": "<backend type>",
-                "path": "<backend path>"
-            },
-            "resource_group": {
-                "name": "<resource group name>",
-                "location": "<location>",
-                "sequence_number": "<sequence number>"
-            },
-            "storage_account": {
-                "name": "<storage account name>",
-                "location": "<location>",
-                "sequence_number": "<sequence number>",
-                "resource_group_name": "<resource group name>",
-                "account_replication_type": "<replication type>",
-                "account_kind": "<account kind>",
-                "account_tier": "<account tier>",
-                "cross_tenant_replication_enabled": <bool>,
-                "access_tier": "<access tier>",
-                "shared_access_key_enabled": <bool>,
-                "public_network_access_enabled": <bool>,
-                "is_hns_enabled": <bool>,
-                "local_user_enabled": <bool>,
-                "infrastructure_encryption_enabled": <bool>,
-                "sftp_enabled": <bool>,
-                "blob_properties": {
-                    "delete_retention_policy": {
-                        "delete_retention_days": <int>
-                    }
-                },
-                "management_lock": {
-                    "lock_level": "<lock level>",
-                    "notes": "<notes>"
-                }
-            }
-        }
-    }
+    Attributes:
+        resource_group_l0 (ResourceGroupL0): The resource group construct.
+        storage_account_l0 (StorageAccountL0): The storage account construct.
     """
 
     def __init__(
