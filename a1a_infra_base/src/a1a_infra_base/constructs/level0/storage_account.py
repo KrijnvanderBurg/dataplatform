@@ -248,24 +248,8 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
         id_: str,
         *,
         env: str,
-        name: str,
-        location: AzureLocation,
+        config: StorageAccountL0Config,
         resource_group_name: str,
-        sequence_number: str,
-        account_replication_type: str,
-        account_kind: str,
-        account_tier: str,
-        cross_tenant_replication_enabled: bool,
-        access_tier: str,
-        shared_access_key_enabled: bool,
-        public_network_access_enabled: bool,
-        is_hns_enabled: bool,
-        local_user_enabled: bool,
-        infrastructure_encryption_enabled: bool,
-        sftp_enabled: bool,
-        blob_properties: BlobProperties,
-        containers: list[StorageContainerL0Config],
-        management_lock: ManagementLockL0Config | None,
     ) -> None:
         """
         Initializes the StorageAccountL0 construct.
@@ -274,70 +258,54 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            name (str): The name of the storage account.
-            location (AzureLocation): The Azure location.
+            config (StorageAccountL0Config): The configuration for the storage account.
             resource_group_name (str): The name of the resource group.
-            sequence_number (str): The sequence number.
-            account_replication_type (str): The replication type of the storage account.
-            account_kind (str): The kind of the storage account.
-            account_tier (str): The tier of the storage account.
-            cross_tenant_replication_enabled (bool): Whether cross-tenant replication is enabled.
-            access_tier (str): The access tier of the storage account.
-            shared_access_key_enabled (bool): Whether shared access key is enabled.
-            public_network_access_enabled (bool): Whether public network access is enabled.
-            is_hns_enabled (bool): Whether hierarchical namespace is enabled.
-            local_user_enabled (bool): Whether local user is enabled.
-            infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
-            sftp_enabled (bool): Whether SFTP is enabled.
-            blob_properties (BlobProperties): The blob properties configuration.
-            containers (list[StorageContainerL0Config]): The list of storage containers configuration.
-            management_lock (ManagementLockL0Config | None): The management lock configuration.
         """
         super().__init__(scope, id_)
 
-        self.full_name = f"{AzureResource.STORAGE_ACCOUNT.abbr}{env}{name}{location.name}{sequence_number}"
+        self.full_name = (
+            f"{AzureResource.STORAGE_ACCOUNT.abbr}{env}{config.name}{config.location.name}{config.sequence_number}"
+        )
         self._storage_account = StorageAccount(
             self,
             f"StorageAccount_{self.full_name}",
             name=self.full_name,
-            location=location.name,
+            location=config.location.name,
             resource_group_name=resource_group_name,
-            account_replication_type=account_replication_type,
-            account_kind=account_kind,
-            account_tier=account_tier,
-            cross_tenant_replication_enabled=cross_tenant_replication_enabled,
-            access_tier=access_tier,
-            shared_access_key_enabled=shared_access_key_enabled,
-            public_network_access_enabled=public_network_access_enabled,
-            is_hns_enabled=is_hns_enabled,
-            local_user_enabled=local_user_enabled,
-            infrastructure_encryption_enabled=infrastructure_encryption_enabled,
-            sftp_enabled=sftp_enabled,
+            account_replication_type=config.account_replication_type,
+            account_kind=config.account_kind,
+            account_tier=config.account_tier,
+            cross_tenant_replication_enabled=config.cross_tenant_replication_enabled,
+            access_tier=config.access_tier,
+            shared_access_key_enabled=config.shared_access_key_enabled,
+            public_network_access_enabled=config.public_network_access_enabled,
+            is_hns_enabled=config.is_hns_enabled,
+            local_user_enabled=config.local_user_enabled,
+            infrastructure_encryption_enabled=config.infrastructure_encryption_enabled,
+            sftp_enabled=config.sftp_enabled,
             blob_properties=StorageAccountBlobProperties(
                 delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
-                    days=blob_properties.delete_retention_policy.days,
+                    days=config.blob_properties.delete_retention_policy.days,
                 )
             ),
         )
 
-        for container in containers:
+        for container in config.containers:
             StorageContainerL0(
                 self,
                 f"StorageContainerL0_{container.name}",
                 _=env,
-                name=container.name,
+                config=container,
                 storage_account_id=self.storage_account.id,
             )
 
-        if management_lock:
+        if config.management_lock:
             self._management_lock: ManagementLockL0 | None = ManagementLockL0(
                 self,
                 "ManagementLockL0",
                 _=env,
+                config=config.management_lock,
                 resource_id=self.storage_account.id,
-                name=management_lock.name,
-                lock_level=management_lock.lock_level,
-                notes=management_lock.notes,
             )
         else:
             self._management_lock = None

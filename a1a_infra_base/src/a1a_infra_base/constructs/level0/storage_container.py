@@ -75,7 +75,7 @@ class StorageContainerL0(Construct, metaclass=CombinedMeta):
         id_: str,
         *,
         _: str,  # unused env parameter; only present for consistency and to match signature
-        name: str,
+        config: StorageContainerL0Config,
         storage_account_id: str,
     ) -> None:
         """
@@ -84,16 +84,15 @@ class StorageContainerL0(Construct, metaclass=CombinedMeta):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            env (str): The environment name.
-            name (str): The name of the storage container.
+            config (StorageContainerL0Config): The configuration for the storage container.
             storage_account_id (str): The ID of the storage account.
         """
         super().__init__(scope, id_)
-        self.full_name = f"{name}"
+        self.full_name = f"{config.name}"
         self._storage_container = StorageContainer(
             self,
-            f"StorageContainer_{name}",
-            name=name,
+            f"StorageContainer_{config.name}",
+            name=config.name,
             storage_account_id=storage_account_id,
         )
 

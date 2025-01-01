@@ -101,10 +101,7 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
         id_: str,
         *,
         env: str,
-        name: str,
-        location: AzureLocation,
-        sequence_number: str,
-        management_lock: ManagementLockL0Config | None,
+        config: ResourceGroupL0Config,
     ) -> None:
         """
         Initializes the ResourceGroupL0 construct.
@@ -113,29 +110,26 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            name (str): The name of the resource group.
-            location (AzureLocation): The Azure location.
-            sequence_number (str): The sequence number.
-            management_lock (ManagementLockL0Config | None): The management lock configuration.
+            config (ResourceGroupL0Config): The configuration for the resource group.
         """
         super().__init__(scope, id_)
-        self._full_name = f"{AzureResource.RESOURCE_GROUP.abbr}-{name}-{env}-{location.abbr}-{sequence_number}"
+        self._full_name = (
+            f"{AzureResource.RESOURCE_GROUP.abbr}-{config.name}-{env}-{config.location.abbr}-{config.sequence_number}"
+        )
         self._resource_group = ResourceGroup(
             self,
             f"ResourceGroup_{self._full_name}",
             name=self._full_name,
-            location=location.full_name,
+            location=config.location.full_name,
         )
 
-        if management_lock:
+        if config.management_lock:
             self._management_lock: ManagementLockL0 | None = ManagementLockL0(
                 self,
                 "ManagementLockL0",
                 _=env,
+                config=config.management_lock,
                 resource_id=self._resource_group.id,
-                name=management_lock.name,
-                lock_level=management_lock.lock_level,
-                notes=management_lock.notes,
             )
         else:
             self._management_lock = None

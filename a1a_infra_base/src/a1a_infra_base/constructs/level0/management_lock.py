@@ -81,10 +81,8 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
         id_: str,
         *,
         _: str,  # unused env parameter; only present for consistency and to match signature
+        config: ManagementLockL0Config,
         resource_id: str,
-        name: str,
-        lock_level: str,
-        notes: str,
     ) -> None:
         """
         Initializes the ManagementLockL0 construct.
@@ -92,22 +90,19 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
         Args:
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
-            env (str): The environment name.
+            config (ManagementLockL0Config): The configuration for the management lock.
             resource_id (str): The resource ID to attach to.
-            name (str): The name of the management lock.
-            lock_level (str): The lock level for the management lock.
-            notes (str): Notes for the management lock.
         """
         super().__init__(scope, id_)
 
-        self.full_name = f"{name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+        self.full_name = f"{config.name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
         self._management_lock = ManagementLock(
             self,
             self.full_name,
             name=self.full_name,
             scope=resource_id,
-            lock_level=lock_level,
-            notes=notes,
+            lock_level=config.lock_level,
+            notes=config.notes,
         )
 
     @property

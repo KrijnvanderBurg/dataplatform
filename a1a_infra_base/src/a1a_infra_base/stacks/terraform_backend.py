@@ -121,6 +121,5 @@ class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
             self,
             "TerraformBackendL0",
             env=env,
-            resource_group_config=config.constructs_config.resource_group_config,
-            storage_account_config=config.constructs_config.storage_account_config,
+            config=config.constructs_config,
         )

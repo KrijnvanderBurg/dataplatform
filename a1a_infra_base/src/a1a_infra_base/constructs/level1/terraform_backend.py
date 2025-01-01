@@ -71,8 +71,7 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
         id_: str,
         *,
         env: str,
-        resource_group_config: ResourceGroupL0Config,
-        storage_account_config: StorageAccountL0Config,
+        config: TerraformBackendL1Config,
     ) -> None:
         """
         Initializes the TerraformBackendL0 construct.
@@ -81,8 +80,7 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            resource_group_config (ResourceGroupL0Config): The configuration for the resource group.
-            storage_account_config (StorageAccountL0Config): The configuration for the storage account.
+            config (TerraformBackendL1Config): The configuration for the Terraform backend.
         """
         super().__init__(scope, id_)
 
@@ -91,10 +89,7 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
             self,
             "ResourceGroupL0",
             env=env,
-            name=resource_group_config.name,
-            location=resource_group_config.location,
-            sequence_number=resource_group_config.sequence_number,
-            management_lock=resource_group_config.management_lock,
+            config=config.resource_group_config,
         )
 
         # Create the storage account
@@ -102,22 +97,6 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
             self,
             "StorageAccountL0",
             env=env,
-            name=storage_account_config.name,
-            location=storage_account_config.location,
+            config=config.storage_account_config,
             resource_group_name=self.resource_group_l0.resource_group.name,
-            sequence_number=storage_account_config.sequence_number,
-            account_replication_type=storage_account_config.account_replication_type,
-            account_kind=storage_account_config.account_kind,
-            account_tier=storage_account_config.account_tier,
-            cross_tenant_replication_enabled=storage_account_config.cross_tenant_replication_enabled,
-            access_tier=storage_account_config.access_tier,
-            shared_access_key_enabled=storage_account_config.shared_access_key_enabled,
-            public_network_access_enabled=storage_account_config.public_network_access_enabled,
-            is_hns_enabled=storage_account_config.is_hns_enabled,
-            local_user_enabled=storage_account_config.local_user_enabled,
-            infrastructure_encryption_enabled=storage_account_config.infrastructure_encryption_enabled,
-            sftp_enabled=storage_account_config.sftp_enabled,
-            blob_properties=storage_account_config.blob_properties,
-            containers=storage_account_config.containers,
-            management_lock=storage_account_config.management_lock,
         )
