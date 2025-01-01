@@ -9,8 +9,11 @@ Classes:
 """
 
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Any, Self
+
+from constructs import Construct
+from jsii import JSIIMeta
 
 from a1a_infra_base.logger import setup_logger
 
@@ -36,4 +39,36 @@ class StackConfigABC(ABC):
 
         Returns:
             ConstructABC: A fully-initialized configuration instance.
+        """
+
+
+class CombinedMeta(JSIIMeta, ABCMeta):
+    """
+    Meta class combining CDKTF.Construct and ABCMeta.
+
+    This class is used to combine the Stack super class with the a1a_infra_base.StackABC.
+    """
+
+
+class StackABC(ABC):
+    """
+    Abstract base class for stacks.
+    """
+
+    def __init__(
+        self,
+        scope: Construct,
+        id_: str,
+        *,
+        env: str,
+        config: StackConfigABC,
+    ) -> None:
+        """
+        Initialize a new stack.
+
+        Args:
+            scope (Construct): The parent construct.
+            id_ (str): The ID of the stack.
+            env (str): The environment.
+            config (StackConfigABC): The stack configuration.
         """

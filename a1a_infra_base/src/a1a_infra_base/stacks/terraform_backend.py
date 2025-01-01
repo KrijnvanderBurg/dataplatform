@@ -19,10 +19,10 @@ from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from constructs import Construct
 
 from a1a_infra_base.backend import BackendLocalConfig
-from a1a_infra_base.constructs.level1.terraform_backend import TerraformBackendL0, TerraformBackendL1Config
+from a1a_infra_base.constructs.level1.terraform_backend import TerraformBackendL1, TerraformBackendL1Config
 from a1a_infra_base.logger import setup_logger
 from a1a_infra_base.provider import ProviderAzurermConfig
-from a1a_infra_base.stacks.stack_abc import StackConfigABC
+from a1a_infra_base.stacks.stack_abc import CombinedMeta, StackABC, StackConfigABC
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -30,7 +30,9 @@ logger: logging.Logger = setup_logger(__name__)
 BACKEND_KEY: Final[str] = "backend"
 PROVIDER_KEY: Final[str] = "provider"
 AZURERM_KEY: Final[str] = "azurerm"
+
 CONSTRUCTS_KEY: Final[str] = "constructs"
+TERRAFORM_BACKEND_L1_KEY: Final[str] = "terraform_backend_l1"
 
 
 @dataclass
@@ -63,7 +65,7 @@ class TerraformBackendStackConfig(StackConfigABC):
         """
         backend_local_config = BackendLocalConfig.from_dict(dict_[BACKEND_KEY])
         provider_azurerm_config = ProviderAzurermConfig.from_dict(dict_[PROVIDER_KEY][AZURERM_KEY])
-        constructs_config = TerraformBackendL1Config.from_dict(dict_[CONSTRUCTS_KEY])
+        constructs_config = TerraformBackendL1Config.from_dict(dict_[CONSTRUCTS_KEY][TERRAFORM_BACKEND_L1_KEY])
 
         return cls(
             backend_local_config=backend_local_config,
@@ -72,7 +74,7 @@ class TerraformBackendStackConfig(StackConfigABC):
         )
 
 
-class TerraformBackendStack(TerraformStack):
+class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
     """
     A Terraform stack that sets up the local backend, Azure provider, and creates a resource group
     and a locked storage account based on a given configuration dictionary.
@@ -115,7 +117,7 @@ class TerraformBackendStack(TerraformStack):
         )
 
         # Initialize the TerraformBackendL0 construct
-        TerraformBackendL0(
+        TerraformBackendL1(
             self,
             "TerraformBackendL0",
             env=env,

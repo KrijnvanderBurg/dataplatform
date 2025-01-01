@@ -17,7 +17,7 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructABC, ConstructConfigABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
 
@@ -86,7 +86,7 @@ class ResourceGroupL0Config(ConstructConfigABC):
         )
 
 
-class ResourceGroupL0(Construct, metaclass=CombinedMeta):
+class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure resource group.
 

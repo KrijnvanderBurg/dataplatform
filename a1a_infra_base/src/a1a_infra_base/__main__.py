@@ -8,11 +8,12 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Any, Final, Type
+from typing import Any, Final
 
 from cdktf import App
 
 from a1a_infra_base.logger import setup_logger
+from a1a_infra_base.stacks.stack_abc import StackABC, StackConfigABC
 from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack, TerraformBackendStackConfig
 
 logger: logging.Logger = setup_logger(__name__)
@@ -26,7 +27,7 @@ NAME_KEY: Final[str] = "name"
 ENABLED_KEY: Final[str] = "enabled"
 
 
-MAPPING_STACKS: Final[dict[str, tuple[Type[TerraformBackendStackConfig], Type[TerraformBackendStack]]]] = {
+MAPPING_STACKS: Final[dict[str, tuple[type[StackConfigABC], type[StackABC]]]] = {
     TERRAFORM_BACKEND_KEY: (TerraformBackendStackConfig, TerraformBackendStack),
 }
 

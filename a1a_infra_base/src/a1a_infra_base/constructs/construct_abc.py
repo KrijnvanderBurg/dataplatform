@@ -55,7 +55,4 @@ class CombinedMeta(JSIIMeta, ABCMeta):
 class ConstructABC(ABC):
     """
     Abstract base class for constructs.
-
-    Properties:
-        full_name: Generates the full name for the configuration.
     """

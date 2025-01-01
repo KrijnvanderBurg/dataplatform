@@ -22,8 +22,8 @@ from a1a_infra_base.logger import setup_logger
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
-RESOURCE_GROUP_KEY: Final[str] = "resource_group"
-STORAGE_ACCOUNT_KEY: Final[str] = "storage_account"
+RESOURCE_GROUP_L0_KEY: Final[str] = "resource_group_l0"
+STORAGE_ACCOUNT_L0_KEY: Final[str] = "storage_account_l0"
 
 
 @dataclass
@@ -50,13 +50,13 @@ class TerraformBackendL1Config(ConstructConfigABC):
         Returns:
             TerraformBackendL1Config: A fully-initialized TerraformBackendL1Config.
         """
-        resource_group_config = ResourceGroupL0Config.from_dict(dict_[RESOURCE_GROUP_KEY])
-        storage_account_config = StorageAccountL0Config.from_dict(dict_[STORAGE_ACCOUNT_KEY])
+        resource_group_config = ResourceGroupL0Config.from_dict(dict_[RESOURCE_GROUP_L0_KEY])
+        storage_account_config = StorageAccountL0Config.from_dict(dict_[STORAGE_ACCOUNT_L0_KEY])
 
         return cls(resource_group_config=resource_group_config, storage_account_config=storage_account_config)
 
 
-class TerraformBackendL0(Construct, metaclass=CombinedMeta):
+class TerraformBackendL1(Construct, metaclass=CombinedMeta):
     """
     A level 1 construct that creates and manages a Terraform backend.
 
