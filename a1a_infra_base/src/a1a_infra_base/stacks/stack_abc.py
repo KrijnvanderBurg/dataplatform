@@ -55,6 +55,7 @@ class StackABC(ABC):
     Abstract base class for stacks.
     """
 
+    @abstractmethod
     def __init__(
         self,
         scope: Construct,

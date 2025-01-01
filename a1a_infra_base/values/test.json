@@ -50,7 +50,6 @@
                             }
                         ],
                         "management_lock": {
-                            "name": "init",
                             "lock_level": "CanNotDelete",
                             "notes": "Required for Terraform deployments."
                         }

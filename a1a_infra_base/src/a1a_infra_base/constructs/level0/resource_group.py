@@ -14,12 +14,12 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
-from constructs import Construct
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructABC, ConstructConfigABC
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
+from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -113,13 +113,13 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
             config (ResourceGroupL0Config): The configuration for the resource group.
         """
         super().__init__(scope, id_)
-        self._full_name = (
+        self.full_name = (
             f"{AzureResource.RESOURCE_GROUP.abbr}-{config.name}-{env}-{config.location.abbr}-{config.sequence_number}"
         )
         self._resource_group = ResourceGroup(
             self,
-            f"ResourceGroup_{self._full_name}",
-            name=self._full_name,
+            f"ResourceGroup_{self.full_name}",
+            name=self.full_name,
             location=config.location.full_name,
         )
 
@@ -129,7 +129,8 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
                 "ManagementLockL0",
                 _=env,
                 config=config.management_lock,
-                resource_id=self._resource_group.id,
+                resource_id=self.resource_group.id,
+                resource_name=self.full_name,
             )
         else:
             self._management_lock = None

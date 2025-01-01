@@ -23,7 +23,6 @@ from a1a_infra_base.logger import setup_logger
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
-NAME_KEY: Final[str] = "name"
 LOCK_LEVEL_KEY: Final[str] = "lock_level"
 NOTES_KEY: Final[str] = "notes"
 
@@ -39,7 +38,6 @@ class ManagementLockL0Config(ConstructConfigABC):
         notes (str): Notes for the management lock.
     """
 
-    name: str
     lock_level: str
     notes: str
 
@@ -61,10 +59,9 @@ class ManagementLockL0Config(ConstructConfigABC):
         Returns:
             ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
         """
-        name = dict_[NAME_KEY]
         lock_level = dict_[LOCK_LEVEL_KEY]
         notes = dict_[NOTES_KEY]
-        return cls(name=name, lock_level=lock_level, notes=notes)
+        return cls(lock_level=lock_level, notes=notes)
 
 
 class ManagementLockL0(Construct, metaclass=CombinedMeta):
@@ -82,6 +79,7 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
         *,
         _: str,  # unused env parameter; only present for consistency and to match signature
         config: ManagementLockL0Config,
+        resource_name: str,
         resource_id: str,
     ) -> None:
         """
@@ -95,7 +93,7 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
         """
         super().__init__(scope, id_)
 
-        self.full_name = f"{config.name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+        self.full_name = f"{resource_name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
         self._management_lock = ManagementLock(
             self,
             self.full_name,
