@@ -21,6 +21,8 @@ Tests:
           Azure resource group with a management lock.
 """
 
+from typing import Any
+
 import pytest
 from cdktf import App, TerraformStack, Testing
 from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
@@ -36,13 +38,13 @@ class TestResourceGroupL0Config:
     Test suite for the ResourceGroupL0Config class.
     """
 
-    @pytest.fixture
-    def dict_(self) -> dict:
+    @pytest.fixture()
+    def dict_(self) -> dict[str, Any]:
         """
         Fixture that provides a configuration dictionary for ResourceGroupL0Config.
 
         Returns:
-            dict: A configuration dictionary.
+            dict[str, Any]: A configuration dictionary.
         """
         return {
             "name": "init",
@@ -54,12 +56,12 @@ class TestResourceGroupL0Config:
             },
         }
 
-    def test__resource_group_config__from_dict(self, dict_: dict) -> None:
+    def test__resource_group_config__from_dict(self, dict_: dict[str, Any]) -> None:
         """
         Test the from_dict method of the ResourceGroupL0Config class.
 
         Args:
-            dict_ (dict): The configuration dictionary.
+            dict_ (dict[str, Any]): The configuration dictionary.
         """
         config = ResourceGroupL0Config.from_dict(dict_)
         assert config.name == "init"
@@ -67,7 +69,7 @@ class TestResourceGroupL0Config:
         assert config.sequence_number == "01"
         assert config.management_lock is not None
         assert config.management_lock.lock_level == "CanNotDelete"
-        assert config.management_lock.notes == "Required for Terraform deployments."
+        assert config.management_lock.notes == "Required for Terraform deployments."  # type: ignore
 
 
 class TestResourceGroupL0:
@@ -75,7 +77,7 @@ class TestResourceGroupL0:
     Test suite for the ResourceGroupL0 construct.
     """
 
-    @pytest.fixture
+    @pytest.fixture()
     def config(self) -> ResourceGroupL0Config:
         """
         Fixture that provides a default configuration for ResourceGroupL0.
@@ -87,25 +89,30 @@ class TestResourceGroupL0:
             name="test", location=AzureLocation.GERMANY_WEST_CENTRAL, sequence_number="01", management_lock=None
         )
 
-    @pytest.fixture
-    def stack(self) -> TerraformStack:
+    @pytest.fixture()
+    def config_with_lock(self) -> ResourceGroupL0Config:
         """
-        Fixture that provides a TerraformStack instance.
+        Fixture that provides a default configuration for ResourceGroupL0.
 
         Returns:
-            TerraformStack: A TerraformStack instance.
+            ResourceGroupL0Config: A default configuration instance.
         """
-        app = App()
-        return TerraformStack(app, "test-stack")
+        return ResourceGroupL0Config(
+            name="test",
+            location=AzureLocation.GERMANY_WEST_CENTRAL,
+            sequence_number="01",
+            management_lock=ManagementLockL0Config(lock_level="CanNotDelete", notes="Test lock"),
+        )
 
-    def test__resource_group__creation(self, stack: TerraformStack, config: ResourceGroupL0Config) -> None:
+    def test__resource_group__creation(self, config: ResourceGroupL0Config) -> None:
         """
         Test that a ResourceGroupL0 construct creates an Azure resource group.
 
         Args:
-            stack (TerraformStack): The Terraform stack.
             config (ResourceGroupL0Config): The configuration for the resource group.
         """
+        app = App()
+        stack = TerraformStack(app, "test-stack")
         ResourceGroupL0(stack, "test", env="dev", config=config)
         synthesized = Testing.synth(stack)
         assert Testing.to_have_resource_with_properties(
@@ -117,20 +124,16 @@ class TestResourceGroupL0:
             },
         )
 
-    def test__resource_group__with__management_lock__creation(self, stack: TerraformStack) -> None:
+    def test__resource_group__with__management_lock__creation(self, config_with_lock: ResourceGroupL0Config) -> None:
         """
         Test that a ResourceGroupL0 construct creates an Azure resource group with a management lock.
 
         Args:
-            stack (TerraformStack): The Terraform stack.
+            config_with_lock (ResourceGroupL0Config): The configuration for the resource group with management lock.
         """
-        config = ResourceGroupL0Config(
-            name="test",
-            location=AzureLocation.GERMANY_WEST_CENTRAL,
-            sequence_number="01",
-            management_lock=ManagementLockL0Config(lock_level="CanNotDelete", notes="Test lock"),
-        )
-        ResourceGroupL0(stack, "test", env="dev", config=config)
+        app = App()
+        stack = TerraformStack(app, "test-stack")
+        ResourceGroupL0(stack, "test", env="dev", config=config_with_lock)
         synthesized = Testing.synth(stack)
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
@@ -144,7 +147,7 @@ class TestResourceGroupL0:
             received=synthesized,
             resource_type=ManagementLock.TF_RESOURCE_TYPE,
             properties={
-                "name": "test-lock",
+                "name": "rg-test-dev-gwc-01-lock",
                 "lock_level": "CanNotDelete",
                 "notes": "Test lock",
             },

@@ -16,13 +16,13 @@ from typing import Any, Final, Self
 
 from cdktf import LocalBackend, TerraformStack
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
-from constructs import Construct
 
 from a1a_infra_base.backend import BackendLocalConfig
 from a1a_infra_base.constructs.level1.terraform_backend import TerraformBackendL1, TerraformBackendL1Config
 from a1a_infra_base.logger import setup_logger
 from a1a_infra_base.provider import ProviderAzurermConfig
 from a1a_infra_base.stacks.stack_abc import CombinedMeta, StackABC, StackConfigABC
+from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -86,7 +86,7 @@ class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
     def __init__(
         self,
         scope: Construct,
-        id_: str,
+        id_: str = "TerraformBackendStack",
         *,
         env: str,
         config: TerraformBackendStackConfig,
@@ -100,7 +100,7 @@ class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
             env (str): The environment name.
             config (TerraformBackendStackConfig): The configuration for the Terraform backend stack.
         """
-        super().__init__(scope, id_)
+        TerraformStack.__init__(self, scope, id_)
 
         # Set up the local backend
         LocalBackend(self, path=config.backend_local_config.path)

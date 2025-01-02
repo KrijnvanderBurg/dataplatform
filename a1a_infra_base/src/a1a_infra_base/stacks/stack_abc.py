@@ -12,10 +12,10 @@ import logging
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any, Self
 
-from constructs import Construct
 from jsii import JSIIMeta
 
 from a1a_infra_base.logger import setup_logger
+from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -56,20 +56,13 @@ class StackABC(ABC):
     """
 
     @abstractmethod
-    def __init__(
-        self,
-        scope: Construct,
-        id_: str,
-        *,
-        env: str,
-        config: StackConfigABC,
-    ) -> None:
+    def __init__(self, scope: Construct, id_: str, *, env: str, config: StackConfigABC) -> None:
         """
-        Initialize a new stack.
+        Initializes the StackABC construct.
 
         Args:
-            scope (Construct): The parent construct.
-            id_ (str): The ID of the stack.
-            env (str): The environment.
-            config (StackConfigABC): The stack configuration.
+            scope (Construct): The scope in which this construct is defined.
+            id_ (str): The scoped construct ID.
+            env (str): The environment name.
+            config (StackConfigABC): The configuration for the stack.
         """

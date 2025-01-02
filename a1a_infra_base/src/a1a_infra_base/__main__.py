@@ -21,15 +21,42 @@ logger: logging.Logger = setup_logger(__name__)
 ENV_KEY: Final[str] = "env"
 STACKS_KEY: Final[str] = "stacks"
 
-TERRAFORM_BACKEND_KEY: Final[str] = "terraform_backend"
-
 NAME_KEY: Final[str] = "name"
 ENABLED_KEY: Final[str] = "enabled"
 
+TERRAFORM_BACKEND_KEY: Final[str] = "terraform_backend"
 
-MAPPING_STACKS: Final[dict[str, tuple[type[StackConfigABC], type[StackABC]]]] = {
-    TERRAFORM_BACKEND_KEY: (TerraformBackendStackConfig, TerraformBackendStack),
-}
+
+class StackFactory:
+    """
+    Factory class for creating stacks.
+    """
+
+    MAPPING_STACKS: Final[dict[str, tuple[type[StackConfigABC], type[StackABC]]]] = {
+        TERRAFORM_BACKEND_KEY: (TerraformBackendStackConfig, TerraformBackendStack),
+    }
+
+    @staticmethod
+    def get_stack(dict_: dict[str, Any]) -> tuple[type[StackConfigABC], type[StackABC]]:
+        """
+        Create a stack by unpacking parameters from a stack configuration dictionary.
+
+        Args:
+            dict_ (dict[str, Any]): The configuration for the stack.
+
+        Returns:
+            StackABC: A fully-initialized stack.
+        """
+        name_cfg: str = dict_[NAME_KEY]
+        if name_cfg not in StackFactory.MAPPING_STACKS:
+            raise ValueError(f"Unknown stack name: {name_cfg}")
+
+        enabled_cfg: bool = dict_[ENABLED_KEY]
+        if not enabled_cfg:
+            logger.info("Stack %s is disabled.", name_cfg)
+
+        return StackFactory.MAPPING_STACKS[name_cfg]
+
 
 if __name__ == "__main__":
     logger.info("Starting application...")
@@ -62,18 +89,9 @@ if __name__ == "__main__":
     stacks: list[dict[str, Any]] = config[STACKS_KEY]
 
     for stack in stacks:
-        name_cfg: str = stack[NAME_KEY]
-        if name_cfg not in MAPPING_STACKS:
-            raise ValueError(f"Unknown stack name: {name_cfg}")
-
-        stack_config_cls, stack_cls = MAPPING_STACKS[name_cfg]
-        enabled_cfg: bool = stack[ENABLED_KEY]
-        if not enabled_cfg:
-            logger.info("Stack %s is disabled.", name_cfg)
-            continue
-
+        stack_config_cls, stack_cls = StackFactory.get_stack(dict_=stack)
         stack_config = stack_config_cls.from_dict(dict_=stack)
-        stack_cls(app, name_cfg, env=env, config=stack_config)
+        stack_cls(app, "test", env=env, config=stack_config)  # type: ignore
 
     app.synth()
     logger.info("Application finished.")

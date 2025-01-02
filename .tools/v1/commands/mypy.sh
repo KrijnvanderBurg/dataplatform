@@ -24,4 +24,5 @@ echo "Config file: $config_filepath"
 echo "Scanning folder: $target_path"
 
 mypy "$target_path" \
-  --config-file "$config_filepath"
+  --config-file "$config_filepath" \
+  --verbose

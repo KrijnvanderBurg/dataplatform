@@ -14,10 +14,10 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
-from constructs import Construct
 
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
+from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -52,7 +52,7 @@ class StorageContainerL0Config(ConstructConfigABC):
         }
 
         Args:
-            dict_ (dict): A dictionary containing storage container configuration.
+            dict_ (dict[str, Any]): A dictionary containing storage container configuration.
 
         Returns:
             StorageContainerL0Config: A fully-initialized StorageContainerL0Config.

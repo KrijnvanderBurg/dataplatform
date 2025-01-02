@@ -14,11 +14,11 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
-from constructs import Construct
 
 from a1a_infra_base.constants import AzureResource
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
+from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
@@ -33,7 +33,6 @@ class ManagementLockL0Config(ConstructConfigABC):
     A configuration class for ManagementLockL0.
 
     Attributes:
-        name (str): The name of the management lock.
         lock_level (str): The lock level for the management lock.
         notes (str): Notes for the management lock.
     """
@@ -48,13 +47,12 @@ class ManagementLockL0Config(ConstructConfigABC):
 
         Expected format of 'dict_':
         {
-            "name": "<lock name>",
             "lock_level": "<lock level>",
             "notes": "<notes>"
         }
 
         Args:
-            dict_ (dict): A dictionary containing management lock configuration.
+            dict_ (dict[str, Any]): A dictionary containing management lock configuration.
 
         Returns:
             ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
@@ -79,8 +77,8 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
         *,
         _: str,  # unused env parameter; only present for consistency and to match signature
         config: ManagementLockL0Config,
-        resource_name: str,
         resource_id: str,
+        resource_name: str,
     ) -> None:
         """
         Initializes the ManagementLockL0 construct.
@@ -90,6 +88,7 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
             id_ (str): The scoped construct ID.
             config (ManagementLockL0Config): The configuration for the management lock.
             resource_id (str): The resource ID to attach to.
+            resource_name (str): The name of the resource to attach to.
         """
         super().__init__(scope, id_)
 

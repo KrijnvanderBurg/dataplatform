@@ -58,14 +58,13 @@ class ResourceGroupL0Config(ConstructConfigABC):
             "location": "<AzureLocation enum value name>",
             "sequence_number": "<sequence number>",
             "management_lock": {
-                "name": "<lock name>",
                 "lock_level": "<lock level>",
                 "notes": "<notes>"
             }
         }
 
         Args:
-            dict_ (dict): A dictionary containing resource group configuration.
+            dict_ (dict[str, Any]): A dictionary containing resource group configuration.
 
         Returns:
             ResourceGroupL0Config: A fully-initialized ResourceGroupL0Config instance.

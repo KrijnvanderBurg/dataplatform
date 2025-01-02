@@ -77,7 +77,7 @@ class AzureResource(Enum):
     """
 
     RESOURCE_GROUP = "resource_group", "rg"
-    STORAGE_ACCOUNT = "storage_account", "st"
+    STORAGE_ACCOUNT = "storage_account", "sa"
     MANAGEMENT_LOCK = "management_lock", "lock"
 
     def __init__(self, full_name: str, abbr: str) -> None:

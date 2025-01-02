@@ -138,9 +138,10 @@
                 "python.testing.pytestArgs": [
                     "-c",
                     "${workspaceFolder}/../.tools/v1/configs/pytest.ini",
-                    "-o",
-                    "cache_dir=${workspaceFolder}/.pytest_cache",
-                    "-s",
+                    // "-o",
+                    // "cache_dir=${workspaceFolder}/.pytest_cache",
+                    // "-s", // disables print/log statements in output
+                    "--verbose",
                     "--cov=${workspaceFolder}/src/",
                     "--cov-report=xml:${workspaceFolder}/coverage.xml",
                     "--cov-config=${workspaceFolder}/../.tools/v1/configs/.coveragerc",

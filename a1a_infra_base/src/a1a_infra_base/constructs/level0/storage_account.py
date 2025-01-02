@@ -183,7 +183,7 @@ class StorageAccountL0Config(ConstructConfigABC):
         }
 
         Args:
-            dict_ (dict): A dictionary containing storage account configuration.
+            dict_ (dict[str, Any]): A dictionary containing storage account configuration.
 
         Returns:
             StorageAccountL0Config: A fully-initialized StorageAccountL0Config.
@@ -264,13 +264,13 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
         super().__init__(scope, id_)
 
         self.full_name = (
-            f"{AzureResource.STORAGE_ACCOUNT.abbr}{env}{config.name}{config.location.name}{config.sequence_number}"
+            f"{AzureResource.STORAGE_ACCOUNT.abbr}{config.name}{env}{config.location.abbr}{config.sequence_number}"
         )
         self._storage_account = StorageAccount(
             self,
             f"StorageAccount_{self.full_name}",
             name=self.full_name,
-            location=config.location.name,
+            location=config.location.full_name,
             resource_group_name=resource_group_name,
             account_replication_type=config.account_replication_type,
             account_kind=config.account_kind,

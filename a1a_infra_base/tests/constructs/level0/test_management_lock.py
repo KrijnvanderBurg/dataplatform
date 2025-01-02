@@ -19,6 +19,8 @@ Tests:
         - test__management_lock__creation: Tests that a ManagementLockL0 construct creates a management lock.
 """
 
+from typing import Any
+
 import pytest
 from cdktf import App, TerraformStack, Testing
 from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
@@ -31,8 +33,8 @@ class TestManagementLockL0Config:
     Test suite for the ManagementLockL0Config class.
     """
 
-    @pytest.fixture
-    def dict_(self) -> dict:
+    @pytest.fixture()
+    def dict_(self) -> dict[str, Any]:
         """
         Fixture that provides a configuration dictionary for ManagementLockL0Config.
 
@@ -44,12 +46,12 @@ class TestManagementLockL0Config:
             "notes": "Required for Terraform deployments.",
         }
 
-    def test__management_lock_config__from_dict(self, dict_: dict) -> None:
+    def test__management_lock_config__from_dict(self, dict_: dict[str, Any]) -> None:
         """
         Test the from_dict method of the ManagementLockL0Config class.
 
         Args:
-            dict_ (dict): The configuration dictionary.
+            dict_ (dict[str, Any]): The configuration dictionary.
         """
         config = ManagementLockL0Config.from_dict(dict_)
         assert config.lock_level == "CanNotDelete"
@@ -61,7 +63,7 @@ class TestManagementLockL0:
     Test suite for the ManagementLockL0 construct.
     """
 
-    @pytest.fixture
+    @pytest.fixture()
     def config(self) -> ManagementLockL0Config:
         """
         Fixture that provides a default configuration for ManagementLockL0.
@@ -74,34 +76,29 @@ class TestManagementLockL0:
             notes="Test lock",
         )
 
-    @pytest.fixture
-    def stack(self) -> TerraformStack:
-        """
-        Fixture that provides a TerraformStack instance.
-
-        Returns:
-            TerraformStack: A TerraformStack instance.
-        """
-        app = App()
-        return TerraformStack(app, "test-stack")
-
-    def test__management_lock__creation(self, stack: TerraformStack, config: ManagementLockL0Config) -> None:
+    def test__management_lock__creation(self, config: ManagementLockL0Config) -> None:
         """
         Test that a ManagementLockL0 construct creates a management lock.
 
         Args:
-            stack (TerraformStack): The Terraform stack.
             config (ManagementLockL0Config): The configuration for the management lock.
         """
+        app = App()
+        stack = TerraformStack(app, "test-stack")
         ManagementLockL0(
-            stack, "test-lock", _="dev", config=config, resource_name="test-resource", resource_id="test-id"
+            stack,
+            "test-lock",
+            _="dev",
+            config=config,
+            resource_name="test",
+            resource_id="test-id",
         )
         synthesized = Testing.synth(stack)
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
             resource_type=ManagementLock.TF_RESOURCE_TYPE,
             properties={
-                "name": "test-resource-ml",
+                "name": "test-lock",
                 "scope": "test-id",
                 "lock_level": "CanNotDelete",
                 "notes": "Test lock",

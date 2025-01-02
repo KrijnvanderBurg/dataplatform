@@ -29,6 +29,8 @@ Tests:
         - test__storage_account__creation: Tests that a StorageAccountL0 construct creates a storage account.
 """
 
+from typing import Any
+
 import pytest
 from cdktf import App, TerraformStack, Testing
 from cdktf_cdktf_provider_azurerm.storage_account import StorageAccount
@@ -44,18 +46,70 @@ from a1a_infra_base.constructs.level0.storage_account import (
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0Config
 
 
+class TestBlobPropertiesL0Config:
+    """
+    Test suite for the BlobProperties class.
+    """
+
+    @pytest.fixture
+    def dict_(self) -> dict[str, Any]:
+        """
+        Fixture that provides a configuration dictionary for BlobProperties.
+
+        Returns:
+            dict[str, Any]: A configuration dictionary.
+        """
+        return {"delete_retention_policy": {"delete_retention_days": 7}}
+
+    def test__blob_properties__from_dict(self, dict_: dict[str, Any]) -> None:
+        """
+        Test the from_dict method of the BlobProperties class.
+
+        Args:
+            dict_ (dict[str, Any]): The configuration dictionary.
+        """
+        blob_properties = BlobPropertiesL0Config.from_dict(dict_)
+        assert blob_properties.delete_retention_policy.days == 7
+
+
+class TestDeleteRetentionPolicyL0Config:
+    """
+    Test suite for the DeleteRetentionPolicy class.
+    """
+
+    @pytest.fixture
+    def dict_(self) -> dict[str, Any]:
+        """
+        Fixture that provides a configuration dictionary for DeleteRetentionPolicy.
+
+        Returns:
+            dict[str, Any]: A configuration dictionary.
+        """
+        return {"delete_retention_days": 7}
+
+    def test__delete_retention_policy__from_dict(self, dict_: dict[str, Any]) -> None:
+        """
+        Test the from_dict method of the DeleteRetentionPolicy class.
+
+        Args:
+            dict_ (dict[str, Any]): The configuration dictionary.
+        """
+        delete_retention_policy = DeleteRetentionPolicyL0Config.from_dict(dict_)
+        assert delete_retention_policy.days == 7
+
+
 class TestStorageAccountL0Config:
     """
     Test suite for the StorageAccountL0Config class.
     """
 
-    @pytest.fixture
-    def dict_(self) -> dict:
+    @pytest.fixture()
+    def dict_(self) -> dict[str, Any]:
         """
         Fixture that provides a configuration dictionary for StorageAccountL0Config.
 
         Returns:
-            dict: A configuration dictionary.
+            dict[str, Any]: A configuration dictionary.
         """
         return {
             "name": "init",
@@ -73,16 +127,16 @@ class TestStorageAccountL0Config:
             "infrastructure_encryption_enabled": True,
             "sftp_enabled": False,
             "blob_properties": {"delete_retention_policy": {"delete_retention_days": 7}},
-            "containers": [{"name": "terraform"}],
+            "containers": [{"name": "test_container"}],
             "management_lock": {"lock_level": "CanNotDelete", "notes": "Required for Terraform deployments."},
         }
 
-    def test__storage_account_config__from_dict(self, dict_: dict) -> None:
+    def test__storage_account_config__from_dict(self, dict_: dict[str, Any]) -> None:
         """
         Test the from_dict method of the StorageAccountL0Config class.
 
         Args:
-            dict_ (dict): The configuration dictionary.
+            dict_ (dict[str, Any]): The configuration dictionary.
         """
         config = StorageAccountL0Config.from_dict(dict_)
         assert config.name == "init"
@@ -101,26 +155,10 @@ class TestStorageAccountL0Config:
         assert config.sftp_enabled is False
         assert config.blob_properties.delete_retention_policy.days == 7
         assert len(config.containers) == 1
-        assert config.containers[0].name == "terraform"
+        assert config.containers[0].name == "test_container"
         assert config.management_lock is not None
         assert config.management_lock.lock_level == "CanNotDelete"
-        assert config.management_lock.notes == "Required for Terraform deployments."
-
-    def test__blob_properties__from_dict(self) -> None:
-        """
-        Test the from_dict method of the BlobProperties class.
-        """
-        dict_ = {"delete_retention_policy": {"delete_retention_days": 7}}
-        blob_properties = BlobPropertiesL0Config.from_dict(dict_)
-        assert blob_properties.delete_retention_policy.days == 7
-
-    def test__delete_retention_policy__from_dict(self) -> None:
-        """
-        Test the from_dict method of the DeleteRetentionPolicy class.
-        """
-        dict_ = {"delete_retention_days": 7}
-        delete_retention_policy = DeleteRetentionPolicyL0Config.from_dict(dict_)
-        assert delete_retention_policy.days == 7
+        assert config.management_lock.notes == "Required for Terraform deployments."  # type: ignore
 
 
 class TestStorageAccountL0:
@@ -128,7 +166,7 @@ class TestStorageAccountL0:
     Test suite for the StorageAccountL0 construct.
     """
 
-    @pytest.fixture
+    @pytest.fixture()
     def config(self) -> StorageAccountL0Config:
         """
         Fixture that provides a default configuration for StorageAccountL0.
@@ -152,38 +190,28 @@ class TestStorageAccountL0:
             infrastructure_encryption_enabled=True,
             sftp_enabled=False,
             blob_properties=BlobPropertiesL0Config(delete_retention_policy=DeleteRetentionPolicyL0Config(days=7)),
-            containers=[StorageContainerL0Config(name="terraform")],
+            containers=[StorageContainerL0Config(name="test_container")],
             management_lock=ManagementLockL0Config(
                 lock_level="CanNotDelete", notes="Required for Terraform deployments."
             ),
         )
 
-    @pytest.fixture
-    def stack(self) -> TerraformStack:
-        """
-        Fixture that provides a TerraformStack instance.
-
-        Returns:
-            TerraformStack: A TerraformStack instance.
-        """
-        app = App()
-        return TerraformStack(app, "test-stack")
-
-    def test__storage_account__creation(self, stack: TerraformStack, config: StorageAccountL0Config) -> None:
+    def test__storage_account__creation(self, config: StorageAccountL0Config) -> None:
         """
         Test that a StorageAccountL0 construct creates a storage account.
 
         Args:
-            stack (TerraformStack): The Terraform stack.
             config (StorageAccountL0Config): The configuration for the storage account.
         """
+        app = App()
+        stack = TerraformStack(app, "test-stack")
         StorageAccountL0(stack, "test-account", env="dev", config=config, resource_group_name="test")
         synthesized = Testing.synth(stack)
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
             resource_type=StorageAccount.TF_RESOURCE_TYPE,
             properties={
-                "name": "stgdevinitgermanywestcentral01",
+                "name": "sainitdevgwc01",
                 "location": "germany west central",
                 "resource_group_name": "test",
                 "account_replication_type": "LRS",
@@ -200,55 +228,12 @@ class TestStorageAccountL0:
                 "blob_properties": {"delete_retention_policy": {"days": 7}},
             },
         )
-
-
-class TestBlobPropertiesL0Config:
-    """
-    Test suite for the BlobProperties class.
-    """
-
-    @pytest.fixture
-    def dict_(self) -> dict:
-        """
-        Fixture that provides a configuration dictionary for BlobProperties.
-
-        Returns:
-            dict: A configuration dictionary.
-        """
-        return {"delete_retention_policy": {"delete_retention_days": 7}}
-
-    def test__blob_properties__from_dict(self, dict_: dict) -> None:
-        """
-        Test the from_dict method of the BlobProperties class.
-
-        Args:
-            dict_ (dict): The configuration dictionary.
-        """
-        blob_properties = BlobPropertiesL0Config.from_dict(dict_)
-        assert blob_properties.delete_retention_policy.days == 7
-
-
-class TestDeleteRetentionPolicyL0Config:
-    """
-    Test suite for the DeleteRetentionPolicy class.
-    """
-
-    @pytest.fixture
-    def dict_(self) -> dict:
-        """
-        Fixture that provides a configuration dictionary for DeleteRetentionPolicy.
-
-        Returns:
-            dict: A configuration dictionary.
-        """
-        return {"delete_retention_days": 7}
-
-    def test__delete_retention_policy__from_dict(self, dict_: dict) -> None:
-        """
-        Test the from_dict method of the DeleteRetentionPolicy class.
-
-        Args:
-            dict_ (dict): The configuration dictionary.
-        """
-        delete_retention_policy = DeleteRetentionPolicyL0Config.from_dict(dict_)
-        assert delete_retention_policy.days == 7
+        # assert Testing.to_have_resource_with_properties(
+        #     received=synthesized,
+        #     resource_type=StorageContainer.TF_RESOURCE_TYPE,
+        #     properties={
+        #         "name": "test_container",
+        #         "notes": "Required for Terraform deployments.",
+        #         "storage_account_name": "sainitdevgwc01",
+        #     },
+        # )
