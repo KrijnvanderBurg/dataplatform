@@ -234,12 +234,12 @@
                     "version": "2.0.0",
                     "options": {
                         "env": {
-                            "PYTEST_ADDOPTS": "-vv --tb=native"
+                            "PYTEST_ADDOPTS": "--tb=native"
                         }
                     },
                     "tasks": [
                         //
-                        // Individual tasks, not part of a group nor automatically triggered
+                        // management / dependent tasks
                         //
                         {
                             "label": "git clean",
@@ -255,6 +255,32 @@
                             "group": "environment",
                             "problemMatcher": []
                         },
+                        {
+                            "label": "coverage-gutters watch",
+                            "command": [
+                                "${command:coverage-gutters.watchCoverageAndVisibleEditors}"
+                            ],
+							"runOptions": {
+								"runOn": "folderOpen"
+							},
+                            "presentation": {
+                                "reveal": "never"
+                            },
+                            "problemMatcher": []
+                        },
+                        {
+							"label": "poetry to requirements",
+							"type": "shell",
+							"command": "${workspaceFolder}/../.tools/v1/commands/poetry_to_requirements.sh",
+							"args": [
+								"--pyproject_filepath=${workspaceFolder}/pyproject.toml",
+								"--requirements_filepath=${workspaceFolder}/$PROJECT_RUNTIME_DIR/requirements.txt"
+							],
+							"presentation": {
+                                "reveal": "OnProblem"
+                            },
+                            "problemMatcher": []
+						},
                         //
                         // all Task groups
                         //
@@ -262,7 +288,8 @@
                             "label": "build & test",
                             "dependsOn": [
                                 "build",
-                                "test"
+                                "test",
+                                "coverage-gutters watch"
                             ],
                             "dependsOrder": "sequence",
                             "runOptions": {
@@ -511,19 +538,6 @@
                                 "panel": "dedicated",
                                 "clear": true
                             },
-                            "problemMatcher": []
-                        },
-                        {
-                            "label": "coverage-gutters watch",
-                            "dependsOn": [
-                                "pytest and coverage"
-                            ],
-                            "presentation": {
-                                "reveal": "never"
-                            },
-                            "command": [
-                                "${command:coverage-gutters.watchCoverageAndVisibleEditors}"
-                            ],
                             "problemMatcher": []
                         },
                         {

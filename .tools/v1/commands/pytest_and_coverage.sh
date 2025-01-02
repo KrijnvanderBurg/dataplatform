@@ -36,5 +36,5 @@ pytest "$tests_path" \
 --cov="$coverage_path" \
 --cov-report="xml:$output_filepath" \
 --cov-config="$config_filepath_coverage" \
---junit-xml="$PWD/JUNIT-TEST.xml" \
---verbose
+--junit-xml="$PWD/JUNIT-TEST.xml"
+# --verbose
