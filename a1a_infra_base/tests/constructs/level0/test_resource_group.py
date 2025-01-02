@@ -5,18 +5,15 @@ This module contains unit tests for the ResourceGroupL0 construct, which is used
 Azure resource groups with optional management locks, and the ResourceGroupL0Config class,
 which is used to configure the ResourceGroupL0 construct.
 
-Fixtures:
-    - TestResourceGroupL0Config:
-        - dict_: Provides a configuration dictionary for ResourceGroupL0Config.
-    - TestResourceGroupL0:
-        - config: Provides a default configuration for ResourceGroupL0.
-        - stack: Provides a TerraformStack instance.
 
 Tests:
     - TestResourceGroupL0Config:
         - test__resource_group_config__from_dict: Tests the from_dict method of the ResourceGroupL0Config class.
     - TestResourceGroupL0:
-        - test__resource_group__creation: Tests that a ResourceGroupL0 construct creates an Azure resource group.
+        - test__resource_group__creation_with_lock: Tests that a ResourceGroupL0 construct creates an Azure resource
+            group with a management lock.
+        - test__resource_group__creation_without_lock: Tests that a ResourceGroupL0 construct creates an Azure resource
+            group without a management lock.
 """
 
 from typing import Any
@@ -90,12 +87,12 @@ class TestResourceGroupL0:
             management_lock=ManagementLockL0Config(lock_level="CanNotDelete", notes="Test lock"),
         )
 
-    def test__resource_group__creation(self, config: ResourceGroupL0Config) -> None:
+    def test__resource_group__creation_with_lock(self, config: ResourceGroupL0Config) -> None:
         """
-        Test that a ResourceGroupL0 construct creates an Azure resource group.
+        Test that a ResourceGroupL0 construct creates an Azure resource group with a management lock.
 
         Args:
-            config (ResourceGroupL0Config): The configuration for the resource group.
+            config (ResourceGroupL0Config): The configuration for the resource group with a management lock.
         """
         app = App()
         stack = TerraformStack(app, "test-stack")
@@ -116,5 +113,33 @@ class TestResourceGroupL0:
                 "name": "rg-test-dev-gwc-01-lock",
                 "lock_level": "CanNotDelete",
                 "notes": "Test lock",
+            },
+        )
+
+    def test__resource_group__creation_without_lock(self, config: ResourceGroupL0Config) -> None:
+        """
+        Test that a ResourceGroupL0 construct creates an Azure resource group without a management lock.
+
+        Args:
+            config (ResourceGroupL0Config): The configuration for the resource group without a management lock.
+        """
+        config.management_lock = None
+        app = App()
+        stack = TerraformStack(app, "test-stack")
+        ResourceGroupL0(stack, "test", env="dev", config=config)
+        synthesized = Testing.synth(stack)
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ResourceGroup.TF_RESOURCE_TYPE,
+            properties={
+                "name": "rg-test-dev-gwc-01",
+                "location": "germany west central",
+            },
+        )
+        assert not Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "name": "rg-test-dev-gwc-01-lock",
             },
         )

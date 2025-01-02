@@ -95,8 +95,3 @@ class StorageContainerL0(Construct, metaclass=CombinedMeta):
             name=config.name,
             storage_account_id=storage_account_id,
         )
-
-    @property
-    def storage_container(self) -> StorageContainer:
-        """Gets the Azure storage container."""
-        return self._storage_container

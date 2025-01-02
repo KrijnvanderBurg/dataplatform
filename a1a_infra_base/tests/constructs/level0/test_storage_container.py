@@ -5,12 +5,6 @@ This module contains unit tests for the StorageContainerL0 construct, which is u
 Azure storage containers, and the StorageContainerL0Config class, which is used to configure
 the StorageContainerL0 construct.
 
-Fixtures:
-    - TestStorageContainerL0Config:
-        - dict_: Provides a configuration dictionary for StorageContainerL0Config.
-    - TestStorageContainerL0:
-        - config: Provides a default configuration for StorageContainerL0.
-        - stack: Provides a TerraformStack instance.
 
 Tests:
     - TestStorageContainerL0Config:

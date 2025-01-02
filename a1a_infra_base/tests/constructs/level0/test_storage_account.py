@@ -5,28 +5,19 @@ This module contains unit tests for the StorageAccountL0 construct, which is use
 Azure storage accounts, and the StorageAccountL0Config class, which is used to configure
 the StorageAccountL0 construct.
 
-Fixtures:
-    - TestStorageAccountL0Config:
-        - dict_: Provides a configuration dictionary for StorageAccountL0Config.
-    - TestStorageAccountL0:
-        - config: Provides a default configuration for StorageAccountL0.
-        - stack: Provides a TerraformStack instance.
-    - TestBlobProperties:
-        - dict_: Provides a configuration dictionary for BlobProperties.
-    - TestDeleteRetentionPolicy:
-        - dict_: Provides a configuration dictionary for DeleteRetentionPolicy.
 
 Tests:
     - TestStorageAccountL0Config:
         - test__storage_account_config__from_dict: Tests the from_dict method of the StorageAccountL0Config class.
-        - test__blob_properties__from_dict: Tests the from_dict method of the BlobProperties class.
-        - test__delete_retention_policy__from_dict: Tests the from_dict method of the DeleteRetentionPolicy class.
     - TestBlobPropertiesL0Config:
         - test__blob_properties__from_dict: Tests the from_dict method of the BlobProperties class.
     - TestDeleteRetentionPolicyL0Config:
         - test__delete_retention_policy__from_dict: Tests the from_dict method of the DeleteRetentionPolicy class.
     - TestStorageAccountL0:
-        - test__storage_account__creation: Tests that a StorageAccountL0 construct creates a storage account.
+        - test__storage_account__creation_with_lock: Tests that a StorageAccountL0 construct creates a storage account
+            with a management lock.
+        - test__storage_account__creation_without_lock: Tests that a StorageAccountL0 construct creates a storage
+            account without a management lock.
 """
 
 from typing import Any
@@ -198,12 +189,12 @@ class TestStorageAccountL0:
             ),
         )
 
-    def test__storage_account__creation(self, config: StorageAccountL0Config) -> None:
+    def test__storage_account__creation_with_lock(self, config: StorageAccountL0Config) -> None:
         """
-        Test that a StorageAccountL0 construct creates a storage account.
+        Test that a StorageAccountL0 construct creates a storage account with a management lock.
 
         Args:
-            config (StorageAccountL0Config): The configuration for the storage account.
+            config (StorageAccountL0Config): The configuration for the storage account with a management lock.
         """
         app = App()
         stack = TerraformStack(app, "test-stack")
@@ -237,6 +228,54 @@ class TestStorageAccountL0:
                 "lock_level": "CanNotDelete",
                 "name": "sainitdevgwc01-lock",
                 "notes": "Required for Terraform deployments.",
+            },
+        )
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=StorageContainer.TF_RESOURCE_TYPE,
+            properties={
+                "name": "test_container",
+            },
+        )
+
+    def test__storage_account__creation_without_lock(self, config: StorageAccountL0Config) -> None:
+        """
+        Test that a StorageAccountL0 construct creates a storage account without a management lock.
+
+        Args:
+            config (StorageAccountL0Config): The configuration for the storage account without a management lock.
+        """
+        config.management_lock = None
+        app = App()
+        stack = TerraformStack(app, "test-stack")
+        StorageAccountL0(stack, "test-account", env="dev", config=config, resource_group_name="test")
+        synthesized = Testing.synth(stack)
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=StorageAccount.TF_RESOURCE_TYPE,
+            properties={
+                "name": "sainitdevgwc01",
+                "location": "germany west central",
+                "resource_group_name": "test",
+                "account_replication_type": "LRS",
+                "account_kind": "StorageV2",
+                "account_tier": "Standard",
+                "cross_tenant_replication_enabled": False,
+                "access_tier": "Hot",
+                "shared_access_key_enabled": False,
+                "public_network_access_enabled": True,
+                "is_hns_enabled": False,
+                "local_user_enabled": False,
+                "infrastructure_encryption_enabled": True,
+                "sftp_enabled": False,
+                "blob_properties": {"delete_retention_policy": {"days": 7}},
+            },
+        )
+        assert not Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "name": "sainitdevgwc01-lock",
             },
         )
         assert Testing.to_have_resource_with_properties(

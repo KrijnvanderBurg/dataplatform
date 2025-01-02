@@ -5,19 +5,13 @@ This module contains unit tests for the TerraformBackendL1 construct, which is u
 a Terraform backend, and the TerraformBackendL1Config class, which is used to configure
 the TerraformBackendL1 construct.
 
-Fixtures:
-    - TestTerraformBackendL1Config:
-        - dict_: Provides a configuration dictionary for TerraformBackendL1Config.
-    - TestTerraformBackendL1:
-        - config: Provides a default configuration for TerraformBackendL1.
-        - stack: Provides a TerraformStack instance.
 
 Tests:
     - TestTerraformBackendL1Config:
         - test__terraform_backend_config__from_dict: Tests the from_dict method of the TerraformBackendL1Config class.
     - TestTerraformBackendL1:
-        - test__terraform_backend__creation: Tests that a TerraformBackendL1 construct creates a resource group
-          and a storage account.
+        - test__terraform_backend__creation: Tests that a TerraformBackendL1 construct creates a resource group and a
+            storage account.
 """
 
 from typing import Any
@@ -49,7 +43,7 @@ class TestTerraformBackendL1Config:
     @pytest.fixture()
     def dict_(self) -> dict[str, Any]:
         """
-        Fixture that provides a configuration dictionary for TerraformBackendL0Config.
+        Fixture that provides a configuration dictionary for TerraformBackendL1Config.
 
         Returns:
             dict[str, Any]: A configuration dictionary.
@@ -92,7 +86,6 @@ class TestTerraformBackendL1Config:
         Args:
             dict_ (dict[str, Any]): The terraform backend configuration dictionary.
         """
-
         config = TerraformBackendL1Config.from_dict(dict_)
         assert isinstance(config.resource_group_config, ResourceGroupL0Config)
         assert isinstance(config.storage_account_config, StorageAccountL0Config)

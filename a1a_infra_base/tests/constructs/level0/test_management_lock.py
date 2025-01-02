@@ -5,13 +5,6 @@ This module contains unit tests for the ManagementLockL0 construct, which is use
 management locks for Azure resources, and the ManagementLockL0Config class, which is used to
 configure the ManagementLockL0 construct.
 
-Fixtures:
-    - TestManagementLockL0Config:
-        - dict_: Provides a configuration dictionary for ManagementLockL0Config.
-    - TestManagementLockL0:
-        - config: Provides a default configuration for ManagementLockL0.
-        - stack: Provides a TerraformStack instance.
-
 Tests:
     - TestManagementLockL0Config:
         - test__management_lock_config__from_dict: Tests the from_dict method of the ManagementLockL0Config class.
@@ -39,7 +32,7 @@ class TestManagementLockL0Config:
         Fixture that provides a configuration dictionary for ManagementLockL0Config.
 
         Returns:
-            dict: A configuration dictionary.
+            dict[str, Any]: A configuration dictionary.
         """
         return {
             "lock_level": "CanNotDelete",

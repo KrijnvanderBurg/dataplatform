@@ -315,8 +315,3 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
     def storage_account(self) -> StorageAccount:
         """Gets the Azure storage account."""
         return self._storage_account
-
-    @property
-    def management_lock(self) -> ManagementLockL0 | None:
-        """Gets the management lock applied to the storage account."""
-        return self._management_lock
