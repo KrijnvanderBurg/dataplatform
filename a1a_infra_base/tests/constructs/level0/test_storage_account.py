@@ -33,7 +33,9 @@ from typing import Any
 
 import pytest
 from cdktf import App, TerraformStack, Testing
+from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from cdktf_cdktf_provider_azurerm.storage_account import StorageAccount
+from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 
 from a1a_infra_base.constants import AzureLocation
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0Config
@@ -228,12 +230,19 @@ class TestStorageAccountL0:
                 "blob_properties": {"delete_retention_policy": {"days": 7}},
             },
         )
-        # assert Testing.to_have_resource_with_properties(
-        #     received=synthesized,
-        #     resource_type=StorageContainer.TF_RESOURCE_TYPE,
-        #     properties={
-        #         "name": "test_container",
-        #         "notes": "Required for Terraform deployments.",
-        #         "storage_account_name": "sainitdevgwc01",
-        #     },
-        # )
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "lock_level": "CanNotDelete",
+                "name": "sainitdevgwc01-lock",
+                "notes": "Required for Terraform deployments.",
+            },
+        )
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=StorageContainer.TF_RESOURCE_TYPE,
+            properties={
+                "name": "test_container",
+            },
+        )

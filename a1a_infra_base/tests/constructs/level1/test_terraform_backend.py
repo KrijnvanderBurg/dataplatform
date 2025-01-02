@@ -24,10 +24,13 @@ from typing import Any
 
 import pytest
 from cdktf import App, TerraformStack, Testing
+from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from cdktf_cdktf_provider_azurerm.storage_account import StorageAccount
+from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 
 from a1a_infra_base.constants import AzureLocation
+from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0Config
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0Config
 from a1a_infra_base.constructs.level0.storage_account import (
     BlobPropertiesL0Config,
@@ -91,8 +94,8 @@ class TestTerraformBackendL1Config:
         """
 
         config = TerraformBackendL1Config.from_dict(dict_)
-        assert isinstance(config.resource_group_config, dict)
-        assert isinstance(config.storage_account_config, dict)
+        assert isinstance(config.resource_group_config, ResourceGroupL0Config)
+        assert isinstance(config.storage_account_config, StorageAccountL0Config)
 
 
 class TestTerraformBackendL1:
@@ -113,6 +116,9 @@ class TestTerraformBackendL1:
                 name="init",
                 location=AzureLocation.GERMANY_WEST_CENTRAL,
                 sequence_number="01",
+                management_lock=ManagementLockL0Config(
+                    lock_level="CanNotDelete", notes="Required for Terraform deployments."
+                ),
             ),
             storage_account_config=StorageAccountL0Config(
                 name="init",
@@ -131,6 +137,9 @@ class TestTerraformBackendL1:
                 sftp_enabled=False,
                 blob_properties=BlobPropertiesL0Config(delete_retention_policy=DeleteRetentionPolicyL0Config(days=7)),
                 containers=[StorageContainerL0Config(name="test_container")],
+                management_lock=ManagementLockL0Config(
+                    lock_level="CanNotDelete", notes="Required for Terraform deployments."
+                ),
             ),
         )
 
@@ -145,7 +154,7 @@ class TestTerraformBackendL1:
         stack = TerraformStack(app, "test-stack")
         TerraformBackendL1(stack, "test", env="dev", config=config)
         synthesized = Testing.synth(stack)
-        print("LOLOLOL", synthesized)
+        # resource group
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
             resource_type=ResourceGroup.TF_RESOURCE_TYPE,
@@ -156,11 +165,21 @@ class TestTerraformBackendL1:
         )
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "name": "rg-init-dev-gwc-01-lock",
+                "lock_level": "CanNotDelete",
+                "notes": "Required for Terraform deployments.",
+            },
+        )
+        # storage account
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
             resource_type=StorageAccount.TF_RESOURCE_TYPE,
             properties={
                 "name": "sainitdevgwc01",
                 "location": "germany west central",
-                "resource_group_name": "rg-init-dev-gwc-01",
+                # "resource_group_name": "", # cannot be tested as its dynamic in terraform hcl
                 "account_replication_type": "LRS",
                 "account_kind": "StorageV2",
                 "account_tier": "Standard",
@@ -172,6 +191,22 @@ class TestTerraformBackendL1:
                 "local_user_enabled": False,
                 "infrastructure_encryption_enabled": True,
                 "sftp_enabled": False,
-                # "blob_properties": {"delete_retention_policy": {"days": 7}},
+                "blob_properties": {"delete_retention_policy": {"days": 7}},
+            },
+        )
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "lock_level": "CanNotDelete",
+                "name": "sainitdevgwc01-lock",
+                "notes": "Required for Terraform deployments.",
+            },
+        )
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=StorageContainer.TF_RESOURCE_TYPE,
+            properties={
+                "name": "test_container",
             },
         )

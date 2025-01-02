@@ -17,8 +17,6 @@ Tests:
         - test__resource_group_config__from_dict: Tests the from_dict method of the ResourceGroupL0Config class.
     - TestResourceGroupL0:
         - test__resource_group__creation: Tests that a ResourceGroupL0 construct creates an Azure resource group.
-        - test__resource_group__with__management_lock__creation: Tests that a ResourceGroupL0 construct creates an
-          Azure resource group with a management lock.
 """
 
 from typing import Any
@@ -86,18 +84,6 @@ class TestResourceGroupL0:
             ResourceGroupL0Config: A default configuration instance.
         """
         return ResourceGroupL0Config(
-            name="test", location=AzureLocation.GERMANY_WEST_CENTRAL, sequence_number="01", management_lock=None
-        )
-
-    @pytest.fixture()
-    def config_with_lock(self) -> ResourceGroupL0Config:
-        """
-        Fixture that provides a default configuration for ResourceGroupL0.
-
-        Returns:
-            ResourceGroupL0Config: A default configuration instance.
-        """
-        return ResourceGroupL0Config(
             name="test",
             location=AzureLocation.GERMANY_WEST_CENTRAL,
             sequence_number="01",
@@ -114,26 +100,6 @@ class TestResourceGroupL0:
         app = App()
         stack = TerraformStack(app, "test-stack")
         ResourceGroupL0(stack, "test", env="dev", config=config)
-        synthesized = Testing.synth(stack)
-        assert Testing.to_have_resource_with_properties(
-            received=synthesized,
-            resource_type=ResourceGroup.TF_RESOURCE_TYPE,
-            properties={
-                "name": "rg-test-dev-gwc-01",
-                "location": "germany west central",
-            },
-        )
-
-    def test__resource_group__with__management_lock__creation(self, config_with_lock: ResourceGroupL0Config) -> None:
-        """
-        Test that a ResourceGroupL0 construct creates an Azure resource group with a management lock.
-
-        Args:
-            config_with_lock (ResourceGroupL0Config): The configuration for the resource group with management lock.
-        """
-        app = App()
-        stack = TerraformStack(app, "test-stack")
-        ResourceGroupL0(stack, "test", env="dev", config=config_with_lock)
         synthesized = Testing.synth(stack)
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
