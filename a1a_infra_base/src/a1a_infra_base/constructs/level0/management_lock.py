@@ -101,8 +101,3 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
             lock_level=config.lock_level,
             notes=config.notes,
         )
-
-    @property
-    def management_lock(self) -> ManagementLock:
-        """Gets the management lock applied to the resource."""
-        return self._management_lock

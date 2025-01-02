@@ -138,8 +138,3 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
     def resource_group(self) -> ResourceGroup:
         """Gets the Azure resource group."""
         return self._resource_group
-
-    @property
-    def management_lock(self) -> ManagementLockL0 | None:
-        """Gets the management lock applied to the resource group."""
-        return self._management_lock

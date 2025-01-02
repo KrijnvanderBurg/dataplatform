@@ -238,6 +238,9 @@
                         }
                     },
                     "tasks": [
+                        //
+                        // Individual tasks, not part of a group nor automatically triggered
+                        //
                         {
                             "label": "git clean",
                             "type": "shell",
@@ -253,13 +256,12 @@
                             "problemMatcher": []
                         },
                         //
-                        // CICD akin task groups
+                        // all Task groups
                         //
                         {
-                            "label": "CICD",
+                            "label": "build & test",
                             "dependsOn": [
-                                "setup",
-                                "validate code",
+                                "build",
                                 "test"
                             ],
                             "dependsOrder": "sequence",
@@ -268,42 +270,21 @@
                             },
                             "problemMatcher": []
                         },
+                        //
+                        // build
+                        //
                         {
-                            "label": "setup",
+                            "label": "build",
                             "dependsOn": [
                                 "poetry install",
 								"sphinx build docs"
                             ],
-                            // "dependsOrder": "sequence",
+                            "group": {
+                                "kind": "build",
+                                "isDefault": true
+                            },
                             "problemMatcher": []
                         },
-                        {
-                            "label": "validate code",
-                            "dependsOn": [
-                                "ruff formatter",
-                                "ruff linter",
-                                "pylint",
-                                "flake8",
-                                "mypy",
-                                "pyre",
-                                "pyright",
-                                "trufflehog",
-                                "bandit",
-                                "vulture"
-                            ],
-                            "problemMatcher": []
-                        },
-                        {
-                            "label": "test",
-                            "dependsOn": [
-                                "pytest and coverage",
-                                "cdktf synth"
-                            ],
-                            "problemMatcher": []
-                        },
-                        //
-                        // Setup environment
-                        //
                         {
                             "label": "poetry lock",
                             "type": "shell",
@@ -311,9 +292,6 @@
                             "args": [
                                 "lock",
                                 "--no-update"
-                            ],
-                            "dependsOn": [
-                                "activate venv"
                             ],
                             "group": "install",
                             "presentation": {
@@ -331,6 +309,9 @@
                                 "--no-ansi",
                                 "--directory=./",
                                 "--with=test"
+                            ],
+                            "dependsOn": [
+                                "poetry lock"
                             ],
                             "presentation": {
                                 "panel": "shared"
@@ -351,8 +332,30 @@
 							}
 						},
                         //
-                        // Validate code
+                        // test
                         //
+                        {
+                            "label": "test",
+                            "dependsOn": [
+                                "ruff formatter",
+                                "ruff linter",
+                                "pylint",
+                                "flake8",
+                                "mypy",
+                                "pyre",
+                                "pyright",
+                                "trufflehog",
+                                "bandit",
+                                "vulture",
+                                "pytest and coverage",
+                                "cdktf synth"
+                            ],      
+                            "group": {
+                                "kind": "test",
+                                "isDefault": true
+                            },
+                            "problemMatcher": []
+                        },
                         {
                             "label": "ruff formatter",
                             "type": "shell",
@@ -364,7 +367,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "ruff linter",
@@ -377,7 +381,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "pylint",
@@ -390,7 +395,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "flake8",
@@ -403,7 +409,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "mypy",
@@ -416,7 +423,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
 							"label": "pyre",
@@ -429,7 +437,8 @@
 							"presentation": {
 								"panel": "dedicated",
 								"clear": true
-							}
+							},
+                            "problemMatcher": []
 						},
                         {
                             "label": "pyright",
@@ -442,7 +451,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "trufflehog",
@@ -455,7 +465,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "bandit",
@@ -468,7 +479,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
                         {
                             "label": "vulture",
@@ -481,11 +493,9 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         },
-                        //
-                        // Test
-                        //
                         {
                             "label": "pytest and coverage",
                             "type": "shell",
@@ -500,7 +510,21 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
+                        },
+                        {
+                            "label": "coverage-gutters watch",
+                            "dependsOn": [
+                                "pytest and coverage"
+                            ],
+                            "presentation": {
+                                "reveal": "never"
+                            },
+                            "command": [
+                                "${command:coverage-gutters.watchCoverageAndVisibleEditors}"
+                            ],
+                            "problemMatcher": []
                         },
                         {
                             "label": "cdktf synth",
@@ -512,7 +536,8 @@
                             "presentation": {
                                 "panel": "dedicated",
                                 "clear": true
-                            }
+                            },
+                            "problemMatcher": []
                         }
                     ]
                 }
