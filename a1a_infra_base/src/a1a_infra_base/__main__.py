@@ -5,13 +5,13 @@ This module initializes the CDKTF application and synthesizes the Terraform back
 """
 
 import argparse
-import json
 import logging
 from pathlib import Path
 from typing import Any, Final
 
 from cdktf import App
 
+from a1a_infra_base.file import FileHandlerFactory
 from a1a_infra_base.logger import setup_logger
 from a1a_infra_base.stacks.stack_abc import StackABC, StackConfigABC
 from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack, TerraformBackendStackConfig
@@ -37,7 +37,7 @@ class StackFactory:
     }
 
     @staticmethod
-    def get_stack(dict_: dict[str, Any]) -> tuple[type[StackConfigABC], type[StackABC]]:
+    def get_stack(dict_: dict[str, Any]) -> tuple[type[StackConfigABC], type[StackABC]] | None:
         """
         Create a stack by unpacking parameters from a stack configuration dictionary.
 
@@ -54,8 +54,37 @@ class StackFactory:
         enabled_cfg: bool = dict_[ENABLED_KEY]
         if not enabled_cfg:
             logger.info("Stack %s is disabled.", name_cfg)
+            return None
 
         return StackFactory.MAPPING_STACKS[name_cfg]
+
+
+def main(config_filepath: Path) -> None:
+    """
+    Main function to load configuration, initialize the application, and synthesize the app.
+
+    Args:
+        config_filepath (Path): The file path to the configuration file.
+
+    Raises:
+        Exception: If there is an error loading the configuration file.
+    """
+    app = App()
+
+    dict_: dict[str, Any] = FileHandlerFactory.create(filepath=str(config_filepath)).read()
+    env: str = dict_[ENV_KEY]
+    stacks: list[dict[str, Any]] = dict_[STACKS_KEY]
+
+    for stack in stacks:
+        stack_result = StackFactory.get_stack(dict_=stack)
+        if stack_result is None:
+            break
+        stack_config_cls, stack_cls = stack_result
+        stack_config = stack_config_cls.from_dict(dict_=stack)
+        stack_cls(app, "test", env=env, config=stack_config)  # type: ignore
+
+    app.synth()
+    logger.info("Application finished.")
 
 
 if __name__ == "__main__":
@@ -72,26 +101,4 @@ if __name__ == "__main__":
     args: argparse.Namespace = parser.parse_args()
     logger.info("Parsed arguments: %s", args)
 
-    config_filepath = Path(args.config_filepath)
-
-    try:
-        with open(file=config_filepath, mode="r", encoding="utf-8") as f:
-            config: dict[str, Any] = json.load(f)
-        logger.info("Loaded configuration from %s", config_filepath)
-        logger.debug("Configuration content from %s: %s", config_filepath, json.dumps(config, indent=2))
-    except Exception as e:
-        logger.error("Failed to load configuration from %s: %s", config_filepath, e)
-        raise
-
-    app = App()
-
-    env: str = config[ENV_KEY]
-    stacks: list[dict[str, Any]] = config[STACKS_KEY]
-
-    for stack in stacks:
-        stack_config_cls, stack_cls = StackFactory.get_stack(dict_=stack)
-        stack_config = stack_config_cls.from_dict(dict_=stack)
-        stack_cls(app, "test", env=env, config=stack_config)  # type: ignore
-
-    app.synth()
-    logger.info("Application finished.")
+    main(config_filepath=Path(args.config_filepath))
