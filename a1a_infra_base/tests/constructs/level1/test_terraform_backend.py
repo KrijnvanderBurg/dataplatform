@@ -203,3 +203,4 @@ class TestTerraformBackendL1:
                 "name": "test_container",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)

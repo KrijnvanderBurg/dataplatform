@@ -237,6 +237,7 @@ class TestStorageAccountL0:
                 "name": "test_container",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)
 
     def test__storage_account__creation_without_lock(self, config: StorageAccountL0Config) -> None:
         """
@@ -285,3 +286,4 @@ class TestStorageAccountL0:
                 "name": "test_container",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)

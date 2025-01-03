@@ -86,3 +86,4 @@ class TestStorageContainerL0:
                 "storage_account_id": "test-account-id",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)

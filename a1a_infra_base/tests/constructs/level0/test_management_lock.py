@@ -97,3 +97,4 @@ class TestManagementLockL0:
                 "notes": "Test lock",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)

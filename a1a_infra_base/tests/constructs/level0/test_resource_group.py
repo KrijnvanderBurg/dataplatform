@@ -115,6 +115,7 @@ class TestResourceGroupL0:
                 "notes": "Test lock",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)
 
     def test__resource_group__creation_without_lock(self, config: ResourceGroupL0Config) -> None:
         """
@@ -143,3 +144,4 @@ class TestResourceGroupL0:
                 "name": "rg-test-dev-gwc-01-lock",
             },
         )
+        # assert Testing.to_be_valid_terraform(synthesized)
