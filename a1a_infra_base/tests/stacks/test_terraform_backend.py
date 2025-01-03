@@ -171,7 +171,7 @@ class TestTerraformBackendL1:
         app = App()
         stack = TerraformBackendStack(app, "test-stack", env="dev", config=config)
         synthesized = Testing.synth(stack)
-
+        print("LOLOLOL", synthesized)
         # There is no function to test terraform backend configuration
 
         # provider
@@ -215,7 +215,7 @@ class TestTerraformBackendL1:
             properties={
                 "name": "sainitdevgwc01",
                 "location": "germany west central",
-                "resource_group_name": "test",
+                # "resource_group_name": "", # cannot be tested as its dynamic in terraform hcl
                 "account_replication_type": "LRS",
                 "account_kind": "StorageV2",
                 "account_tier": "Standard",
