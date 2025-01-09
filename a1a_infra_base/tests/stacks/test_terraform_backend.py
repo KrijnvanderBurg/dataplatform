@@ -64,7 +64,7 @@ class TestTerraformBackendStackConfig:
                         "name": "init",
                         "location": "germany west central",
                         "sequence_number": "01",
-                        "management_lock": {
+                        "management_lock_l0": {
                             "lock_level": "CanNotDelete",
                             "notes": "Required for Terraform deployments.",
                         },
@@ -84,9 +84,9 @@ class TestTerraformBackendStackConfig:
                         "local_user_enabled": False,
                         "infrastructure_encryption_enabled": True,
                         "sftp_enabled": False,
-                        "blob_properties": {"delete_retention_policy": {"delete_retention_days": 7}},
-                        "containers": [{"name": "terraform"}],
-                        "management_lock": {
+                        "blob_properties_l0": {"delete_retention_policy_l0": {"days": 7}},
+                        "storage_containers_l0": [{"name": "terraform"}],
+                        "management_lock_l0": {
                             "lock_level": "CanNotDelete",
                             "notes": "Required for Terraform deployments.",
                         },
@@ -155,11 +155,11 @@ class TestTerraformBackendL1:
                     local_user_enabled=False,
                     infrastructure_encryption_enabled=True,
                     sftp_enabled=False,
-                    blob_properties=BlobPropertiesL0Config(
-                        delete_retention_policy=DeleteRetentionPolicyL0Config(days=7)
+                    blob_properties_l0=BlobPropertiesL0Config(
+                        delete_retention_policy_l0=DeleteRetentionPolicyL0Config(days=7)
                     ),
-                    containers=[StorageContainerL0Config(name="test_container")],
-                    management_lock=ManagementLockL0Config(
+                    storage_containers_l0=[StorageContainerL0Config(name="test_container")],
+                    management_lock_l0=ManagementLockL0Config(
                         lock_level="CanNotDelete", notes="Required for Terraform deployments."
                     ),
                 ),
@@ -171,7 +171,6 @@ class TestTerraformBackendL1:
         app = App()
         stack = TerraformBackendStack(app, "test-stack", env="dev", config=config)
         synthesized = Testing.synth(stack)
-        print("LOLOLOL", synthesized)
         # There is no function to test terraform backend configuration
 
         # provider

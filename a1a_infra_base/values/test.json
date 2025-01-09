@@ -39,17 +39,17 @@
                         "local_user_enabled": false,
                         "infrastructure_encryption_enabled": true,
                         "sftp_enabled": false,
-                        "blob_properties": {
-                            "delete_retention_policy": {
-                                "delete_retention_days": 7
+                        "blob_properties_l0": {
+                            "delete_retention_policy_l0": {
+                                "days": 7
                             }
                         },
-                        "containers": [
+                        "storage_containers_l0": [
                             {
                                 "name": "terraform"
                             }
                         ],
-                        "management_lock": {
+                        "management_lock_l0": {
                             "lock_level": "CanNotDelete",
                             "notes": "Required for Terraform deployments."
                         }

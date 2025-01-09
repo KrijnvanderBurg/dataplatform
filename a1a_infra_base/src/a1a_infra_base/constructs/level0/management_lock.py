@@ -38,7 +38,7 @@ class ManagementLockL0Config(ConstructConfigABC):
     """
 
     lock_level: str
-    notes: str
+    notes: str | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -58,7 +58,7 @@ class ManagementLockL0Config(ConstructConfigABC):
             ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
         """
         lock_level = dict_[LOCK_LEVEL_KEY]
-        notes = dict_[NOTES_KEY]
+        notes = dict_.get(NOTES_KEY, cls.notes)
         return cls(lock_level=lock_level, notes=notes)
 
 

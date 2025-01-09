@@ -53,7 +53,7 @@ class TestTerraformBackendL1Config:
                 "name": "init",
                 "location": "germany west central",
                 "sequence_number": "01",
-                "management_lock": {
+                "management_lock_l0": {
                     "lock_level": "CanNotDelete",
                     "notes": "Required for Terraform deployments.",
                 },
@@ -73,9 +73,9 @@ class TestTerraformBackendL1Config:
                 "local_user_enabled": False,
                 "infrastructure_encryption_enabled": True,
                 "sftp_enabled": False,
-                "blob_properties": {"delete_retention_policy": {"delete_retention_days": 7}},
-                "containers": [{"name": "terraform"}],
-                "management_lock": {"lock_level": "CanNotDelete", "notes": "Required for Terraform deployments."},
+                "blob_properties_l0": {"delete_retention_policy_l0": {"days": 7}},
+                "storage_containers_l0": [{"name": "terraform"}],
+                "management_lock_l0": {"lock_level": "CanNotDelete", "notes": "Required for Terraform deployments."},
             },
         }
 
@@ -128,9 +128,11 @@ class TestTerraformBackendL1:
                 local_user_enabled=False,
                 infrastructure_encryption_enabled=True,
                 sftp_enabled=False,
-                blob_properties=BlobPropertiesL0Config(delete_retention_policy=DeleteRetentionPolicyL0Config(days=7)),
-                containers=[StorageContainerL0Config(name="test_container")],
-                management_lock=ManagementLockL0Config(
+                blob_properties_l0=BlobPropertiesL0Config(
+                    delete_retention_policy_l0=DeleteRetentionPolicyL0Config(days=7)
+                ),
+                storage_containers_l0=[StorageContainerL0Config(name="test_container")],
+                management_lock_l0=ManagementLockL0Config(
                     lock_level="CanNotDelete", notes="Required for Terraform deployments."
                 ),
             ),

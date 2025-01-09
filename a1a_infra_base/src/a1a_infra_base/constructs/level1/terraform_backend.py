@@ -12,12 +12,11 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from constructs import Construct
-
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
 from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
 from a1a_infra_base.logger import setup_logger
+from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 

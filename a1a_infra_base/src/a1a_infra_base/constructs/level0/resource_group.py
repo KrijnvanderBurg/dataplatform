@@ -73,9 +73,11 @@ class ResourceGroupL0Config(ConstructConfigABC):
         location = AzureLocation.from_full_name(dict_[LOCATION_KEY])
         sequence_number = dict_[SEQUENCE_NUMBER_KEY]
 
-        management_lock = dict_.get(MANAGEMENT_LOCK_KEY, None)
+        management_lock = dict_.get(MANAGEMENT_LOCK_KEY, cls.management_lock)
         if management_lock:
-            management_lock = ManagementLockL0Config.from_dict(dict_=dict_[MANAGEMENT_LOCK_KEY])
+            management_lock = ManagementLockL0Config.from_dict(
+                dict_=dict_.get(MANAGEMENT_LOCK_KEY, cls.management_lock)
+            )
 
         return cls(
             name=name,

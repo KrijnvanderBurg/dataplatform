@@ -52,7 +52,7 @@ class TestBlobPropertiesL0Config:
         Returns:
             dict[str, Any]: A configuration dictionary.
         """
-        return {"delete_retention_policy": {"delete_retention_days": 7}}
+        return {"delete_retention_policy_l0": {"days": 7}}
 
     def test__blob_properties__from_dict(self, dict_: dict[str, Any]) -> None:
         """
@@ -62,7 +62,8 @@ class TestBlobPropertiesL0Config:
             dict_ (dict[str, Any]): The configuration dictionary.
         """
         blob_properties = BlobPropertiesL0Config.from_dict(dict_)
-        assert blob_properties.delete_retention_policy.days == 7
+        assert blob_properties.delete_retention_policy_l0 is not None
+        assert blob_properties.delete_retention_policy_l0.days == 7
 
 
 class TestDeleteRetentionPolicyL0Config:
@@ -78,7 +79,7 @@ class TestDeleteRetentionPolicyL0Config:
         Returns:
             dict[str, Any]: A configuration dictionary.
         """
-        return {"delete_retention_days": 7}
+        return {"days": 7}
 
     def test__delete_retention_policy__from_dict(self, dict_: dict[str, Any]) -> None:
         """
@@ -119,9 +120,9 @@ class TestStorageAccountL0Config:
             "local_user_enabled": False,
             "infrastructure_encryption_enabled": True,
             "sftp_enabled": False,
-            "blob_properties": {"delete_retention_policy": {"delete_retention_days": 7}},
-            "containers": [{"name": "test_container"}],
-            "management_lock": {"lock_level": "CanNotDelete", "notes": "Required for Terraform deployments."},
+            "blob_properties_l0": {"delete_retention_policy_l0": {"days": 7}},
+            "storage_containers_l0": [{"name": "test_container"}],
+            "management_lock_l0": {"lock_level": "CanNotDelete"},
         }
 
     def test__storage_account_config__from_dict(self, dict_: dict[str, Any]) -> None:
@@ -146,12 +147,14 @@ class TestStorageAccountL0Config:
         assert config.local_user_enabled is False
         assert config.infrastructure_encryption_enabled is True
         assert config.sftp_enabled is False
-        assert config.blob_properties.delete_retention_policy.days == 7
-        assert len(config.containers) == 1
-        assert config.containers[0].name == "test_container"
-        assert config.management_lock is not None
-        assert config.management_lock.lock_level == "CanNotDelete"
-        assert config.management_lock.notes == "Required for Terraform deployments."  # type: ignore
+        assert config.blob_properties_l0 is not None
+        assert config.blob_properties_l0.delete_retention_policy_l0 is not None
+        assert config.blob_properties_l0.delete_retention_policy_l0.days == 7
+        assert config.storage_containers_l0 is not None
+        assert len(config.storage_containers_l0) == 1
+        assert config.storage_containers_l0[0].name == "test_container"  # type: ignore
+        assert config.management_lock_l0 is not None
+        assert config.management_lock_l0.lock_level == "CanNotDelete"
 
 
 class TestStorageAccountL0:
@@ -182,9 +185,9 @@ class TestStorageAccountL0:
             local_user_enabled=False,
             infrastructure_encryption_enabled=True,
             sftp_enabled=False,
-            blob_properties=BlobPropertiesL0Config(delete_retention_policy=DeleteRetentionPolicyL0Config(days=7)),
-            containers=[StorageContainerL0Config(name="test_container")],
-            management_lock=ManagementLockL0Config(
+            blob_properties_l0=BlobPropertiesL0Config(delete_retention_policy_l0=DeleteRetentionPolicyL0Config(days=7)),
+            storage_containers_l0=[StorageContainerL0Config(name="test_container")],
+            management_lock_l0=ManagementLockL0Config(
                 lock_level="CanNotDelete", notes="Required for Terraform deployments."
             ),
         )
@@ -221,6 +224,7 @@ class TestStorageAccountL0:
                 "blob_properties": {"delete_retention_policy": {"days": 7}},
             },
         )
+
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
             resource_type=ManagementLock.TF_RESOURCE_TYPE,
@@ -230,6 +234,7 @@ class TestStorageAccountL0:
                 "notes": "Required for Terraform deployments.",
             },
         )
+
         assert Testing.to_have_resource_with_properties(
             received=synthesized,
             resource_type=StorageContainer.TF_RESOURCE_TYPE,
@@ -246,7 +251,7 @@ class TestStorageAccountL0:
         Args:
             config (StorageAccountL0Config): The configuration for the storage account without a management lock.
         """
-        config.management_lock = None
+        config.management_lock_l0 = None
         app = App()
         stack = TerraformStack(app, "test-stack")
         StorageAccountL0(stack, "test-account", env="dev", config=config, resource_group_name="test")
@@ -272,18 +277,10 @@ class TestStorageAccountL0:
                 "blob_properties": {"delete_retention_policy": {"days": 7}},
             },
         )
-        assert not Testing.to_have_resource_with_properties(
+
+        assert not Testing.to_have_resource(
             received=synthesized,
             resource_type=ManagementLock.TF_RESOURCE_TYPE,
-            properties={
-                "name": "sainitdevgwc01-lock",
-            },
         )
-        assert Testing.to_have_resource_with_properties(
-            received=synthesized,
-            resource_type=StorageContainer.TF_RESOURCE_TYPE,
-            properties={
-                "name": "test_container",
-            },
-        )
+
         # assert Testing.to_be_valid_terraform(synthesized)
