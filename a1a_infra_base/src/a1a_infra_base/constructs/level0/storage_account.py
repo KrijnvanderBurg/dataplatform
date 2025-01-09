@@ -235,13 +235,18 @@ class StorageAccountL0Config(ConstructConfigABC):
             INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY, cls.infrastructure_encryption_enabled
         )
         sftp_enabled = dict_.get(SFTP_ENABLED_KEY, cls.sftp_enabled)
-        blob_properties_l0 = BlobPropertiesL0Config.from_dict(dict_.get(BLOB_PROPERTIES_L0_KEY, cls.blob_properties_l0))
+
+        blob_properties_l0 = (
+            BlobPropertiesL0Config.from_dict(dict_[BLOB_PROPERTIES_L0_KEY])
+            if BLOB_PROPERTIES_L0_KEY in dict_
+            else cls.blob_properties_l0
+        )
 
         storage_containers_l0 = []
-        for container_dict in dict_.get(STORAGE_CONTAINERS_L0_KEY, []):
+        for container_dict in dict_.get(STORAGE_CONTAINERS_L0_KEY, cls.storage_containers_l0):
             storage_containers_l0.append(StorageContainerL0Config.from_dict(dict_=container_dict))
 
-        management_lock_l0 = dict_.get(MANAGEMENT_LOCK_L0_KEY, None)
+        management_lock_l0 = dict_.get(MANAGEMENT_LOCK_L0_KEY, cls.management_lock_l0)
         if management_lock_l0:
             management_lock_l0 = ManagementLockL0Config.from_dict(
                 dict_=dict_.get(MANAGEMENT_LOCK_L0_KEY, cls.management_lock_l0)
