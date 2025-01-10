@@ -132,7 +132,7 @@ class TestTerraformBackendL1:
                 client_secret="test-client-secret",
             ),
             constructs_config=TerraformBackendL1Config(
-                resource_group_config=ResourceGroupL0Config(
+                resource_group_l0_config=ResourceGroupL0Config(
                     name="init",
                     location=AzureLocation.GERMANY_WEST_CENTRAL,
                     sequence_number="01",
@@ -140,7 +140,7 @@ class TestTerraformBackendL1:
                         lock_level="CanNotDelete", notes="Required for Terraform deployments."
                     ),
                 ),
-                storage_account_config=StorageAccountL0Config(
+                storage_account_l0_config=StorageAccountL0Config(
                     name="init",
                     location=AzureLocation.GERMANY_WEST_CENTRAL,
                     sequence_number="01",

@@ -5,7 +5,7 @@ This module defines the TerraformBackendL0 class, which creates a resource group
 
 Classes:
     TerraformBackendL0: A construct that creates a resource group and a locked storage account.
-    TerraformBackendL1Config: A configuration class for TerraformBackendL0.
+    LakeHouseL2Config: A configuration class for TerraformBackendL0.
 """
 
 import logging
@@ -14,7 +14,7 @@ from typing import Any, Final, Self
 
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
-from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
+from a1a_infra_base.constructs.level1.datalake import DataLakeL1, DataLakeL1Config
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -22,42 +22,40 @@ logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 RESOURCE_GROUP_L0_KEY: Final[str] = "resource_group_l0"
-STORAGE_ACCOUNT_L0_KEY: Final[str] = "storage_account_l0"
+DATA_LAKE_L1_KEY: Final[str] = "data_lake_l1_key"
 
 
 @dataclass
-class TerraformBackendL1Config(ConstructConfigABC):
+class LakeHouseL2Config(ConstructConfigABC):
     """
     A configuration class for TerraformBackendL0.
 
     Attributes:
-        resource_group_config (ResourceGroupL0Config): The configuration for the resource group.
-        storage_account_config (StorageAccountL0Config): The configuration for the storage account.
+        resource_group_l0_config (ResourceGroupL0Config): The configuration for the resource group.
+        data_lake_l1_config (DataLakeL1Config): The configuration for the storage account.
     """
 
     resource_group_l0_config: ResourceGroupL0Config
-    storage_account_l0_config: StorageAccountL0Config
+    data_lake_l1_config: DataLakeL1Config
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a TerraformBackendL1Config by unpacking parameters from a configuration dictionary.
+        Create a LakeHouseL2Config by unpacking parameters from a configuration dictionary.
 
         Args:
             dict_ (dict): A dictionary containing the configuration.
 
         Returns:
-            TerraformBackendL1Config: A fully-initialized TerraformBackendL1Config.
+            LakeHouseL2Config: A fully-initialized LakeHouseL2Config.
         """
         resource_group_l0_config = ResourceGroupL0Config.from_dict(dict_[RESOURCE_GROUP_L0_KEY])
-        storage_account_l0_config = StorageAccountL0Config.from_dict(dict_[STORAGE_ACCOUNT_L0_KEY])
+        data_lake_l1_config = DataLakeL1Config.from_dict(dict_[DATA_LAKE_L1_KEY])
 
-        return cls(
-            resource_group_l0_config=resource_group_l0_config, storage_account_l0_config=storage_account_l0_config
-        )
+        return cls(resource_group_l0_config=resource_group_l0_config, data_lake_l1_config=data_lake_l1_config)
 
 
-class TerraformBackendL1(Construct, metaclass=CombinedMeta):
+class LakeHouseL2(Construct, metaclass=CombinedMeta):
     """
     A level 1 construct that creates and manages a Terraform backend.
 
@@ -72,7 +70,7 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
         id_: str,
         *,
         env: str,
-        config: TerraformBackendL1Config,
+        config: LakeHouseL2Config,
     ) -> None:
         """
         Initializes the TerraformBackendL0 construct.
@@ -81,7 +79,7 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            config (TerraformBackendL1Config): The configuration for the Terraform backend.
+            config (LakeHouseL2Config): The configuration for the Terraform backend.
         """
         super().__init__(scope, id_)
 
@@ -94,10 +92,10 @@ class TerraformBackendL1(Construct, metaclass=CombinedMeta):
         )
 
         # Create the storage account
-        self.storage_account_l0 = StorageAccountL0(
+        self.storage_account_l0 = DataLakeL1(
             self,
             "StorageAccountL0",
             env=env,
-            config=config.storage_account_l0_config,
+            config=config.data_lake_l1_config,
             resource_group_name=self.resource_group_l0.resource_group.name,
         )
