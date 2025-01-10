@@ -98,9 +98,13 @@ class BlobPropertiesL0Config:
         Returns:
             BlobProperties: A fully-initialized BlobProperties.
         """
-        delete_retention_policy_l0 = DeleteRetentionPolicyL0Config.from_dict(
-            dict_.get(DELETE_RETENTION_POLICY_L0_KEY, cls.delete_retention_policy_l0)
+
+        delete_retention_policy_l0 = (
+            DeleteRetentionPolicyL0Config.from_dict(dict_[DELETE_RETENTION_POLICY_L0_KEY])
+            if DELETE_RETENTION_POLICY_L0_KEY in dict_
+            else cls.delete_retention_policy_l0
         )
+
         return cls(delete_retention_policy_l0=delete_retention_policy_l0)
 
 
@@ -243,14 +247,15 @@ class StorageAccountL0Config(ConstructConfigABC):
         )
 
         storage_containers_l0 = []
-        for container_dict in dict_.get(STORAGE_CONTAINERS_L0_KEY, cls.storage_containers_l0):
+        container_dicts = dict_.get(STORAGE_CONTAINERS_L0_KEY, [])
+        for container_dict in container_dicts:
             storage_containers_l0.append(StorageContainerL0Config.from_dict(dict_=container_dict))
 
-        management_lock_l0 = dict_.get(MANAGEMENT_LOCK_L0_KEY, cls.management_lock_l0)
-        if management_lock_l0:
-            management_lock_l0 = ManagementLockL0Config.from_dict(
-                dict_=dict_.get(MANAGEMENT_LOCK_L0_KEY, cls.management_lock_l0)
-            )
+        management_lock_l0 = (
+            ManagementLockL0Config.from_dict(dict_[MANAGEMENT_LOCK_L0_KEY])
+            if MANAGEMENT_LOCK_L0_KEY in dict_
+            else cls.management_lock_l0
+        )
 
         return cls(
             name=name,

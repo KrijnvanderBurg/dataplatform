@@ -45,7 +45,7 @@ class TestResourceGroupL0Config:
             "name": "init",
             "location": "germany west central",
             "sequence_number": "01",
-            "management_lock": {
+            "management_lock_l0": {
                 "lock_level": "CanNotDelete",
                 "notes": "Required for Terraform deployments.",
             },
@@ -62,9 +62,9 @@ class TestResourceGroupL0Config:
         assert config.name == "init"
         assert config.location == AzureLocation.GERMANY_WEST_CENTRAL
         assert config.sequence_number == "01"
-        assert config.management_lock is not None
-        assert config.management_lock.lock_level == "CanNotDelete"
-        assert config.management_lock.notes == "Required for Terraform deployments."  # type: ignore
+        assert config.management_lock_l0 is not None
+        assert config.management_lock_l0.lock_level == "CanNotDelete"
+        assert config.management_lock_l0.notes == "Required for Terraform deployments."  # type: ignore
 
 
 class TestResourceGroupL0:
@@ -84,7 +84,7 @@ class TestResourceGroupL0:
             name="test",
             location=AzureLocation.GERMANY_WEST_CENTRAL,
             sequence_number="01",
-            management_lock=ManagementLockL0Config(lock_level="CanNotDelete", notes="Test lock"),
+            management_lock_l0=ManagementLockL0Config(lock_level="CanNotDelete", notes="Test lock"),
         )
 
     def test__resource_group__creation_with_lock(self, config: ResourceGroupL0Config) -> None:
@@ -124,7 +124,7 @@ class TestResourceGroupL0:
         Args:
             config (ResourceGroupL0Config): The configuration for the resource group without a management lock.
         """
-        config.management_lock = None
+        config.management_lock_l0 = None
         app = App()
         stack = TerraformStack(app, "test-stack")
         ResourceGroupL0(stack, "test", env="dev", config=config)

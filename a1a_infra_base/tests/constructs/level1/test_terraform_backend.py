@@ -109,7 +109,7 @@ class TestTerraformBackendL1:
                 name="init",
                 location=AzureLocation.GERMANY_WEST_CENTRAL,
                 sequence_number="01",
-                management_lock=ManagementLockL0Config(
+                management_lock_l0=ManagementLockL0Config(
                     lock_level="CanNotDelete", notes="Required for Terraform deployments."
                 ),
             ),

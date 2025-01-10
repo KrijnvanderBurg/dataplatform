@@ -27,7 +27,7 @@ logger: logging.Logger = setup_logger(__name__)
 NAME_KEY: Final[str] = "name"
 LOCATION_KEY: Final[str] = "location"
 SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
-MANAGEMENT_LOCK_KEY: Final[str] = "management_lock"
+MANAGEMENT_LOCK_L0_KEY: Final[str] = "management_lock_l0"
 
 
 @dataclass
@@ -39,13 +39,13 @@ class ResourceGroupL0Config(ConstructConfigABC):
         name (str): The name of the resource group.
         location (AzureLocation): The Azure location.
         sequence_number (str): The sequence number.
-        management_lock (ManagementLockL0Config | None): The management lock configuration.
+        management_lock_l0 (ManagementLockL0Config | None): The management lock configuration.
     """
 
     name: str
     location: AzureLocation
     sequence_number: str
-    management_lock: ManagementLockL0Config | None = None
+    management_lock_l0: ManagementLockL0Config | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -57,7 +57,7 @@ class ResourceGroupL0Config(ConstructConfigABC):
             "name": "<resource group name>",
             "location": "<AzureLocation enum value name>",
             "sequence_number": "<sequence number>",
-            "management_lock": {
+            "management_lock_l0": {
                 "lock_level": "<lock level>",
                 "notes": "<notes>"
             }
@@ -73,17 +73,17 @@ class ResourceGroupL0Config(ConstructConfigABC):
         location = AzureLocation.from_full_name(dict_[LOCATION_KEY])
         sequence_number = dict_[SEQUENCE_NUMBER_KEY]
 
-        management_lock = dict_.get(MANAGEMENT_LOCK_KEY, cls.management_lock)
-        if management_lock:
-            management_lock = ManagementLockL0Config.from_dict(
-                dict_=dict_.get(MANAGEMENT_LOCK_KEY, cls.management_lock)
-            )
+        management_lock_l0 = (
+            ManagementLockL0Config.from_dict(dict_[MANAGEMENT_LOCK_L0_KEY])
+            if MANAGEMENT_LOCK_L0_KEY in dict_
+            else cls.management_lock_l0
+        )
 
         return cls(
             name=name,
             location=location,
             sequence_number=sequence_number,
-            management_lock=management_lock,
+            management_lock_l0=management_lock_l0,
         )
 
 
@@ -124,12 +124,12 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
             location=config.location.full_name,
         )
 
-        if config.management_lock:
+        if config.management_lock_l0:
             self._management_lock: ManagementLockL0 | None = ManagementLockL0(
                 self,
                 "ManagementLockL0",
                 _=env,
-                config=config.management_lock,
+                config=config.management_lock_l0,
                 resource_id=self.resource_group.id,
                 resource_name=self.full_name,
             )
