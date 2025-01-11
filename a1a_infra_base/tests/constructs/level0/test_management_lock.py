@@ -21,34 +21,49 @@ from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 
 
+@pytest.fixture(name="management_lock_l0_config__dict")
+def fixture__management_lock_l0_config__dict() -> dict[str, Any]:
+    """
+    Fixture that provides a configuration dictionary for ManagementLockL0Config.
+
+    Returns:
+        dict[str, Any]: A configuration dictionary.
+    """
+    return {
+        "lock_level": "CanNotDelete",
+        "notes": "Test notes.",
+    }
+
+
 class TestManagementLockL0Config:
     """
     Test suite for the ManagementLockL0Config class.
     """
 
-    @pytest.fixture()
-    def dict_(self) -> dict[str, Any]:
-        """
-        Fixture that provides a configuration dictionary for ManagementLockL0Config.
-
-        Returns:
-            dict[str, Any]: A configuration dictionary.
-        """
-        return {
-            "lock_level": "CanNotDelete",
-            "notes": "Required for Terraform deployments.",
-        }
-
-    def test__management_lock_config__from_dict(self, dict_: dict[str, Any]) -> None:
+    def test__management_lock_config__from_dict(self, management_lock_l0_config__dict: dict[str, Any]) -> None:
         """
         Test the from_dict method of the ManagementLockL0Config class.
 
         Args:
-            dict_ (dict[str, Any]): The configuration dictionary.
+            management_lock_l0_config__dict (dict[str, Any]): The configuration dictionary.
         """
-        config = ManagementLockL0Config.from_dict(dict_)
+        config = ManagementLockL0Config.from_dict(management_lock_l0_config__dict)
         assert config.lock_level == "CanNotDelete"
-        assert config.notes == "Required for Terraform deployments."
+        assert config.notes == "Test notes."
+
+
+@pytest.fixture(name="management_lock_l0_config__instance")
+def fixture__management_lock_l0_config__instance() -> ManagementLockL0Config:
+    """
+    Fixture that provides a default configuration for ManagementLockL0.
+
+    Returns:
+        ManagementLockL0Config: A default configuration instance.
+    """
+    return ManagementLockL0Config(
+        lock_level="CanNotDelete",
+        notes="Test notes.",
+    )
 
 
 class TestManagementLockL0:
@@ -56,25 +71,12 @@ class TestManagementLockL0:
     Test suite for the ManagementLockL0 construct.
     """
 
-    @pytest.fixture()
-    def config(self) -> ManagementLockL0Config:
-        """
-        Fixture that provides a default configuration for ManagementLockL0.
-
-        Returns:
-            ManagementLockL0Config: A default configuration instance.
-        """
-        return ManagementLockL0Config(
-            lock_level="CanNotDelete",
-            notes="Test lock",
-        )
-
-    def test__management_lock__creation(self, config: ManagementLockL0Config) -> None:
+    def test__management_lock__creation(self, management_lock_l0_config__instance: ManagementLockL0Config) -> None:
         """
         Test that a ManagementLockL0 construct creates a management lock.
 
         Args:
-            config (ManagementLockL0Config): The configuration for the management lock.
+            management_lock_l0_config__instance (ManagementLockL0Config): The configuration for the management lock.
         """
         app = App()
         stack = TerraformStack(app, "test-stack")
@@ -82,7 +84,7 @@ class TestManagementLockL0:
             stack,
             "test-lock",
             _="dev",
-            config=config,
+            config=management_lock_l0_config__instance,
             resource_name="test",
             resource_id="test-id",
         )
@@ -94,7 +96,7 @@ class TestManagementLockL0:
                 "name": "test-lock",
                 "scope": "test-id",
                 "lock_level": "CanNotDelete",
-                "notes": "Test lock",
+                "notes": "Test notes.",
             },
         )
         # assert Testing.to_be_valid_terraform(synthesized)

@@ -18,7 +18,7 @@ from cdktf import LocalBackend, TerraformStack
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 
 from a1a_infra_base.backend import BackendLocalConfig
-from a1a_infra_base.constructs.level1.terraform_backend import TerraformBackendL1, TerraformBackendL1Config
+from a1a_infra_base.constructs.level3.terraform_backend import TerraformBackendL3, TerraformBackendL3Config
 from a1a_infra_base.logger import setup_logger
 from a1a_infra_base.provider import ProviderAzurermConfig
 from a1a_infra_base.stacks.stack_abc import CombinedMeta, StackABC, StackConfigABC
@@ -32,7 +32,7 @@ PROVIDER_KEY: Final[str] = "provider"
 AZURERM_KEY: Final[str] = "azurerm"
 
 CONSTRUCTS_KEY: Final[str] = "constructs"
-TERRAFORM_BACKEND_L1_KEY: Final[str] = "terraform_backend_l1"
+TERRAFORM_BACKEND_L3_KEY: Final[str] = "terraform_backend_l3"
 
 
 @dataclass
@@ -50,7 +50,7 @@ class TerraformBackendStackConfig(StackConfigABC):
 
     backend_local_config: BackendLocalConfig
     provider_azurerm_config: ProviderAzurermConfig
-    constructs_config: TerraformBackendL1Config
+    constructs_config: TerraformBackendL3Config
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -65,7 +65,7 @@ class TerraformBackendStackConfig(StackConfigABC):
         """
         backend_local_config = BackendLocalConfig.from_dict(dict_[BACKEND_KEY])
         provider_azurerm_config = ProviderAzurermConfig.from_dict(dict_[PROVIDER_KEY][AZURERM_KEY])
-        constructs_config = TerraformBackendL1Config.from_dict(dict_[CONSTRUCTS_KEY][TERRAFORM_BACKEND_L1_KEY])
+        constructs_config = TerraformBackendL3Config.from_dict(dict_[CONSTRUCTS_KEY][TERRAFORM_BACKEND_L3_KEY])
 
         return cls(
             backend_local_config=backend_local_config,
@@ -117,7 +117,7 @@ class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
         )
 
         # Initialize the TerraformBackendL0 construct
-        TerraformBackendL1(
+        TerraformBackendL3(
             self,
             "TerraformBackendL0",
             env=env,

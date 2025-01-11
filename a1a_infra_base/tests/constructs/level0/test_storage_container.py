@@ -22,32 +22,46 @@ from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
 
 
+@pytest.fixture(name="storage_container_l0_config__dict")
+def fixture__storage_container_l0_config__dict() -> dict[str, Any]:
+    """
+    Fixture that provides a configuration dictionary for StorageContainerL0Config.
+
+    Returns:
+        dict[str, Any]: A configuration dictionary.
+    """
+    return {
+        "name": "test-container",
+    }
+
+
 class TestStorageContainerL0Config:
     """
     Test suite for the StorageContainerL0Config class.
     """
 
-    @pytest.fixture()
-    def dict_(self) -> dict[str, Any]:
-        """
-        Fixture that provides a configuration dictionary for StorageContainerL0Config.
-
-        Returns:
-            dict[str, Any]: A configuration dictionary.
-        """
-        return {
-            "name": "test-container",
-        }
-
-    def test__storage_container_config__from_dict(self, dict_: dict[str, Any]) -> None:
+    def test__storage_container_config__from_dict(self, storage_container_l0_config__dict: dict[str, Any]) -> None:
         """
         Test the from_dict method of the StorageContainerL0Config class.
 
         Args:
-            dict_ (dict[str, Any]): The configuration dictionary.
+            storage_container_l0_config__dict (dict[str, Any]): The configuration dictionary.
         """
-        config = StorageContainerL0Config.from_dict(dict_)
+        config = StorageContainerL0Config.from_dict(storage_container_l0_config__dict)
         assert config.name == "test-container"
+
+
+@pytest.fixture(name="storage_container_l0_config__instance")
+def fixture__storage_container_l0_config__instance() -> StorageContainerL0Config:
+    """
+    Fixture that provides a default configuration for StorageContainerL0.
+
+    Returns:
+        StorageContainerL0Config: A default configuration instance.
+    """
+    return StorageContainerL0Config(
+        name="test-container",
+    )
 
 
 class TestStorageContainerL0:
@@ -55,28 +69,24 @@ class TestStorageContainerL0:
     Test suite for the StorageContainerL0 construct.
     """
 
-    @pytest.fixture
-    def config(self) -> StorageContainerL0Config:
-        """
-        Fixture that provides a default configuration for StorageContainerL0.
-
-        Returns:
-            StorageContainerL0Config: A default configuration instance.
-        """
-        return StorageContainerL0Config(
-            name="test-container",
-        )
-
-    def test__storage_container__creation(self, config: StorageContainerL0Config) -> None:
+    def test__storage_container__creation(
+        self, storage_container_l0_config__instance: StorageContainerL0Config
+    ) -> None:
         """
         Test that a StorageContainerL0 construct creates a storage container.
 
         Args:
-            config (StorageContainerL0Config): The configuration for the storage container.
+            storage_container_l0_config__instance (StorageContainerL0Config): The configuration for the storage container.
         """
         app = App()
         stack = TerraformStack(app, "test-stack")
-        StorageContainerL0(stack, "test-container", _="dev", config=config, storage_account_id="test-account-id")
+        StorageContainerL0(
+            stack,
+            "test-container",
+            _="dev",
+            config=storage_container_l0_config__instance,
+            storage_account_id="test-account-id",
+        )
         synthesized = Testing.synth(stack)
         assert Testing.to_have_resource_with_properties(
             received=synthesized,

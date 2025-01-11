@@ -1,5 +1,5 @@
 """
-Module storage_account
+Module storage_account_l0
 
 This module defines the StorageAccountL0 class and the StorageAccountL0Config class,
 which are responsible for creating and managing an Azure storage account with specific configurations.
@@ -21,8 +21,6 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
-from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
-from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -46,8 +44,6 @@ SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
 BLOB_PROPERTIES_L0_KEY: Final[str] = "blob_properties_l0"
 DELETE_RETENTION_POLICY_L0_KEY: Final[str] = "delete_retention_policy_l0"
 DAYS_KEY: Final[str] = "days"
-STORAGE_CONTAINERS_L0_KEY: Final[str] = "storage_containers_l0"
-MANAGEMENT_LOCK_L0_KEY: Final[str] = "management_lock_l0"
 
 
 @dataclass
@@ -129,8 +125,6 @@ class StorageAccountL0Config(ConstructConfigABC):
         infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
         sftp_enabled (bool): Whether SFTP is enabled.
         blob_properties (BlobProperties): The blob properties configuration.
-        containers (list[StorageContainerL0Config]): The list of storage containers configuration.
-        management_lock: ManagementLockL0Config | None = None
     """
 
     # custom added
@@ -142,78 +136,21 @@ class StorageAccountL0Config(ConstructConfigABC):
     name: str
     access_tier: str | None = None
     account_kind: str | None = None
-    # allowed_copy_scope: str | None = None
-    # allow_nested_items_to_be_public: bool | None = None
-    # azure_files_authentication: "StorageAccountAzureFilesAuthentication" | dict[str, any] | None = None
     blob_properties_l0: BlobPropertiesL0Config | None = None
     cross_tenant_replication_enabled: bool | None = False
-    # custom_domain: "StorageAccountCustomDomain" | dict[str, any] | None = None
-    # customer_managed_key: "StorageAccountCustomerManagedKey" | dict[str, any] | None = None
-    # default_to_oauth_authentication: bool | None = None
-    # dns_endpoint_type: str | None = None
-    # edge_zone: str | None = None
-    # https_traffic_only_enabled: bool | None = None
-    id_: str | None = None
-    # identity: "StorageAccountIdentity" | dict[str, any] | None = None
-    # immutability_policy: "StorageAccountImmutabilityPolicy" | dict[str, any] | None = None
     infrastructure_encryption_enabled: bool | None = True
     is_hns_enabled: bool | None = None
-    # large_file_share_enabled: bool | None = None
     local_user_enabled: bool | None = False
-    min_tls_version: str | None = None
-    # network_rules: "StorageAccountNetworkRules" | dict[str, any] | None = None
     nfsv3_enabled: bool | None = False
     public_network_access_enabled: bool | None = False
-    # queue_encryption_key_type: str | None = None
-    # queue_properties: "StorageAccountQueueProperties" | dict[str, any] | None = None
-    # routing: "StorageAccountRouting" | dict[str, any] | None = None
-    # sas_policy: "StorageAccountSasPolicy" | dict[str, any] | None = None
     sftp_enabled: bool | None = False
     shared_access_key_enabled: bool | None = False
-    # share_properties: "StorageAccountShareProperties" | dict[str, any] | None = None
-    # static_website: "StorageAccountStaticWebsite" | dict[str, any] | None = None
-    # table_encryption_key_type: str | None = None
     tags: dict[str, str] | None = None
-    # custom added
-    storage_containers_l0: list[StorageContainerL0Config] | None = None
-    management_lock_l0: ManagementLockL0Config | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a StorageAccountL0Config by unpacking parameters from a configuration dictionary.
-
-        Expected format of 'dict_':
-        {
-            "name": "<storage account name>",
-            "location": "<AzureLocation enum value name>",
-            "sequence_number": "<sequence number>",
-            "account_replication_type": "<replication type>",
-            "account_kind": "<account kind>",
-            "account_tier": "<account tier>",
-            "cross_tenant_replication_enabled": <bool>,
-            "access_tier": "<access tier>",
-            "shared_access_key_enabled": <bool>,
-            "public_network_access_enabled": <bool>,
-            "is_hns_enabled": <bool>,
-            "local_user_enabled": <bool>,
-            "infrastructure_encryption_enabled": <bool>,
-            "sftp_enabled": <bool>,
-            "blob_properties": {
-                "delete_retention_policy": {
-                    "delete_retention_days": <int>
-                }
-            },
-            "containers": [
-                {
-                    "name": "<container name>"
-                }
-            ],
-            "management_lock": {
-                "lock_level": "<lock level>",
-                "notes": "<notes>"
-            }
-        }
 
         Args:
             dict_ (dict[str, Any]): A dictionary containing storage account configuration.
@@ -246,17 +183,6 @@ class StorageAccountL0Config(ConstructConfigABC):
             else cls.blob_properties_l0
         )
 
-        storage_containers_l0 = []
-        container_dicts = dict_.get(STORAGE_CONTAINERS_L0_KEY, [])
-        for container_dict in container_dicts:
-            storage_containers_l0.append(StorageContainerL0Config.from_dict(dict_=container_dict))
-
-        management_lock_l0 = (
-            ManagementLockL0Config.from_dict(dict_[MANAGEMENT_LOCK_L0_KEY])
-            if MANAGEMENT_LOCK_L0_KEY in dict_
-            else cls.management_lock_l0
-        )
-
         return cls(
             name=name,
             location=location,
@@ -273,8 +199,6 @@ class StorageAccountL0Config(ConstructConfigABC):
             infrastructure_encryption_enabled=infrastructure_encryption_enabled,
             sftp_enabled=sftp_enabled,
             blob_properties_l0=blob_properties_l0,
-            storage_containers_l0=storage_containers_l0,
-            management_lock_l0=management_lock_l0,
         )
 
 
@@ -284,7 +208,6 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
 
     Attributes:
         storage_account (StorageAccount): The Azure storage account.
-        management_lock (ManagementLockL0): The management lock applied to the storage account.
     """
 
     def __init__(
@@ -341,28 +264,6 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
             sftp_enabled=config.sftp_enabled,
             blob_properties=blob_properties,
         )
-
-        if config.storage_containers_l0 is not None:
-            for container in config.storage_containers_l0:  # type: ignore
-                StorageContainerL0(
-                    self,
-                    f"StorageContainerL0_{container.name}",
-                    _=env,
-                    config=container,
-                    storage_account_id=self.storage_account.id,
-                )
-
-        if config.management_lock_l0:
-            self._management_lock: ManagementLockL0 | None = ManagementLockL0(
-                self,
-                "ManagementLockL0",
-                _=env,
-                config=config.management_lock_l0,
-                resource_id=self.storage_account.id,
-                resource_name=self.full_name,
-            )
-        else:
-            self._management_lock = None
 
     @property
     def storage_account(self) -> StorageAccount:

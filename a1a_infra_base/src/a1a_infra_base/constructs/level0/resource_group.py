@@ -17,7 +17,6 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructABC, ConstructConfigABC
-from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -27,7 +26,6 @@ logger: logging.Logger = setup_logger(__name__)
 NAME_KEY: Final[str] = "name"
 LOCATION_KEY: Final[str] = "location"
 SEQUENCE_NUMBER_KEY: Final[str] = "sequence_number"
-MANAGEMENT_LOCK_L0_KEY: Final[str] = "management_lock_l0"
 
 
 @dataclass
@@ -45,7 +43,6 @@ class ResourceGroupL0Config(ConstructConfigABC):
     name: str
     location: AzureLocation
     sequence_number: str
-    management_lock_l0: ManagementLockL0Config | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -57,10 +54,6 @@ class ResourceGroupL0Config(ConstructConfigABC):
             "name": "<resource group name>",
             "location": "<AzureLocation enum value name>",
             "sequence_number": "<sequence number>",
-            "management_lock_l0": {
-                "lock_level": "<lock level>",
-                "notes": "<notes>"
-            }
         }
 
         Args:
@@ -73,17 +66,10 @@ class ResourceGroupL0Config(ConstructConfigABC):
         location = AzureLocation.from_full_name(dict_[LOCATION_KEY])
         sequence_number = dict_[SEQUENCE_NUMBER_KEY]
 
-        management_lock_l0 = (
-            ManagementLockL0Config.from_dict(dict_[MANAGEMENT_LOCK_L0_KEY])
-            if MANAGEMENT_LOCK_L0_KEY in dict_
-            else cls.management_lock_l0
-        )
-
         return cls(
             name=name,
             location=location,
             sequence_number=sequence_number,
-            management_lock_l0=management_lock_l0,
         )
 
 
@@ -123,18 +109,6 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
             name=self.full_name,
             location=config.location.full_name,
         )
-
-        if config.management_lock_l0:
-            self._management_lock: ManagementLockL0 | None = ManagementLockL0(
-                self,
-                "ManagementLockL0",
-                _=env,
-                config=config.management_lock_l0,
-                resource_id=self.resource_group.id,
-                resource_name=self.full_name,
-            )
-        else:
-            self._management_lock = None
 
     @property
     def resource_group(self) -> ResourceGroup:
