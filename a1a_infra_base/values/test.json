@@ -4,7 +4,7 @@
         {
             "name": "terraform_backend",
             "enabled": true,
-            "provider": {
+            "terraform_provider": {
                 "azurerm": {
                     "tenant_id": "00000000-0000-0000-0000-000000000000",
                     "subscription_id": "00000000-0000-0000-0000-000000000000",
@@ -12,48 +12,70 @@
                     "client_secret": "00000000-0000-0000-0000-000000000000"
                 }
             },
-            "backend": {
+            "terraform_backend": {
                 "type": "local",
                 "path": "tfstate/init.tfstate"
             },
             "constructs": {
-                "terraform_backend_l1": {
-                    "resource_group_l0": {
-                        "name": "init",
+                "data_lake": {
+                    "resource_group_secure_l1": {
+                        "name": "storage",
                         "location": "germany west central",
                         "sequence_number": "01"
                     },
-                    "storage_account_l0": {
-                        "name": "init",
-                        "location": "germany west central",
-                        "sequence_number": "01",
-                        "resource_group_name": "init",
-                        "account_replication_type": "LRS",
-                        "account_kind": "StorageV2",
-                        "account_tier": "Standard",
-                        "cross_tenant_replication_enabled": false,
-                        "access_tier": "Hot",
-                        "shared_access_key_enabled": false,
-                        "public_network_access_enabled": true,
-                        "is_hns_enabled": false,
-                        "local_user_enabled": false,
-                        "infrastructure_encryption_enabled": true,
-                        "sftp_enabled": false,
-                        "blob_properties_l0": {
-                            "delete_retention_policy_l0": {
-                                "days": 7
+                    "storages": [
+                        {
+                            "storage": {
+                                "storage_account": {
+                                    "name": "bronze",
+                                    "location": "germany west central",
+                                    "sequence_number": "01",
+                                    "account_replication_type": "LRS",
+                                    "account_tier": "Standard",
+                                    "is_hns_enabled": true
+                                },
+                                "storage_containers": [
+                                    {
+                                        "name": "gw2api"
+                                    }
+                                ]
                             }
                         },
-                        "storage_containers_l0": [
-                            {
-                                "name": "terraform"
+                        {
+                            "storage": {
+                                "storage_account": {
+                                    "name": "silver",
+                                    "location": "germany west central",
+                                    "sequence_number": "01",
+                                    "account_replication_type": "LRS",
+                                    "account_tier": "Standard",
+                                    "is_hns_enabled": true
+                                },
+                                "storage_containers": [
+                                    {
+                                        "name": "gw2api"
+                                    }
+                                ]
                             }
-                        ],
-                        "management_lock_l0": {
-                            "lock_level": "CanNotDelete",
-                            "notes": "Required for Terraform deployments."
+                        },
+                        {
+                            "storage": {
+                                "storage_account": {
+                                    "name": "gold",
+                                    "location": "germany west central",
+                                    "sequence_number": "01",
+                                    "account_replication_type": "LRS",
+                                    "account_tier": "Standard",
+                                    "is_hns_enabled": true
+                                },
+                                "storage_containers": [
+                                    {
+                                        "name": "gw2api"
+                                    }
+                                ]
+                            }
                         }
-                    }
+                    ]
                 }
             }
         }

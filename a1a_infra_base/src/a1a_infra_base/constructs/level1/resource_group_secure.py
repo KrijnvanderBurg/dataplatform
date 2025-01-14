@@ -25,12 +25,15 @@ from constructs import Construct
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
-RESOURCE_GROUP_L0_KEY: Final[str] = "resource_group_l0"
-MANAGEMENT_LOCK_L0_KEY: Final[str] = "management_lock_l0"
+# root key
+RESOURCE_GROUP_SECURE_L1_KEY: Final[str] = "resource_group_secure"
+# attributes
+RESOURCE_GROUP_L0_KEY: Final[str] = "resource_group"
+MANAGEMENT_LOCK_L0_KEY: Final[str] = "management_lock"
 
 
 @dataclass
-class ResourceGroupLockedL1Config(ConstructConfigABC):
+class ResourceGroupSecureL1Config(ConstructConfigABC):
     """
     A configuration class for ResourceGroupLockedL1.
 
@@ -42,7 +45,7 @@ class ResourceGroupLockedL1Config(ConstructConfigABC):
     """
 
     resource_group_l0: ResourceGroupL0Config
-    management_lock_l0: ManagementLockL0Config
+    management_lock_l0: ManagementLockL0Config = ManagementLockL0Config(lock_level="CanNotDelete")
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -70,7 +73,7 @@ class ResourceGroupLockedL1Config(ConstructConfigABC):
         )
 
 
-class ResourceGroupLockedL1(Construct, ConstructABC, metaclass=CombinedMeta):
+class ResourceGroupSecureL1(Construct, ConstructABC, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure resource group.
 
@@ -85,7 +88,7 @@ class ResourceGroupLockedL1(Construct, ConstructABC, metaclass=CombinedMeta):
         id_: str,
         *,
         env: str,
-        config: ResourceGroupLockedL1Config,
+        config: ResourceGroupSecureL1Config,
     ) -> None:
         """
         Initializes the ResourceGroupLockedL1 construct.

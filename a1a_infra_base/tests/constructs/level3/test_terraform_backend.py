@@ -23,9 +23,9 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 from cdktf_cdktf_provider_azurerm.storage_account import StorageAccount
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 
-from a1a_infra_base.constructs.level1.resource_group_locked import ResourceGroupLockedL1Config
+from a1a_infra_base.constructs.level1.resource_group_secure import ResourceGroupSecureL1Config
 from a1a_infra_base.constructs.level2.storage_account_with_containers import (
-    StorageAccountWithContainersL2Config,
+    StorageL1Config,
 )
 from a1a_infra_base.constructs.level3.terraform_backend import TerraformBackendL3, TerraformBackendL3Config
 
@@ -60,14 +60,14 @@ class TestTerraformBackendL3Config:
             terraform_backend_l3_config__dict (dict[str, Any]): The terraform backend configuration dictionary.
         """
         config = TerraformBackendL3Config.from_dict(terraform_backend_l3_config__dict)
-        assert isinstance(config.resource_group_locked_l1, ResourceGroupLockedL1Config)
-        assert isinstance(config.storage_account_with_containers_l2, StorageAccountWithContainersL2Config)
+        assert isinstance(config.resource_group_locked_l1, ResourceGroupSecureL1Config)
+        assert isinstance(config.storage_account_with_containers_l2, StorageL1Config)
 
 
 @pytest.fixture(name="terraform_backend_l3_config__instance")
 def fixture__terraform_backend_l3_config__instance(
-    resource_group_locked_l1_config__instance: ResourceGroupLockedL1Config,
-    storage_account_with_containers_l2_config__instance: StorageAccountWithContainersL2Config,
+    resource_group_locked_l1_config__instance: ResourceGroupSecureL1Config,
+    storage_account_with_containers_l2_config__instance: StorageL1Config,
 ) -> TerraformBackendL3Config:
     """
     Fixture that provides a default configuration for TerraformBackendL1.

@@ -23,7 +23,7 @@ from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0Config
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0Config
-from a1a_infra_base.constructs.level1.resource_group_locked import ResourceGroupLockedL1, ResourceGroupLockedL1Config
+from a1a_infra_base.constructs.level1.resource_group_secure import ResourceGroupLockedL1, ResourceGroupLockedL1Config
 
 
 @pytest.fixture(name="resource_group_locked_l1_config__dict")

@@ -5,7 +5,7 @@ This module defines the TerraformBackendL0 class, which creates a resource group
 
 Classes:
     TerraformBackendL0: A construct that creates a resource group and a locked storage account.
-    LakeHouseL2Config: A configuration class for TerraformBackendL0.
+    TerraformBackendL2Config: A configuration class for TerraformBackendL0.
 """
 
 import logging
@@ -13,49 +13,54 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
-from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
-from a1a_infra_base.constructs.level1.datalake import DataLakeL1, DataLakeL1Config
+from a1a_infra_base.constructs.level1.resource_group_secure import ResourceGroupSecureL1, ResourceGroupSecureL1Config
+from a1a_infra_base.constructs.level1.storage import STORAGE_L1_KEY, StorageL1, StorageL1Config
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
-RESOURCE_GROUP_L0_KEY: Final[str] = "resource_group_l0"
-DATA_LAKE_L1_KEY: Final[str] = "data_lake_l1_key"
+# root key
+TERRAFORM_BACKEND_L2_KEY: Final[str] = "terraform_backend_l2"
+# attributes
+RESOURCE_GROUP_LOCKED_L1_KEY: Final[str] = "resource_group_locked_l1"
 
 
 @dataclass
-class LakeHouseL2Config(ConstructConfigABC):
+class TerraformBackendL2Config(ConstructConfigABC):
     """
     A configuration class for TerraformBackendL0.
 
     Attributes:
-        resource_group_l0_config (ResourceGroupL0Config): The configuration for the resource group.
-        data_lake_l1_config (DataLakeL1Config): The configuration for the storage account.
+        resource_group_config (ResourceGroupLockedL1Config): The configuration for the resource group.
+        storage_account_with_containers_l2 (StorageL1Config): The configuration for the storage account.
     """
 
-    resource_group_l0_config: ResourceGroupL0Config
-    data_lake_l1_config: DataLakeL1Config
+    resource_group_secure_l1: ResourceGroupSecureL1Config
+    storage_l1: StorageL1Config
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a LakeHouseL2Config by unpacking parameters from a configuration dictionary.
+        Create a TerraformBackendL2Config by unpacking parameters from a configuration dictionary.
 
         Args:
             dict_ (dict): A dictionary containing the configuration.
 
         Returns:
-            LakeHouseL2Config: A fully-initialized LakeHouseL2Config.
+            TerraformBackendL2Config: A fully-initialized TerraformBackendL2Config.
         """
-        resource_group_l0_config = ResourceGroupL0Config.from_dict(dict_[RESOURCE_GROUP_L0_KEY])
-        data_lake_l1_config = DataLakeL1Config.from_dict(dict_[DATA_LAKE_L1_KEY])
+        resource_group_locked_l1 = ResourceGroupSecureL1Config.from_dict(dict_[RESOURCE_GROUP_LOCKED_L1_KEY])
+        storage_l1 = StorageL1Config.from_dict(dict_[STORAGE_L1_KEY])
 
-        return cls(resource_group_l0_config=resource_group_l0_config, data_lake_l1_config=data_lake_l1_config)
+        return cls(
+            resource_group_secure_l1=resource_group_locked_l1,
+            storage_l1=storage_l1,
+        )
 
 
-class LakeHouseL2(Construct, metaclass=CombinedMeta):
+class TerraformBackendL2(Construct, metaclass=CombinedMeta):
     """
     A level 1 construct that creates and manages a Terraform backend.
 
@@ -70,7 +75,7 @@ class LakeHouseL2(Construct, metaclass=CombinedMeta):
         id_: str,
         *,
         env: str,
-        config: LakeHouseL2Config,
+        config: TerraformBackendL2Config,
     ) -> None:
         """
         Initializes the TerraformBackendL0 construct.
@@ -79,23 +84,23 @@ class LakeHouseL2(Construct, metaclass=CombinedMeta):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            config (LakeHouseL2Config): The configuration for the Terraform backend.
+            config (TerraformBackendL2Config): The configuration for the Terraform backend.
         """
         super().__init__(scope, id_)
 
         # Create the resource group
-        self.resource_group_l0 = ResourceGroupL0(
+        self.resource_group_l0 = ResourceGroupSecureL1(
             self,
-            "ResourceGroupL0",
+            "ResourceGroupSecureL1",
             env=env,
-            config=config.resource_group_l0_config,
+            config=config.resource_group_secure_l1,
         )
 
         # Create the storage account
-        self.storage_account_l0 = DataLakeL1(
+        self.storage_account_l0 = StorageL1(
             self,
-            "StorageAccountL0",
+            "StorageL1",
             env=env,
-            config=config.data_lake_l1_config,
+            config=config.storage_l1,
             resource_group_name=self.resource_group_l0.resource_group.name,
         )

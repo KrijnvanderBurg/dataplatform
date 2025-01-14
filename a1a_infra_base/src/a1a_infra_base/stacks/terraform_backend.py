@@ -12,27 +12,31 @@ Classes:
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Final, Self
+from typing import Any, Self
 
 from cdktf import LocalBackend, TerraformStack
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 
-from a1a_infra_base.backend import BackendLocalConfig
-from a1a_infra_base.constructs.level3.terraform_backend import TerraformBackendL3, TerraformBackendL3Config
+from a1a_infra_base.constructs.level2.terraform_backend import (
+    TERRAFORM_BACKEND_L2_KEY,
+    TerraformBackendL2,
+    TerraformBackendL2Config,
+)
 from a1a_infra_base.logger import setup_logger
-from a1a_infra_base.provider import ProviderAzurermConfig
-from a1a_infra_base.stacks.stack_abc import CombinedMeta, StackABC, StackConfigABC
+from a1a_infra_base.stacks.stack_abc import (
+    AZURERM_KEY,
+    BACKEND_KEY,
+    CONSTRUCTS_KEY,
+    PROVIDER_KEY,
+    CombinedMeta,
+    StackABC,
+    StackConfigABC,
+)
+from a1a_infra_base.terraform_backend import TerraformBackendLocalConfig
+from a1a_infra_base.terraform_provider import TerraformProviderAzurermConfig
 from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
-
-# Constants for dictionary keys
-BACKEND_KEY: Final[str] = "backend"
-PROVIDER_KEY: Final[str] = "provider"
-AZURERM_KEY: Final[str] = "azurerm"
-
-CONSTRUCTS_KEY: Final[str] = "constructs"
-TERRAFORM_BACKEND_L3_KEY: Final[str] = "terraform_backend_l3"
 
 
 @dataclass
@@ -43,14 +47,14 @@ class TerraformBackendStackConfig(StackConfigABC):
     This class is responsible for unpacking parameters from a configuration dictionary.
 
     Attributes:
-        backend_local_config (BackendLocalConfig): The configuration for the Terraform backend.
-        provider_azurerm_config (ProviderAzurermConfig): The configuration for the Terraform AzureRM provider.
+        backend_local_config (TerraformBackendLocalConfig): The configuration for the Terraform backend.
+        provider_azurerm_config (TerraformProviderAzurermConfig): The configuration for the Terraform AzureRM provider.
         constructs_config (TerraformBackendL1Config): The configuration for the Terraform backend L1 construct.
     """
 
-    backend_local_config: BackendLocalConfig
-    provider_azurerm_config: ProviderAzurermConfig
-    constructs_config: TerraformBackendL3Config
+    backend_local_config: TerraformBackendLocalConfig
+    provider_azurerm_config: TerraformProviderAzurermConfig
+    constructs_config: TerraformBackendL2Config
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -63,9 +67,9 @@ class TerraformBackendStackConfig(StackConfigABC):
         Returns:
             TerraformBackendStackConfig: A fully-initialized TerraformBackendStackConfig.
         """
-        backend_local_config = BackendLocalConfig.from_dict(dict_[BACKEND_KEY])
-        provider_azurerm_config = ProviderAzurermConfig.from_dict(dict_[PROVIDER_KEY][AZURERM_KEY])
-        constructs_config = TerraformBackendL3Config.from_dict(dict_[CONSTRUCTS_KEY][TERRAFORM_BACKEND_L3_KEY])
+        backend_local_config = TerraformBackendLocalConfig.from_dict(dict_[BACKEND_KEY])
+        provider_azurerm_config = TerraformProviderAzurermConfig.from_dict(dict_[PROVIDER_KEY][AZURERM_KEY])
+        constructs_config = TerraformBackendL2Config.from_dict(dict_[CONSTRUCTS_KEY][TERRAFORM_BACKEND_L2_KEY])
 
         return cls(
             backend_local_config=backend_local_config,
@@ -117,7 +121,7 @@ class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
         )
 
         # Initialize the TerraformBackendL0 construct
-        TerraformBackendL3(
+        TerraformBackendL2(
             self,
             "TerraformBackendL0",
             env=env,

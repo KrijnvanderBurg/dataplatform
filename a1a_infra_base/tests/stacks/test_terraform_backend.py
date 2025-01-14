@@ -17,10 +17,10 @@ from cdktf import App, Testing
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 
-from a1a_infra_base.backend import BackendLocalConfig
 from a1a_infra_base.constructs.level3.terraform_backend import TerraformBackendL3Config
-from a1a_infra_base.provider import ProviderAzurermConfig
 from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack, TerraformBackendStackConfig
+from a1a_infra_base.terraform_backend import TerraformBackendLocalConfig
+from a1a_infra_base.terraform_provider import TerraformProviderAzurermConfig
 
 
 @pytest.fixture(name="terraform_backend_l3_config__dict")
@@ -58,8 +58,8 @@ class TestTerraformBackendStackConfig:
             terraform_backend_l3_config__dict (dict[str, Any]): The terraform backend stack configuration dictionary.
         """
         config = TerraformBackendStackConfig.from_dict(terraform_backend_l3_config__dict)
-        assert isinstance(config.backend_local_config, BackendLocalConfig)
-        assert isinstance(config.provider_azurerm_config, ProviderAzurermConfig)
+        assert isinstance(config.backend_local_config, TerraformBackendLocalConfig)
+        assert isinstance(config.provider_azurerm_config, TerraformProviderAzurermConfig)
         assert isinstance(config.constructs_config, TerraformBackendL3Config)
 
 
@@ -74,10 +74,10 @@ def fixture__stack__terraform_backend_l3_config__instance(
         TerraformBackendL1Config: A default configuration instance.
     """
     return TerraformBackendStackConfig(
-        backend_local_config=BackendLocalConfig(
+        backend_local_config=TerraformBackendLocalConfig(
             path="test/local/path",
         ),
-        provider_azurerm_config=ProviderAzurermConfig(
+        provider_azurerm_config=TerraformProviderAzurermConfig(
             tenant_id="test-tenant-id",
             subscription_id="test-sub-id",
             client_id="test-client-id",

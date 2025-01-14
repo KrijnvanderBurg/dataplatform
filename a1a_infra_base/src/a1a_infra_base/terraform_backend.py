@@ -17,7 +17,7 @@ PATH_KEY: Final[str] = "path"
 
 
 @dataclass
-class BackendConfigABC(ABC):
+class TerraformBackendConfigABC(ABC):
     """
     Abstract base class for backend configuration classes.
 
@@ -40,7 +40,7 @@ class BackendConfigABC(ABC):
 
 
 @dataclass
-class BackendLocalConfig(BackendConfigABC):
+class TerraformTerraformBackendLocalConfig(TerraformBackendConfigABC):
     """
     A class to represent the local backend configuration.
 
