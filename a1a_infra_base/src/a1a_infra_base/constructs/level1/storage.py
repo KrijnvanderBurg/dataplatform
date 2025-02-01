@@ -50,16 +50,31 @@ class StorageL1Config(StorageAccountL0Config):
         Returns:
             StorageL1Config: A fully-initialized StorageL1Config.
         """
-        storage_account_config = super().from_dict(dict_)
+        config = super().from_dict(dict_)
         containers = [StorageContainerL0Config.from_dict(container) for container in dict_.get("containers", [])]
 
         return cls(
-            **storage_account_config.__dict__,
+            sequence_number=config.sequence_number,
+            account_replication_type=config.account_replication_type,
+            account_tier=config.account_tier,
+            location=config.location,
+            name=config.name,
+            access_tier=config.access_tier,
+            account_kind=config.account_kind,
+            blob_properties_l0=config.blob_properties_l0,
+            cross_tenant_replication_enabled=config.cross_tenant_replication_enabled,
+            infrastructure_encryption_enabled=config.infrastructure_encryption_enabled,
+            is_hns_enabled=config.is_hns_enabled,
+            local_user_enabled=config.local_user_enabled,
+            nfsv3_enabled=config.nfsv3_enabled,
+            public_network_access_enabled=config.public_network_access_enabled,
+            sftp_enabled=config.sftp_enabled,
+            shared_access_key_enabled=config.shared_access_key_enabled,
+            tags=config.tags,
             containers=containers,
         )
 
 
-@dataclass
 class StorageL1(Construct, metaclass=CombinedMeta):
     """
     A level 1 construct that creates and manages an Azure storage account with a management lock and storage containers.
@@ -105,7 +120,7 @@ class StorageL1(Construct, metaclass=CombinedMeta):
             _=env,
             config=ManagementLockL0Config(lock_level="CanNotDelete"),
             resource_id=self._storage_account.storage_account.id,
-            resource_name=self._storage_account.storage_account.name,
+            resource_name=config.name,
         )
 
         self._storage_containers = [

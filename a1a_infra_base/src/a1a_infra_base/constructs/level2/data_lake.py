@@ -10,10 +10,9 @@ Classes:
 """
 
 import logging
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from a1a_infra_base.constants import AzureLocation
 from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructABC, ConstructConfigABC
 from a1a_infra_base.constructs.level1.storage import StorageL1, StorageL1Config
 from a1a_infra_base.logger import setup_logger
@@ -43,46 +42,10 @@ class DataLakeL2Config(ConstructConfigABC):
         gold_storage_l1_config (StorageL1Config): The configuration for the gold storage account.
     """
 
-    source_storage_l1_config: StorageL1Config = field(
-        default_factory=lambda: StorageL1Config(
-            name="source",
-            location=AzureLocation.GERMANY_WEST_CENTRAL,
-            sequence_number="01",
-            account_replication_type="ZRS",
-            account_tier="Standard",
-            is_hns_enabled=True,
-        )
-    )
-    bronze_storage_l1_config: StorageL1Config = field(
-        default_factory=lambda: StorageL1Config(
-            name="bronze",
-            location=AzureLocation.GERMANY_WEST_CENTRAL,
-            sequence_number="01",
-            account_replication_type="LRS",
-            account_tier="Standard",
-            is_hns_enabled=True,
-        )
-    )
-    silver_storage_l1_config: StorageL1Config = field(
-        default_factory=lambda: StorageL1Config(
-            name="silver",
-            location=AzureLocation.GERMANY_WEST_CENTRAL,
-            sequence_number="01",
-            account_replication_type="LRS",
-            account_tier="Standard",
-            is_hns_enabled=True,
-        )
-    )
-    gold_storage_l1_config: StorageL1Config = field(
-        default_factory=lambda: StorageL1Config(
-            name="gold",
-            location=AzureLocation.GERMANY_WEST_CENTRAL,
-            sequence_number="01",
-            account_replication_type="LRS",
-            account_tier="Standard",
-            is_hns_enabled=True,
-        )
-    )
+    source_storage_l1_config: StorageL1Config
+    bronze_storage_l1_config: StorageL1Config
+    silver_storage_l1_config: StorageL1Config
+    gold_storage_l1_config: StorageL1Config
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -95,12 +58,10 @@ class DataLakeL2Config(ConstructConfigABC):
         Returns:
             DataLakeL1Config: A fully-initialized DataLakeL1Config.
         """
-        default_instance = cls()
-
-        source_storage_l1_config = replace(default_instance.source_storage_l1_config, **dict_.get(SOURCE_STORAGE, {}))
-        bronze_storage_l1_config = replace(default_instance.bronze_storage_l1_config, **dict_.get(BRONZE_STORAGE, {}))
-        silver_storage_l1_config = replace(default_instance.silver_storage_l1_config, **dict_.get(SILVER_STORAGE, {}))
-        gold_storage_l1_config = replace(default_instance.gold_storage_l1_config, **dict_.get(GOLD_STORAGE, {}))
+        source_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
+        bronze_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
+        silver_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
+        gold_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
 
         return cls(
             source_storage_l1_config=source_storage_l1_config,
@@ -145,35 +106,35 @@ class DataLakeL2(Construct, ConstructABC, metaclass=CombinedMeta):
 
         self._source_storage_l1 = StorageL1(
             self,
-            "StorageL1",
+            "StorageL1_Source",
             env=env,
             config=config.source_storage_l1_config,
             resource_group_name=resource_group_name,
         )
 
-        # self._bronze_storage_l1 = StorageL1(
-        #     self,
-        #     "StorageL1",
-        #     env=env,
-        #     config=config.bronze_storage_l1_config,
-        #     resource_group_name=resource_group_name,
-        # )
+        self._bronze_storage_l1 = StorageL1(
+            self,
+            "StorageL1_Bronze",
+            env=env,
+            config=config.bronze_storage_l1_config,
+            resource_group_name=resource_group_name,
+        )
 
-        # self._silver_storage_l1 = StorageL1(
-        #     self,
-        #     "StorageL1",
-        #     env=env,
-        #     config=config.silver_storage_l1_config,
-        #     resource_group_name=resource_group_name,
-        # )
+        self._silver_storage_l1 = StorageL1(
+            self,
+            "StorageL1_Silver",
+            env=env,
+            config=config.silver_storage_l1_config,
+            resource_group_name=resource_group_name,
+        )
 
-        # self._gold_storage_l1 = StorageL1(
-        #     self,
-        #     "StorageL1",
-        #     env=env,
-        #     config=config.gold_storage_l1_config,
-        #     resource_group_name=resource_group_name,
-        # )
+        self._gold_storage_l1 = StorageL1(
+            self,
+            "StorageL1_Gold",
+            env=env,
+            config=config.gold_storage_l1_config,
+            resource_group_name=resource_group_name,
+        )
 
     @property
     def source_storage_l1(self) -> StorageL1:

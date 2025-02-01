@@ -127,6 +127,7 @@ class StorageAccountL0Config(ConstructConfigABC):
         blob_properties (BlobProperties): The blob properties configuration.
     """
 
+    # on changes, also update level1/storage.py
     # custom added
     sequence_number: str
     # all StorageAccount parameters
@@ -229,8 +230,6 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
             config (StorageAccountL0Config): The configuration for the storage account.
             resource_group_name (str): The name of the resource group.
         """
-
-        print(scope)
         super().__init__(scope, id_)
 
         self.full_name = (

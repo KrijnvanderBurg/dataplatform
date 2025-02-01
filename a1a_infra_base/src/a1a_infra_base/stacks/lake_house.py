@@ -16,7 +16,6 @@ from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, M
 from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
 
 # from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
-from a1a_infra_base.constructs.level1.storage import StorageL1, StorageL1Config
 from a1a_infra_base.constructs.level2.data_lake import DATA_LAKE_KEY, DataLakeL2, DataLakeL2Config
 from a1a_infra_base.logger import setup_logger
 from a1a_infra_base.stacks.ABC import (
@@ -169,45 +168,14 @@ class LakeHouseStack(TerraformStack, StackABC, metaclass=CombinedMeta):
             resource_name=config.constructs_config.rg_storage.name,
         )
 
-        # StorageAccountL0(
-        #     self,
-        #     "StorageAccountL0_test",
-        #     env=env,
-        #     config=StorageAccountL0Config(
-        #         name="storage",
-        #         location=AzureLocation.GERMANY_WEST_CENTRAL,
-        #         sequence_number="01",
-        #         account_tier="Standard",
-        #         account_replication_type="LRS",
-        #     ),
-        #     resource_group_name=self._resource_group.resource_group.name,
-        # )
-
-        self._storage = StorageL1(
+        # Create the data lake storage accounts
+        self._data_lake = DataLakeL2(
             self,
-            "StorageL1",
+            "DataLakeL2",
             env=env,
-            config=StorageL1Config(
-                name="storage",
-                location=AzureLocation.GERMANY_WEST_CENTRAL,
-                sequence_number="01",
-                account_tier="Standard",
-                account_replication_type="LRS",
-                containers=[],
-            ),
+            config=config.constructs_config.data_lake,
             resource_group_name=self._resource_group.resource_group.name,
         )
-
-        self.x = 5
-
-        # # Create the data lake storage accounts
-        # self._data_lake = DataLakeL2(
-        #     self,
-        #     "DataLakeL2",
-        #     env=env,
-        #     config=config.constructs_config.data_lake,
-        #     resource_group_name=self._resource_group.resource_group.name,
-        # )
 
     @property
     def resource_group(self) -> ResourceGroupL0:
