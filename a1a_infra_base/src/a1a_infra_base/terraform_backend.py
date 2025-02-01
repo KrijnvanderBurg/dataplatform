@@ -40,7 +40,7 @@ class TerraformBackendConfigABC(ABC):
 
 
 @dataclass
-class TerraformTerraformBackendLocalConfig(TerraformBackendConfigABC):
+class TerraformBackendLocalConfig(TerraformBackendConfigABC):
     """
     A class to represent the local backend configuration.
 

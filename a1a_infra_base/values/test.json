@@ -1,8 +1,7 @@
 {
-    "env": "prod",
-    "stacks": [
-        {
-            "name": "terraform_backend",
+    "env": "dev",
+    "stacks": {
+        "data_lake": {
             "enabled": true,
             "terraform_provider": {
                 "azurerm": {
@@ -14,7 +13,7 @@
             },
             "terraform_backend": {
                 "type": "local",
-                "path": "tfstate/init.tfstate"
+                "path": "tfstate/data_lake.tfstate"
             },
             "constructs": {
                 "data_lake": {
@@ -76,8 +75,38 @@
                             }
                         }
                     ]
+                },
+                "ingress_azure_function": {
+                    "Enabled": true,
+                    "constructs": {
+                        "storage": {
+                            "storage_account": {
+                                "name": "ingressaf",
+                                "location": "germany west central",
+                                "sequence_number": "01",
+                                "account_replication_type": "LRS",
+                                "account_tier": "Standard",
+                            },
+                            "storage_containers": [
+                                {
+                                    "name": "gw2api"
+                                }
+                            ]
+                        },
+                        "keyvault_secure_l1": {
+
+                        },
+                        "dedicated_azure_functions": [
+                            {
+                                "dedicated_azure_function": {
+                                    "app_plan": {},
+                                    "functions": []
+                                }
+                            }
+                        ]
+                    }
                 }
             }
         }
-    ]
+    }
 }

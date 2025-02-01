@@ -42,7 +42,7 @@ class TerraformProviderConfigABC(ABC):
 
 
 @dataclass
-class TerraformTerraformProviderAzurermConfig(TerraformProviderConfigABC):
+class TerraformProviderAzurermConfig(TerraformProviderConfigABC):
     """
     A class to represent the Azurerm provider configuration.
 

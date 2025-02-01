@@ -1,5 +1,5 @@
 """
-Module construct_abc
+Module ABC
 
 This module defines abstract base classes for stack configurations.
 
@@ -22,6 +22,8 @@ logger: logging.Logger = setup_logger(__name__)
 
 # Constants for dictionary keys
 BACKEND_KEY: Final[str] = "terraform_backend"
+LOCAL_KEY: Final[str] = "local"
+
 PROVIDER_KEY: Final[str] = "terraform_provider"
 AZURERM_KEY: Final[str] = "azurerm"
 

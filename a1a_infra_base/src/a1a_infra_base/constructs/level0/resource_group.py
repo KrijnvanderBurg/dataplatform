@@ -16,12 +16,15 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructABC, ConstructConfigABC
+from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructABC, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
 
+# Constants for dictionary keys
+# root key
+RESOURCE_GROUP_KEY: Final[str] = "resource_group"
 # Constants for dictionary keys
 NAME_KEY: Final[str] = "name"
 LOCATION_KEY: Final[str] = "location"
@@ -100,9 +103,11 @@ class ResourceGroupL0(Construct, ConstructABC, metaclass=CombinedMeta):
             config (ResourceGroupL0Config): The configuration for the resource group.
         """
         super().__init__(scope, id_)
+
         self.full_name = (
             f"{AzureResource.RESOURCE_GROUP.abbr}-{config.name}-{env}-{config.location.abbr}-{config.sequence_number}"
         )
+
         self._resource_group = ResourceGroup(
             self,
             f"ResourceGroup_{self.full_name}",

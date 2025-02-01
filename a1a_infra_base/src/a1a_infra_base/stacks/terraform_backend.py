@@ -23,7 +23,7 @@ from a1a_infra_base.constructs.level2.terraform_backend import (
     TerraformBackendL2Config,
 )
 from a1a_infra_base.logger import setup_logger
-from a1a_infra_base.stacks.stack_abc import (
+from a1a_infra_base.stacks.ABC import (
     AZURERM_KEY,
     BACKEND_KEY,
     CONSTRUCTS_KEY,
@@ -120,10 +120,10 @@ class TerraformBackendStack(TerraformStack, StackABC, metaclass=CombinedMeta):
             client_secret=config.provider_azurerm_config.client_secret,
         )
 
-        # Initialize the TerraformBackendL0 construct
+        # Initialize the TerraformBackendL2 construct
         TerraformBackendL2(
             self,
-            "TerraformBackendL0",
+            "TerraformBackendL2",
             env=env,
             config=config.constructs_config,
         )

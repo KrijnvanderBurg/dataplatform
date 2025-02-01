@@ -12,8 +12,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
-from a1a_infra_base.constructs.level1.resource_group_secure import ResourceGroupSecureL1, ResourceGroupSecureL1Config
+from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.level0.resource_group import ResourceGroupL0, ResourceGroupL0Config
+from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.constructs.level1.storage import STORAGE_L1_KEY, StorageL1, StorageL1Config
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct

@@ -20,7 +20,7 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 )
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -229,6 +229,8 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
             config (StorageAccountL0Config): The configuration for the storage account.
             resource_group_name (str): The name of the resource group.
         """
+
+        print(scope)
         super().__init__(scope, id_)
 
         self.full_name = (

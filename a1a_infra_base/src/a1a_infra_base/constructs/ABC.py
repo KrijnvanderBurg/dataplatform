@@ -1,5 +1,5 @@
 """
-Module construct_abc
+Module ABC
 
 This module defines abstract base classes for construct configurations and constructs.
 

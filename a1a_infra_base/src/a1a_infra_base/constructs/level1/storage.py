@@ -11,9 +11,10 @@ Classes:
     StorageL1Config: A configuration class for StorageL1.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Final, Self
 
+from a1a_infra_base.constructs.ABC import CombinedMeta
 from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
 from a1a_infra_base.constructs.level0.storage_account import StorageAccountL0, StorageAccountL0Config
 from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
@@ -24,24 +25,19 @@ from constructs import Construct
 STORAGE_L1_KEY: Final[str] = "storage"
 # attributes
 STORAGE_ACCOUNT_L0_KEY: Final[str] = "storage_account"
-MANAGEMENT_LOCK_L0_KEY: Final[str] = "management_lock"
-STORAGE_CONTAINERS_L0_KEY: Final[str] = "storage_containers"
+STORAGE_CONTAINERS_L0_KEY: Final[str] = "containers"
 
 
 @dataclass
-class StorageL1Config:
+class StorageL1Config(StorageAccountL0Config):
     """
-    A configuration class for StorageL1.
+    A configuration class for StorageL1, inheriting from StorageAccountL0Config and adding containers.
 
     Attributes:
-        storage_account_l0 (StorageAccountL0Config): The configuration for the storage account.
-        management_lock_l0 (ManagementLockL0Config): The configuration for the management lock.
-        storage_containers_l0 (list[StorageContainerL0Config]): The configuration for the storage containers.
+        containers (list[StorageContainerL0Config]): The configuration for the storage containers.
     """
 
-    storage_account_l0: StorageAccountL0Config
-    management_lock_l0: ManagementLockL0Config = ManagementLockL0Config(lock_level="CanNotDelete")
-    storage_containers_l0: list[StorageContainerL0Config] | None = None
+    containers: list[StorageContainerL0Config] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -49,30 +45,22 @@ class StorageL1Config:
         Create a StorageL1Config by unpacking parameters from a configuration dictionary.
 
         Args:
-            dict_ (dict[str, Any]): A dictionary containing storage account, management lock, and storage containers
-            configuration.
+            dict_ (dict): A dictionary containing the configuration.
 
         Returns:
             StorageL1Config: A fully-initialized StorageL1Config.
         """
-        storage_account_l0 = StorageAccountL0Config.from_dict(dict_[STORAGE_ACCOUNT_L0_KEY])
-        management_lock_l0 = (
-            ManagementLockL0Config.from_dict(dict_[MANAGEMENT_LOCK_L0_KEY])
-            if MANAGEMENT_LOCK_L0_KEY in dict_
-            else cls.management_lock_l0
-        )
-        storage_containers_l0 = [
-            StorageContainerL0Config.from_dict(container) for container in dict_.get(STORAGE_CONTAINERS_L0_KEY, [])
-        ]
+        storage_account_config = super().from_dict(dict_)
+        containers = [StorageContainerL0Config.from_dict(container) for container in dict_.get("containers", [])]
 
         return cls(
-            storage_account_l0=storage_account_l0,
-            management_lock_l0=management_lock_l0,
-            storage_containers_l0=storage_containers_l0,
+            **storage_account_config.__dict__,
+            containers=containers,
         )
 
 
-class StorageL1(Construct):
+@dataclass
+class StorageL1(Construct, metaclass=CombinedMeta):
     """
     A level 1 construct that creates and manages an Azure storage account with a management lock and storage containers.
 
@@ -98,16 +86,16 @@ class StorageL1(Construct):
             scope (Construct): The scope in which this construct is defined.
             id_ (str): The scoped construct ID.
             env (str): The environment name.
-            config (StorageL1Config): The configuration for the storage account, management lock, and storage containers.
-            resource_group_name (str): The name of the resource group.
+            config (StorageL1Config): The configuration for the storage account and containers.
+            resource_group_name (str): The name of the resource group to create the storage account in.
         """
         super().__init__(scope, id_)
 
-        self._storage_account_l0 = StorageAccountL0(
+        self._storage_account = StorageAccountL0(
             self,
-            f"StorageAccountL0_{id_}",
+            "StorageAccountL0",
             env=env,
-            config=config.storage_account_l0,
+            config=config,
             resource_group_name=resource_group_name,
         )
 
@@ -115,33 +103,33 @@ class StorageL1(Construct):
             self,
             "ManagementLockL0",
             _=env,
-            config=config.management_lock_l0,
-            resource_id=self._storage_account_l0.storage_account.id,
-            resource_name=self._storage_account_l0.full_name,
+            config=ManagementLockL0Config(lock_level="CanNotDelete"),
+            resource_id=self._storage_account.storage_account.id,
+            resource_name=self._storage_account.storage_account.name,
         )
 
         self._storage_containers = [
             StorageContainerL0(
                 self,
-                f"StorageContainerL0_{container.name}",
+                f"StorageContainerL0_{container_config.name}",
                 _=env,
-                config=container,
-                storage_account_id=self._storage_account_l0.storage_account.id,
+                config=container_config,
+                storage_account_id=self._storage_account.storage_account.id,
             )
-            for container in config.storage_containers_l0 or []
+            for container_config in config.containers
         ]
 
     @property
     def storage_account(self) -> StorageAccountL0:
-        """Gets the Azure storage account."""
-        return self._storage_account_l0
+        """Gets the storage account."""
+        return self._storage_account
 
     @property
     def management_lock(self) -> ManagementLockL0:
-        """Gets the management lock applied to the storage account."""
+        """Gets the management lock."""
         return self._management_lock
 
     @property
     def storage_containers(self) -> list[StorageContainerL0]:
-        """Gets the Azure storage containers."""
+        """Gets the storage containers."""
         return self._storage_containers
