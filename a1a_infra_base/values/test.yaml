@@ -24,7 +24,7 @@ stack:
           account_tier: Standard
           is_hns_enabled: true
           containers:
-            - name: gw2api
+            - name: test
 
         bronze_storage:
           name: bronze
@@ -34,7 +34,7 @@ stack:
           account_tier: Standard
           is_hns_enabled: true
           containers:
-            - name: gw2api
+            - name: test
 
         silver_storage:
           name: silver
@@ -44,7 +44,7 @@ stack:
           account_tier: Standard
           is_hns_enabled: true
           containers:
-            - name: gw2api
+            - name: test
 
         gold_storage:
           name: gold
@@ -54,22 +54,4 @@ stack:
           account_tier: Standard
           is_hns_enabled: true
           containers:
-            - name: gw2api
-
-    # ingress_azure_function:
-    #   Enabled: true
-    #   constructs:
-    #     storage:
-    #     storage_account:
-    #       name: ingressaf
-    #       location: germany west central
-    #       sequence_number: "01"
-    #       account_replication_type: LRS
-    #       account_tier: Standard
-    #     storage_containers:
-    #       - name: gw2api
-    #     keyvault_secure_l1: {}
-    #     dedicated_azure_functions:
-    #     - dedicated_azure_function:
-    #       app_plan: {}
-    #       functions: []
+            - name: test

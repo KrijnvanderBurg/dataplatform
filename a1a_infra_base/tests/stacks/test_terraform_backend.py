@@ -5,26 +5,26 @@ This module contains unit tests for the TerraformBackendStack class, which initi
 with a local backend, an Azure provider, and creates a resource group and a locked storage account,
 and the TerraformBackendStackConfig class, which is used to configure the TerraformBackendStack.
 
-
-Tests:
-    - test_terraform_backend_stack: Tests that a TerraformBackendStack creates a local backend and an AzureRM provider.
+The code was modified and these tests not updated, its not working but the approach remains the same.
 """
 
 from typing import Any
 
 import pytest
 from cdktf import App, Testing
+from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from cdktf_cdktf_provider_azurerm.resource_group import ResourceGroup
+from cdktf_cdktf_provider_azurerm.storage_account import StorageAccount
+from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 
-from a1a_infra_base.constructs.level3.terraform_backend import TerraformBackendL3Config
 from a1a_infra_base.stacks.terraform_backend import TerraformBackendStack, TerraformBackendStackConfig
 from a1a_infra_base.terraform_backend import TerraformBackendLocalConfig
 from a1a_infra_base.terraform_provider import TerraformProviderAzurermConfig
 
 
 @pytest.fixture(name="terraform_backend_l3_config__dict")
-def fixture__terraform_backend_l3_config__dict(terraform_backend_l3_config__dict: dict[str, Any]) -> dict[str, Any]:
+def fixture__terraform_backend_l3_config__dict() -> dict[str, Any]:
     """
     Fixture that provides a configuration dictionary for TerraformBackendStackConfig.
 
@@ -41,7 +41,7 @@ def fixture__terraform_backend_l3_config__dict(terraform_backend_l3_config__dict
                 "client_secret": "test-client-secret",
             }
         },
-        "constructs": {"terraform_backend_l3": terraform_backend_l3_config__dict},
+        "constructs": {"storage": ...},
     }
 
 
@@ -60,12 +60,12 @@ class TestTerraformBackendStackConfig:
         config = TerraformBackendStackConfig.from_dict(terraform_backend_l3_config__dict)
         assert isinstance(config.backend_local_config, TerraformBackendLocalConfig)
         assert isinstance(config.provider_azurerm_config, TerraformProviderAzurermConfig)
-        assert isinstance(config.constructs_config, TerraformBackendL3Config)
+        assert isinstance(config.constructs_config, ...)
 
 
 @pytest.fixture(name="stack__terraform_backend_l3_config__instance")
 def fixture__stack__terraform_backend_l3_config__instance(
-    terraform_backend_l3_config__instance: TerraformBackendL3Config,
+    terraform_backend_l3_config__instance: ...,
 ) -> TerraformBackendStackConfig:
     """
     Fixture that provides a default configuration for TerraformBackendL1.
@@ -124,56 +124,56 @@ class TestTerraformBackendL1:
             },
         )
 
-        # # rg lock
-        # assert Testing.to_have_resource_with_properties(
-        #     received=synthesized,
-        #     resource_type=ManagementLock.TF_RESOURCE_TYPE,
-        #     properties={
-        #         "name": "rg-init-dev-gwc-01-lock",
-        #         "lock_level": "CanNotDelete",
-        #         "notes": "Test notes.",
-        #     },
-        # )
+        # rg lock
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "name": "rg-init-dev-gwc-01-lock",
+                "lock_level": "CanNotDelete",
+                "notes": "Test notes.",
+            },
+        )
 
-        # # storage account
-        # assert Testing.to_have_resource_with_properties(
-        #     received=synthesized,
-        #     resource_type=StorageAccount.TF_RESOURCE_TYPE,
-        #     properties={
-        #         "name": "sainitdevgwc01",
-        #         "location": "germany west central",
-        #         # "resource_group_name": "", # cannot be tested as its dynamic in terraform hcl
-        #         "account_replication_type": "LRS",
-        #         "account_kind": "StorageV2",
-        #         "account_tier": "Standard",
-        #         "cross_tenant_replication_enabled": False,
-        #         "access_tier": "Hot",
-        #         "shared_access_key_enabled": False,
-        #         "public_network_access_enabled": True,
-        #         "is_hns_enabled": False,
-        #         "local_user_enabled": False,
-        #         "infrastructure_encryption_enabled": True,
-        #         "sftp_enabled": False,
-        #         "blob_properties": {"delete_retention_policy": {"days": 7}},
-        #     },
-        # )
+        # storage account
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=StorageAccount.TF_RESOURCE_TYPE,
+            properties={
+                "name": "sainitdevgwc01",
+                "location": "germany west central",
+                # "resource_group_name": "", # cannot be tested as its dynamic in terraform hcl
+                "account_replication_type": "LRS",
+                "account_kind": "StorageV2",
+                "account_tier": "Standard",
+                "cross_tenant_replication_enabled": False,
+                "access_tier": "Hot",
+                "shared_access_key_enabled": False,
+                "public_network_access_enabled": True,
+                "is_hns_enabled": False,
+                "local_user_enabled": False,
+                "infrastructure_encryption_enabled": True,
+                "sftp_enabled": False,
+                "blob_properties": {"delete_retention_policy": {"days": 7}},
+            },
+        )
 
-        # # storage account lock
-        # assert Testing.to_have_resource_with_properties(
-        #     received=synthesized,
-        #     resource_type=ManagementLock.TF_RESOURCE_TYPE,
-        #     properties={
-        #         "name": "sainitdevgwc01-lock",
-        #         "lock_level": "CanNotDelete",
-        #         "notes": "Test notes.",
-        #     },
-        # )
+        # storage account lock
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=ManagementLock.TF_RESOURCE_TYPE,
+            properties={
+                "name": "sainitdevgwc01-lock",
+                "lock_level": "CanNotDelete",
+                "notes": "Test notes.",
+            },
+        )
 
-        # # container
-        # assert Testing.to_have_resource_with_properties(
-        #     received=synthesized,
-        #     resource_type=StorageContainer.TF_RESOURCE_TYPE,
-        #     properties={
-        #         "name": "test_container",
-        #     },
-        # )
+        # container
+        assert Testing.to_have_resource_with_properties(
+            received=synthesized,
+            resource_type=StorageContainer.TF_RESOURCE_TYPE,
+            properties={
+                "name": "test_container",
+            },
+        )
