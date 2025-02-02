@@ -134,7 +134,7 @@ class LakeHouseStack(TerraformStack, StackABC, metaclass=CombinedMeta):
             env (str): The environment name.
             config (DataLakeStackConfig): The configuration for the data lake stack.
         """
-        super().__init__(scope, id_)
+        TerraformStack.__init__(self, scope, id_)
 
         # Set up the local backend
         LocalBackend(self, path=config.backend_local_config.path)

@@ -76,7 +76,8 @@ class TestStorageContainerL0:
         Test that a StorageContainerL0 construct creates a storage container.
 
         Args:
-            storage_container_l0_config__instance (StorageContainerL0Config): The configuration for the storage container.
+            storage_container_l0_config__instance (StorageContainerL0Config): The configuration for the
+            storage container.
         """
         app = App()
         stack = TerraformStack(app, "test-stack")

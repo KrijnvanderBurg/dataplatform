@@ -76,7 +76,10 @@ class TestDeleteRetentionPolicyL0Config:
     Test suite for the DeleteRetentionPolicy class.
     """
 
-    def test__delete_retention_policy__from_dict(self, delete_retention_policy_l0_config__dict: dict[str, Any]) -> None:
+    def test__delete_retention_policy__from_dict(
+        self,
+        delete_retention_policy_l0_config__dict: dict[str, Any],
+    ) -> None:
         """
         Test the from_dict method of the DeleteRetentionPolicy class.
 
@@ -183,7 +186,8 @@ class TestStorageAccountL0:
         Test that a StorageAccountL0 construct creates a storage account without a management lock.
 
         Args:
-            storage_account_l0_config__instance (StorageAccountL0Config): The fixture configuration for the storage account without a management lock.
+            storage_account_l0_config__instance (StorageAccountL0Config): The fixture configuration for the storage
+            account without a management lock.
         """
         app = App()
         stack = TerraformStack(app, "test-stack")

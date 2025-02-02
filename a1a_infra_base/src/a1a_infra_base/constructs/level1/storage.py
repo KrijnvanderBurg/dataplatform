@@ -106,7 +106,7 @@ class StorageL1(Construct, metaclass=CombinedMeta):
         """
         super().__init__(scope, id_)
 
-        self._storage_account = StorageAccountL0(
+        self._storage_account: StorageAccountL0 = StorageAccountL0(
             self,
             "StorageAccountL0",
             env=env,
@@ -114,7 +114,7 @@ class StorageL1(Construct, metaclass=CombinedMeta):
             resource_group_name=resource_group_name,
         )
 
-        self._management_lock = ManagementLockL0(
+        self._management_lock: ManagementLockL0 = ManagementLockL0(
             self,
             "ManagementLockL0",
             _=env,
@@ -123,7 +123,7 @@ class StorageL1(Construct, metaclass=CombinedMeta):
             resource_name=config.name,
         )
 
-        self._storage_containers = [
+        self._storage_containers: list[StorageContainerL0] = [
             StorageContainerL0(
                 self,
                 f"StorageContainerL0_{container_config.name}",
