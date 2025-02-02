@@ -1,6 +1,10 @@
 # Terraform CDK trial Documentation
 
-## Overview
+## What is Terraform CDK?
+
+Terraform CDK (Cloud Development Kit for Terraform) allows developers to define infrastructure using familiar programming languages instead of traditional HCL (HashiCorp Configuration Language). This project specifically utilizes the Python binding of Terraform CDK (CDKTF Python) to define and manage infrastructure as code.
+
+## Project overview
 This project serves as my trial for using Terraform CDK with Python, focusing on initializing variables via a custom YAML structure.
 
 ## Key Areas of Interest
