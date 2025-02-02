@@ -58,6 +58,13 @@ class DataLakeL2Config(ConstructConfigABC):
         Returns:
             DataLakeL1Config: A fully-initialized DataLakeL1Config.
         """
+
+        # I can use a dataclass replace function and supply the dict, this works great except the from_dict is never actually called then.
+        # So any processing that is required to initialise the object isnt done, this is most notable in the location attribute.
+        # I create an enum based on the string which is the location attribute, therefore location attribute is an enum. But when using
+        # replace with dataclass its initialised based on dict, so the location attribute is a string and never properly processed.
+        # the program will then crash later on calling the abbr getter I have added to the enum.
+
         source_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
         bronze_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
         silver_storage_l1_config = StorageL1Config.from_dict(dict_[SOURCE_STORAGE])
