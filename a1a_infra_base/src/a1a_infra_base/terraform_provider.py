@@ -19,7 +19,7 @@ CLIENT_SECRET: Final[str] = "client_secret"
 
 
 @dataclass
-class ProviderConfigABC(ABC):
+class TerraformProviderConfigABC(ABC):
     """
     Abstract base class for provider configuration classes.
 
@@ -42,7 +42,7 @@ class ProviderConfigABC(ABC):
 
 
 @dataclass
-class ProviderAzurermConfig(ProviderConfigABC):
+class TerraformProviderAzurermConfig(TerraformProviderConfigABC):
     """
     A class to represent the Azurerm provider configuration.
 

@@ -73,6 +73,7 @@
                 "GitHub.copilot-chat" // https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat
             ],
             "settings": {
+                "editor.insertSpaces": true,
                 "editor.tabSize": 4,
                 "workbench.tree.indent": 24,
                 "testing.alwaysRevealTestOnStateChange": true,

@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 from cdktf_cdktf_provider_azurerm.management_lock import ManagementLock
 
 from a1a_infra_base.constants import AzureResource
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructABC, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -37,8 +37,8 @@ class ManagementLockL0Config(ConstructConfigABC):
         notes (str): Notes for the management lock.
     """
 
-    lock_level: str
-    notes: str
+    lock_level: str = "CanNotDelete"
+    notes: str | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -58,11 +58,11 @@ class ManagementLockL0Config(ConstructConfigABC):
             ManagementLockL0Config: A fully-initialized ManagementLockL0Config.
         """
         lock_level = dict_[LOCK_LEVEL_KEY]
-        notes = dict_[NOTES_KEY]
+        notes = dict_.get(NOTES_KEY, cls.notes)
         return cls(lock_level=lock_level, notes=notes)
 
 
-class ManagementLockL0(Construct, metaclass=CombinedMeta):
+class ManagementLockL0(Construct, ConstructABC, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages a management lock for Azure resources.
 
@@ -93,6 +93,7 @@ class ManagementLockL0(Construct, metaclass=CombinedMeta):
         super().__init__(scope, id_)
 
         self.full_name = f"{resource_name}-{AzureResource.MANAGEMENT_LOCK.abbr}"
+
         self._management_lock = ManagementLock(
             self,
             self.full_name,

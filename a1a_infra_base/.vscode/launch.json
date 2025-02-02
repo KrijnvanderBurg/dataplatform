@@ -1,0 +1,13 @@
+{
+    "configurations": [
+      {
+        "type": "debugpy",
+        "request": "launch",
+        "name": "Launch a1a_infra_base",
+        "module": "a1a_infra_base",
+        "args": [
+          "--config-filepath=values/test.yaml"
+        ]
+      }
+    ]
+  }

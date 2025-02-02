@@ -15,7 +15,7 @@ from typing import Any, Final, Self
 
 from cdktf_cdktf_provider_azurerm.storage_container import StorageContainer
 
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
+from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructABC, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -61,7 +61,7 @@ class StorageContainerL0Config(ConstructConfigABC):
         return cls(name=name)
 
 
-class StorageContainerL0(Construct, metaclass=CombinedMeta):
+class StorageContainerL0(Construct, ConstructABC, metaclass=CombinedMeta):
     """
     A level 0 construct that creates and manages an Azure storage container.
 
@@ -88,6 +88,7 @@ class StorageContainerL0(Construct, metaclass=CombinedMeta):
             storage_account_id (str): The ID of the storage account.
         """
         super().__init__(scope, id_)
+
         self.full_name = f"{config.name}"
         self._storage_container = StorageContainer(
             self,

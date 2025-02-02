@@ -1,5 +1,5 @@
 """
-Module storage_account
+Module storage_account_l0
 
 This module defines the StorageAccountL0 class and the StorageAccountL0Config class,
 which are responsible for creating and managing an Azure storage account with specific configurations.
@@ -20,9 +20,7 @@ from cdktf_cdktf_provider_azurerm.storage_account import (
 )
 
 from a1a_infra_base.constants import AzureLocation, AzureResource
-from a1a_infra_base.constructs.construct_abc import CombinedMeta, ConstructConfigABC
-from a1a_infra_base.constructs.level0.management_lock import ManagementLockL0, ManagementLockL0Config
-from a1a_infra_base.constructs.level0.storage_container import StorageContainerL0, StorageContainerL0Config
+from a1a_infra_base.constructs.ABC import CombinedMeta, ConstructConfigABC
 from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
@@ -43,11 +41,9 @@ IS_HNS_ENABLED_KEY: Final[str] = "is_hns_enabled"
 LOCAL_USER_ENABLED_KEY: Final[str] = "local_user_enabled"
 INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY: Final[str] = "infrastructure_encryption_enabled"
 SFTP_ENABLED_KEY: Final[str] = "sftp_enabled"
-BLOB_PROPERTIES_KEY: Final[str] = "blob_properties"
-DELETE_RETENTION_POLICY_KEY: Final[str] = "delete_retention_policy"
-DELETE_RETENTION_DAYS_KEY: Final[str] = "delete_retention_days"
-CONTAINERS_KEY: Final[str] = "containers"
-MANAGEMENT_LOCK_KEY: Final[str] = "management_lock"
+BLOB_PROPERTIES_L0_KEY: Final[str] = "blob_properties_l0"
+DELETE_RETENTION_POLICY_L0_KEY: Final[str] = "delete_retention_policy_l0"
+DAYS_KEY: Final[str] = "days"
 
 
 @dataclass
@@ -59,7 +55,7 @@ class DeleteRetentionPolicyL0Config:
         days (int): The number of days to retain deleted items.
     """
 
-    days: int
+    days: int | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -72,7 +68,7 @@ class DeleteRetentionPolicyL0Config:
         Returns:
             DeleteRetentionPolicy: A fully-initialized DeleteRetentionPolicy.
         """
-        days = dict_[DELETE_RETENTION_DAYS_KEY]
+        days = dict_.get(DAYS_KEY, cls.days)
         return cls(days=days)
 
 
@@ -85,7 +81,7 @@ class BlobPropertiesL0Config:
         delete_retention_policy (DeleteRetentionPolicy): The delete retention policy configuration.
     """
 
-    delete_retention_policy: DeleteRetentionPolicyL0Config
+    delete_retention_policy_l0: DeleteRetentionPolicyL0Config | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -98,8 +94,14 @@ class BlobPropertiesL0Config:
         Returns:
             BlobProperties: A fully-initialized BlobProperties.
         """
-        delete_retention_policy = DeleteRetentionPolicyL0Config.from_dict(dict_[DELETE_RETENTION_POLICY_KEY])
-        return cls(delete_retention_policy=delete_retention_policy)
+
+        delete_retention_policy_l0 = (
+            DeleteRetentionPolicyL0Config.from_dict(dict_[DELETE_RETENTION_POLICY_L0_KEY])
+            if DELETE_RETENTION_POLICY_L0_KEY in dict_
+            else cls.delete_retention_policy_l0
+        )
+
+        return cls(delete_retention_policy_l0=delete_retention_policy_l0)
 
 
 @dataclass
@@ -123,64 +125,33 @@ class StorageAccountL0Config(ConstructConfigABC):
         infrastructure_encryption_enabled (bool): Whether infrastructure encryption is enabled.
         sftp_enabled (bool): Whether SFTP is enabled.
         blob_properties (BlobProperties): The blob properties configuration.
-        containers (list[StorageContainerL0Config]): The list of storage containers configuration.
-        management_lock: ManagementLockL0Config | None = None
     """
 
-    name: str
-    location: AzureLocation
+    # on changes, also update level1/storage.py
+    # custom added
     sequence_number: str
+    # all StorageAccount parameters
     account_replication_type: str
-    account_kind: str
     account_tier: str
-    cross_tenant_replication_enabled: bool
-    access_tier: str
-    shared_access_key_enabled: bool
-    public_network_access_enabled: bool
-    is_hns_enabled: bool
-    local_user_enabled: bool
-    infrastructure_encryption_enabled: bool
-    sftp_enabled: bool
-    blob_properties: BlobPropertiesL0Config
-    containers: list[StorageContainerL0Config]
-    management_lock: ManagementLockL0Config | None = None
+    location: AzureLocation
+    name: str
+    access_tier: str | None = None
+    account_kind: str | None = None
+    blob_properties_l0: BlobPropertiesL0Config | None = None
+    cross_tenant_replication_enabled: bool | None = False
+    infrastructure_encryption_enabled: bool | None = True
+    is_hns_enabled: bool | None = None
+    local_user_enabled: bool | None = False
+    nfsv3_enabled: bool | None = False
+    public_network_access_enabled: bool | None = False
+    sftp_enabled: bool | None = False
+    shared_access_key_enabled: bool | None = False
+    tags: dict[str, str] | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a StorageAccountL0Config by unpacking parameters from a configuration dictionary.
-
-        Expected format of 'dict_':
-        {
-            "name": "<storage account name>",
-            "location": "<AzureLocation enum value name>",
-            "sequence_number": "<sequence number>",
-            "account_replication_type": "<replication type>",
-            "account_kind": "<account kind>",
-            "account_tier": "<account tier>",
-            "cross_tenant_replication_enabled": <bool>,
-            "access_tier": "<access tier>",
-            "shared_access_key_enabled": <bool>,
-            "public_network_access_enabled": <bool>,
-            "is_hns_enabled": <bool>,
-            "local_user_enabled": <bool>,
-            "infrastructure_encryption_enabled": <bool>,
-            "sftp_enabled": <bool>,
-            "blob_properties": {
-                "delete_retention_policy": {
-                    "delete_retention_days": <int>
-                }
-            },
-            "containers": [
-                {
-                    "name": "<container name>"
-                }
-            ],
-            "management_lock": {
-                "lock_level": "<lock level>",
-                "notes": "<notes>"
-            }
-        }
 
         Args:
             dict_ (dict[str, Any]): A dictionary containing storage account configuration.
@@ -192,25 +163,26 @@ class StorageAccountL0Config(ConstructConfigABC):
         location = AzureLocation.from_full_name(dict_[LOCATION_KEY])
         sequence_number = dict_[SEQUENCE_NUMBER_KEY]
         account_replication_type = dict_[ACCOUNT_REPLICATION_TYPE_KEY]
-        account_kind = dict_[ACCOUNT_KIND_KEY]
+        account_kind = dict_.get(ACCOUNT_KIND_KEY, cls.account_kind)
         account_tier = dict_[ACCOUNT_TIER_KEY]
-        cross_tenant_replication_enabled = dict_[CROSS_TENANT_REPLICATION_ENABLED_KEY]
-        access_tier = dict_[ACCESS_TIER_KEY]
-        shared_access_key_enabled = dict_[SHARED_ACCESS_KEY_ENABLED_KEY]
-        public_network_access_enabled = dict_[PUBLIC_NETWORK_ACCESS_ENABLED_KEY]
-        is_hns_enabled = dict_[IS_HNS_ENABLED_KEY]
-        local_user_enabled = dict_[LOCAL_USER_ENABLED_KEY]
-        infrastructure_encryption_enabled = dict_[INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY]
-        sftp_enabled = dict_[SFTP_ENABLED_KEY]
-        blob_properties = BlobPropertiesL0Config.from_dict(dict_[BLOB_PROPERTIES_KEY])
+        cross_tenant_replication_enabled = dict_.get(
+            CROSS_TENANT_REPLICATION_ENABLED_KEY, cls.cross_tenant_replication_enabled
+        )
+        access_tier = dict_.get(ACCESS_TIER_KEY, cls.access_tier)
+        shared_access_key_enabled = dict_.get(SHARED_ACCESS_KEY_ENABLED_KEY, cls.shared_access_key_enabled)
+        public_network_access_enabled = dict_.get(PUBLIC_NETWORK_ACCESS_ENABLED_KEY, cls.public_network_access_enabled)
+        is_hns_enabled = dict_.get(IS_HNS_ENABLED_KEY, cls.is_hns_enabled)
+        local_user_enabled = dict_.get(LOCAL_USER_ENABLED_KEY, cls.local_user_enabled)
+        infrastructure_encryption_enabled = dict_.get(
+            INFRASTRUCTURE_ENCRYPTION_ENABLED_KEY, cls.infrastructure_encryption_enabled
+        )
+        sftp_enabled = dict_.get(SFTP_ENABLED_KEY, cls.sftp_enabled)
 
-        containers = []
-        for container_dict in dict_.get(CONTAINERS_KEY, []):
-            containers.append(StorageContainerL0Config.from_dict(dict_=container_dict))
-
-        management_lock = dict_.get(MANAGEMENT_LOCK_KEY, None)
-        if management_lock:
-            management_lock = ManagementLockL0Config.from_dict(dict_=dict_[MANAGEMENT_LOCK_KEY])
+        blob_properties_l0 = (
+            BlobPropertiesL0Config.from_dict(dict_[BLOB_PROPERTIES_L0_KEY])
+            if BLOB_PROPERTIES_L0_KEY in dict_
+            else cls.blob_properties_l0
+        )
 
         return cls(
             name=name,
@@ -227,9 +199,7 @@ class StorageAccountL0Config(ConstructConfigABC):
             local_user_enabled=local_user_enabled,
             infrastructure_encryption_enabled=infrastructure_encryption_enabled,
             sftp_enabled=sftp_enabled,
-            blob_properties=blob_properties,
-            containers=containers,
-            management_lock=management_lock,
+            blob_properties_l0=blob_properties_l0,
         )
 
 
@@ -239,7 +209,6 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
 
     Attributes:
         storage_account (StorageAccount): The Azure storage account.
-        management_lock (ManagementLockL0): The management lock applied to the storage account.
     """
 
     def __init__(
@@ -266,6 +235,17 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
         self.full_name = (
             f"{AzureResource.STORAGE_ACCOUNT.abbr}{config.name}{env}{config.location.abbr}{config.sequence_number}"
         )
+
+        blob_properties = None
+        if config.blob_properties_l0 is not None:
+            delete_retention_policy = None
+            if config.blob_properties_l0.delete_retention_policy_l0 is not None:
+                delete_retention_policy = StorageAccountBlobPropertiesDeleteRetentionPolicy(
+                    days=config.blob_properties_l0.delete_retention_policy_l0.days
+                )
+
+            blob_properties = StorageAccountBlobProperties(delete_retention_policy=delete_retention_policy)
+
         self._storage_account = StorageAccount(
             self,
             f"StorageAccount_{self.full_name}",
@@ -283,33 +263,8 @@ class StorageAccountL0(Construct, metaclass=CombinedMeta):
             local_user_enabled=config.local_user_enabled,
             infrastructure_encryption_enabled=config.infrastructure_encryption_enabled,
             sftp_enabled=config.sftp_enabled,
-            blob_properties=StorageAccountBlobProperties(
-                delete_retention_policy=StorageAccountBlobPropertiesDeleteRetentionPolicy(
-                    days=config.blob_properties.delete_retention_policy.days,
-                )
-            ),
+            blob_properties=blob_properties,
         )
-
-        for container in config.containers:
-            StorageContainerL0(
-                self,
-                f"StorageContainerL0_{container.name}",
-                _=env,
-                config=container,
-                storage_account_id=self.storage_account.id,
-            )
-
-        if config.management_lock:
-            self._management_lock: ManagementLockL0 | None = ManagementLockL0(
-                self,
-                "ManagementLockL0",
-                _=env,
-                config=config.management_lock,
-                resource_id=self.storage_account.id,
-                resource_name=self.full_name,
-            )
-        else:
-            self._management_lock = None
 
     @property
     def storage_account(self) -> StorageAccount:

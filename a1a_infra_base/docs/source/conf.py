@@ -19,7 +19,7 @@ release = "0.0.1"
 extensions = [
     "sphinx.ext.autodoc",  # Automatically generates documentation from docstrings
     "sphinx.ext.viewcode",  # Adds links to source code
-    "sphinx.ext.napoleon",  # Supports Google and NumPy-style docstrings
+    # "sphinx.ext.napoleon",  # Supports Google and NumPy-style docstrings
     "sphinx.ext.todo",  # Tracks TODO items in the documentation
     "autoapi.extension",  # Automatically generates API documentation
 ]

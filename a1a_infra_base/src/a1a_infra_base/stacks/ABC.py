@@ -1,5 +1,5 @@
 """
-Module construct_abc
+Module ABC
 
 This module defines abstract base classes for stack configurations.
 
@@ -10,7 +10,7 @@ Classes:
 
 import logging
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Any, Self
+from typing import Any, Final, Self
 
 from jsii import JSIIMeta
 
@@ -18,6 +18,16 @@ from a1a_infra_base.logger import setup_logger
 from constructs import Construct
 
 logger: logging.Logger = setup_logger(__name__)
+
+
+# Constants for dictionary keys
+BACKEND_KEY: Final[str] = "terraform_backend"
+LOCAL_KEY: Final[str] = "local"
+
+PROVIDER_KEY: Final[str] = "terraform_provider"
+AZURERM_KEY: Final[str] = "azurerm"
+
+CONSTRUCTS_KEY: Final[str] = "constructs"
 
 
 class StackConfigABC(ABC):
