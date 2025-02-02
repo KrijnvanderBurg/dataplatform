@@ -1,4 +1,5 @@
 # Terraform CDK trial Documentation
+A structured approach to Terraform CDK with Python, featuring YAML-based stack initialization and configuration management.
 
 ## What is Terraform CDK?
 
