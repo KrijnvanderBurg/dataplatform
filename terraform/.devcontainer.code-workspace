@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "terraform",
+			"path": "."
+		},
+		{
+			"name": ".devcontainer",
+			"path": "../.devcontainer/terraform"
+		},
+		{
+			"name": ".tools",
+			"path": "../.tools"
+		}
+	],
+	"settings": {}
+}
