@@ -22,6 +22,8 @@ stages:
 
           - template: /.azuredevops/v1/templates/opentofu_install.yml
 
+          - template: /.azuredevops/v1/templates/opentofu_validate.yml
+
           # - publish: ${{ variables.pythonSrcDirectory }}
           #   displayName: Publish artifact module
           #   artifact: module
