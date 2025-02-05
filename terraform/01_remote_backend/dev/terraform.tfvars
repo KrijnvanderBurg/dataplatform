@@ -1,0 +1,5 @@
+tenant_id             = "9e8cdb6a-eda5-4cca-8b83-b40f0074d999"
+subscription_id       = "6867b85b-e868-4d21-a71a-0f82b27117b9"
+environment           = "dev"
+location_primary      = "germany west central"
+location_primary_abbr = "gwc"
