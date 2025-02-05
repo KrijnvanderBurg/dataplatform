@@ -33,7 +33,6 @@
             "extensions": [
                 // Terraform
                 "hashicorp.terraform", // https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform
-                "hashicorp.hcl", // https://marketplace.visualstudio.com/items?itemName=HashiCorp.HCL
                 // Tools
                 "eamodio.gitlens", // https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens
                 "ms-azure-devops.azuredevops", // https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azuredevops
@@ -42,8 +41,6 @@
                 "GitHub.copilot-chat" // https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat
             ],
             "settings": {
-                "editor.insertSpaces": true,
-                "editor.tabSize": 4,
                 "workbench.tree.indent": 24,
                 "testing.alwaysRevealTestOnStateChange": true,
                 "problems.showCurrentInStatus": true,
@@ -68,14 +65,17 @@
                 "git.openRepositoryInParentFolders": "always",
                 "search.useIgnoreFiles": true,
                 "search.useParentIgnoreFiles": true,
-                // Python
-                // "[python]": {
-                // 	"editor.defaultFormatter": "ms-python.black-formatter",
-                // 	"editor.formatOnSave": true,
-                // 	"editor.codeActionsOnSave": {
-                // 		"source.organizeImports": "explicit"
-                // 	}
-                // },
+                //
+                // tf files
+                //
+                "editor.formatOnSave": true,
+                "[terraform]": {
+                    "editor.defaultFormatter": "hashicorp.terraform",
+                    "editor.formatOnSave": false,
+                    "editor.codeActionsOnSave": {
+                        "source.formatAll.terraform": "explicit"
+                    }
+                },
                 //
                 // VsCode Tasks
                 //

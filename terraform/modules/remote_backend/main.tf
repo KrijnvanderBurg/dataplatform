@@ -4,13 +4,13 @@ resource "azurerm_resource_group" "remote_backend" {
 }
 
 resource "azurerm_management_lock" "remote_backend_lock" {
-  name       = "resource-group-lock"
+  name       = "${azurerm_resource_group.remote_backend.name}-lock"
   scope      = azurerm_resource_group.remote_backend.id
   lock_level = "CanNotDelete"
 }
 
 resource "azurerm_storage_account" "remote_backend" {
-  name                     = "satfbackend${environment}${location_primary_abbr}01"
+  name                     = "sttfbackend${environment}${location_primary_abbr}01"
   resource_group_name      = azurerm_resource_group.remote_backend.name
   location                 = var.location_primary
   account_tier             = "Standard"
@@ -18,13 +18,13 @@ resource "azurerm_storage_account" "remote_backend" {
 }
 
 resource "azurerm_management_lock" "storage_account_lock" {
-  name       = "storage-account-lock"
+  name       = "${azurerm_storage_account.remote_backend.name}-lock"
   scope      = azurerm_storage_account.remote_backend.id
   lock_level = "CanNotDelete"
 }
 
 resource "azurerm_storage_container" "backend" {
-  name                  = "tfbackend"
+  name                  = "tfstate"
   storage_account_id    = azurerm_storage_account.remote_backend.id
   container_access_type = "private"
 }
