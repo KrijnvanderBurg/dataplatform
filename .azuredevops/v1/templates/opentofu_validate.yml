@@ -32,7 +32,8 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      tofu init -backend=false
+      echo "Current working directory: $(pwd)"
+      tofu init 
     workingDirectory: $(Build.Repository.LocalPath)/terraform/01_terraform_backend/dev/
 
 - task: AzureCLI@2
