@@ -20,9 +20,9 @@ stages:
           - checkout: self
             fetchDepth: 0
 
-          - template: /.azuredevops/v1/templates/opentofu_install.yml
+          - template: /.azuredevops/v1/templates/terraform_install.yml
 
-          - template: /.azuredevops/v1/templates/opentofu_validate.yml
+          - template: /.azuredevops/v1/templates/terraform_init.yml
 
           # - publish: ${{ variables.pythonSrcDirectory }}
           #   displayName: Publish artifact module
