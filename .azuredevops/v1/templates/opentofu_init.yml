@@ -35,5 +35,6 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      tofu init
+      tofu init -json
+      grep -q 'OpenTofu initialized in an empty directory' && exit 1
     workingDirectory: ${{ parameters.openTofuDir }}
