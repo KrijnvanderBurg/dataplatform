@@ -1,0 +1,27 @@
+# Requirements:
+# - OpenTofu is installed on pipeline agent
+# - opentofu init
+
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+
+- name: continueOnError
+  type: boolean
+  default: false
+
+- name: openTofuDir
+  type: string
+
+steps:
+- task: AzureCLI@2
+  displayName: OpenTofu validate
+  inputs:
+    azureSubscription: pers-reg-dev-eu-krijn
+    scriptType: bash
+    addSpnToEnvironment: true
+    scriptLocation: inlineScript
+    inlineScript: |
+      tofu plan -out=$(Pipeline.Workspace)/remote_backend/plan.out
+    workingDirectory: ${{ parameters.openTofuDir }}
