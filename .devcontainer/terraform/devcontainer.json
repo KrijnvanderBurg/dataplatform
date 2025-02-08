@@ -69,6 +69,7 @@
                 // tf files
                 //
                 "editor.formatOnSave": true,
+                // doesnt work currently because terraform isnt installed in devcontainer, only opentofu is
                 "[terraform]": {
                     "editor.defaultFormatter": "hashicorp.terraform",
                     "editor.formatOnSave": false,
