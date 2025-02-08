@@ -1,9 +1,0 @@
-# Requirements:
-# - Terraform is installed on pipeline agent
-
-steps:
-- task: TerraformTaskV4@4
-  displayName: init
-  inputs:
-    provider: azurerm
-    command: init
