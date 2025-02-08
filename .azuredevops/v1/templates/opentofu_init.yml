@@ -22,7 +22,6 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      SubId=$(az account show -query id -output tsv)
       export ARM_CLIENT_ID=$servicePrincipalId
       export ARM_CLIENT_SECRET=$servicePrincipalKey
       
