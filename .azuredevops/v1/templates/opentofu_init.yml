@@ -25,7 +25,7 @@ steps:
       SubId=$(az account show -query id -output tsv)
       export ARM_CLIENT_ID=$servicePrincipalId
       export ARM_CLIENT_SECRET=$servicePrincipalKey
-    workingDirectory: ${{ varialbes.openTofuDir }}
+    workingDirectory: ${{ parameters.openTofuDir }}
 
 - task: AzureCLI@2
   displayName: OpenTofu init
@@ -36,4 +36,4 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       tofu init
-    workingDirectory: ${{ varialbes.openTofuDir }}
+    workingDirectory: ${{ parameters.openTofuDir }}
