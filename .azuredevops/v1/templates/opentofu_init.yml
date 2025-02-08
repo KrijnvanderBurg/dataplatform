@@ -35,5 +35,5 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      tofu init -json
+      tofu init
     workingDirectory: ${{ parameters.openTofuDir }}
