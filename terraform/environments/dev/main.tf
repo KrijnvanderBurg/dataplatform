@@ -18,7 +18,7 @@ terraform {
     resource_group_name  = "rg-init-dev-gwc-01" 
     storage_account_name = "sttfbackenddevgwc01"
     container_name       = "tfstate"
-    key                  = "remote_backend.tfstate"
+    key                  = "lakehouse.tfstate"
   }
 }
 
