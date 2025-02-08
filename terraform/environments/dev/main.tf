@@ -28,7 +28,7 @@ resource "azurerm_resource_group" "storage" {
 }
 
 module "source_datalake" {
-  source                          = "../modules/lakehouse"
+  source                          = "../../modules/lakehouse"
   subscription_id                 = var.subscription_id
   resource_group_name             = azurerm_resource_group.storage.name
   source_location_primary         = var.location_primary
