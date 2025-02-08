@@ -16,7 +16,7 @@ parameters:
 
 steps:
 - task: AzureCLI@2
-  displayName: OpenTofu init
+  displayName: OpenTofu validate
   inputs:
     azureSubscription: pers-reg-dev-eu-krijn
     scriptType: bash

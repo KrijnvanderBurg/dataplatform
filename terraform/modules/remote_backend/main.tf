@@ -10,7 +10,7 @@ resource "azurerm_management_lock" "remote_backend_lock" {
 }
 
 resource "azurerm_storage_account" "remote_backend" {
-  name                     = "sttfbackend${environment}${location_primary_abbr}01"
+  name                     = "sttfbackend${var.environment}${var.location_primary_abbr}01"
   resource_group_name      = azurerm_resource_group.remote_backend.name
   location                 = var.location_primary
   account_tier             = "Standard"
