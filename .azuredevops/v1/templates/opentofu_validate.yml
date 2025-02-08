@@ -1,5 +1,6 @@
 # Requirements:
 # - OpenTofu is installed on pipeline agent
+# - opentofu init
 
 parameters:
 - name: enabled
@@ -15,19 +16,6 @@ parameters:
 
 steps:
 - task: AzureCLI@2
-  displayName: OpenTofu SPN
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    addSpnToEnvironment: true
-    scriptLocation: inlineScript
-    inlineScript: |
-      SubId=$(az account show -query id -output tsv)
-      export ARM_CLIENT_ID=$servicePrincipalId
-      export ARM_CLIENT_SECRET=$servicePrincipalKey
-    workingDirectory: ${{ parameters.openTofuDir }}
-
-- task: AzureCLI@2
   displayName: OpenTofu init
   inputs:
     azureSubscription: pers-reg-dev-eu-krijn
@@ -35,5 +23,5 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      tofu init -json
+      tofu validate
     workingDirectory: ${{ parameters.openTofuDir }}

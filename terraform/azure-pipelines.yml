@@ -25,6 +25,10 @@ stages:
           - template: /.azuredevops/v1/templates/opentofu_init.yml
             parameters:
               openTofuDir: $(Build.Repository.LocalPath)/terraform/01_remote_backend/dev/
+        
+          - template: /.azuredevops/v1/templates/opentofu_validate.yml
+            parameters:
+              openTofuDir: $(Build.Repository.LocalPath)/terraform/01_remote_backend/dev/
 
           # - publish: ${{ variables.pythonSrcDirectory }}
           #   displayName: Publish artifact module
