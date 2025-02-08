@@ -25,15 +25,16 @@ steps:
       SubId=$(az account show -query id -output tsv)
       export ARM_CLIENT_ID=$servicePrincipalId
       export ARM_CLIENT_SECRET=$servicePrincipalKey
-    workingDirectory: ${{ parameters.openTofuDir }}
-
-- task: AzureCLI@2
-  displayName: OpenTofu init
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    addSpnToEnvironment: true
-    scriptLocation: inlineScript
-    inlineScript: |
+      
       tofu init
     workingDirectory: ${{ parameters.openTofuDir }}
+
+# - task: AzureCLI@2
+#   displayName: OpenTofu init
+#   inputs:
+#     azureSubscription: pers-reg-dev-eu-krijn
+#     scriptType: bash
+#     addSpnToEnvironment: true
+#     scriptLocation: inlineScript
+#     inlineScript: |
+#     workingDirectory: ${{ parameters.openTofuDir }}
