@@ -23,6 +23,7 @@ steps:
       export ARM_CLIENT_SECRET=$servicePrincipalKey
       export ARM_SUBSCRIPTION_ID="6867b85b-e868-4d21-a71a-0f82b27117b9"
       export ARM_TENANT_ID="9e8cdb6a-eda5-4cca-8b83-b40f0074d999"
+      export ARM_USE_OIDC=True
 
       tofu init
     workingDirectory: ${{ parameters.openTofuDir }}
