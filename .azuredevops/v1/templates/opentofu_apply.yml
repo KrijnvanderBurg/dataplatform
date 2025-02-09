@@ -20,7 +20,12 @@ steps:
   displayName: OpenTofu show
   workingDirectory: $(Pipeline.Workspace)/lakehouse/
 
-- script: |
-    tofu apply plan.out
-  displayName: OpenTofu show
-  workingDirectory: $(Pipeline.Workspace)/lakehouse/
+- task: AzureCLI@2
+  displayName: tofu apply
+  inputs:
+    azureSubscription: pers-reg-dev-eu-krijn
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      tofu apply plan.out
+    workingDirectory: $(Pipeline.Workspace)/lakehouse/
