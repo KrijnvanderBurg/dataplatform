@@ -34,4 +34,3 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       tofu apply ${{ parameters.openTofuPlanArtifactPath }}/plan.out
-    workingDirectory: ${{ parameters.openTofuDir }}
