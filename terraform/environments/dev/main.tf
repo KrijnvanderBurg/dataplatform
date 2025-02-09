@@ -11,16 +11,6 @@ provider "azurerm" {
   features {}
 }
 
-terraform {
-  backend "azurerm" {
-    subscription_id      = var.subscription_id
-    tenant_id            = var.tenant_id
-    resource_group_name  = "rg-init-dev-gwc-01" 
-    storage_account_name = "sttfbackenddevgwc01"
-    container_name       = "tfstate"
-    key                  = "lakehouse.tfstate"
-  }
-}
 
 resource "azurerm_resource_group" "storage" {
   name     = "rg-storage-${var.environment}-${var.location_primary_abbr}-01"
