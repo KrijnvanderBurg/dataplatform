@@ -21,7 +21,7 @@ steps:
   workingDirectory: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
 
 - task: AzureCLI@2
-  displayName: tofu apply
+  displayName: OpenTofu apply
   inputs:
     azureSubscription: pers-reg-dev-eu-krijn
     scriptType: bash
