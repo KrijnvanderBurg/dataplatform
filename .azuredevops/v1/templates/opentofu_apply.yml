@@ -11,16 +11,8 @@ parameters:
   type: boolean
   default: false
 
-- name: openTofuPlanArtifactPath
-  type: string
-  default: $(Pipeline.Workspace)/opentofu
-
 steps:
-- task: DownloadPipelineArtifact@2
-  displayName: Download plan
-  inputs:
-    artifactName: opentofu
-    targetPath: ${{ parameters.openTofuPlanArtifactPath }}
+- download: lakehouse
 
 - task: AzureCLI@2
   displayName: OpenTofu apply
@@ -30,4 +22,4 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      tofu apply ${{ parameters.openTofuPlanArtifactPath }}/plan.out
+      tofu apply $(Pipeline.Workspace)/lakehouse/plan.out
