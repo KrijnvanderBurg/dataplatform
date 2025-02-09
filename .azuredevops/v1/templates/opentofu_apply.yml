@@ -16,7 +16,7 @@ steps:
   artifact: lakehouse
 
 - script: |
-    tofu show 
+    tofu show plan.out
   displayName: OpenTofu show
   workingDirectory: $(Pipeline.Workspace)/lakehouse/
 
