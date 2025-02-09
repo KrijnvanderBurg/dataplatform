@@ -16,11 +16,19 @@ steps:
   artifact: lakehouse
 
 - task: AzureCLI@2
-  displayName: OpenTofu apply
+  displayName: tofu show
   inputs:
     azureSubscription: pers-reg-dev-eu-krijn
     scriptType: bash
-    addSpnToEnvironment: true
+    scriptLocation: inlineScript
+    inlineScript: |
+      tofu show $(Pipeline.Workspace)/lakehouse/plan.out
+
+- task: AzureCLI@2
+  displayName: tofu apply
+  inputs:
+    azureSubscription: pers-reg-dev-eu-krijn
+    scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
       tofu apply $(Pipeline.Workspace)/lakehouse/plan.out
