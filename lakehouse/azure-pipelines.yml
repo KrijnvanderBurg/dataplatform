@@ -8,12 +8,12 @@ trigger:
 
 stages:
   - stage: Validate
-    displayName: Validate terraform
+    displayName: Validate
     variables:
       - template: /.azuredevops/v1/variables/environments/shared.yml
     jobs:
-      - job: ValidateCode
-        displayName: Validate code
+      - job: ValidateTerraform
+        displayName: Validate terraform
         pool:
           vmImage: ubuntu-latest
         steps:

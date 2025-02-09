@@ -14,10 +14,6 @@ parameters:
 - name: openTofuDir
   type: string
 
-- name: openTofuPlanArtifactPath
-  type: string
-  default: $(Pipeline.Workspace)/opentofu
-
 steps:
 - task: AzureCLI@2
   displayName: OpenTofu plan
@@ -28,11 +24,11 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       mkdir ${{ parameters.openTofuPlanArtifactPath }}
-      tofu plan -out=${{ parameters.openTofuPlanArtifactPath }}/plan.out
+      tofu plan -out=${{ parameters.openTofuDir }}/plan.out
     workingDirectory: ${{ parameters.openTofuDir }}
 
 - task: PublishPipelineArtifact@1
   displayName: Publish plan
   inputs:
-    targetPath: ${{ parameters.openTofuPlanArtifactPath }}
-    artifactName: opentofu
+    targetPath: ${{ parameters.openTofuDir }}
+    artifactName: lakehouse

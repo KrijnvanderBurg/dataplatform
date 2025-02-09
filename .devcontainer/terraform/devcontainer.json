@@ -1,10 +1,10 @@
 {
-    "name": "terraform",
+    "name": "lakehouse",
     "dockerComposeFile": [
         "./docker-compose.yml"
     ],
     "service": "app",
-    "workspaceFolder": "/workspace/terraform",
+    "workspaceFolder": "/workspace/lakehouse",
     "remoteUser": "vscode",
     "containerUser": "vscode",
     //
