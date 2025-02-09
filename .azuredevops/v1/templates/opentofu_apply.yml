@@ -28,4 +28,4 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       tofu apply plan.out
-    workingDirectory: $(Pipeline.Workspace)/lakehouse/
+  workingDirectory: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
