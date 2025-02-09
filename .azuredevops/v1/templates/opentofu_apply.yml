@@ -19,7 +19,7 @@ steps:
 - task: DownloadPipelineArtifact@2
   displayName: Download plan
   inputs:
-    artifactName: opentofu_plan
+    artifactName: opentofu
     targetPath: ${{ parameters.openTofuPlanArtifactPath }}
 
 - task: AzureCLI@2
