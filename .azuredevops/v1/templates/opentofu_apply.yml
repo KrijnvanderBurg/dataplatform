@@ -12,7 +12,8 @@ parameters:
   default: false
 
 steps:
-- download: lakehouse
+- download: current
+  artifact: lakehouse
 
 - task: AzureCLI@2
   displayName: OpenTofu apply
