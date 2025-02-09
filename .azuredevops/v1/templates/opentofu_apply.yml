@@ -18,7 +18,7 @@ steps:
 - script: |
     tofu show plan.out
   displayName: OpenTofu show
-  workingDirectory: $(Pipeline.Workspace)/lakehouse/
+  workingDirectory: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
 
 - task: AzureCLI@2
   displayName: tofu apply
