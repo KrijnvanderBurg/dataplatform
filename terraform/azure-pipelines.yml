@@ -34,10 +34,6 @@ stages:
             parameters:
               openTofuDir: $(Build.Repository.LocalPath)/terraform/environments/dev/
 
-          - template: /.azuredevops/v1/templates/opentofu_plan.yml
-            parameters:
-              openTofuDir: $(Build.Repository.LocalPath)/terraform/environments/dev/
-
           - template: /.azuredevops/v1/templates/opentofu_apply.yml
 
           # - publish: ${{ variables.pythonSrcDirectory }}
