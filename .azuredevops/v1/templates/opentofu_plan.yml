@@ -26,8 +26,5 @@ steps:
       tofu plan -out=${{ parameters.openTofuDir }}/plan.out
     workingDirectory: ${{ parameters.openTofuDir }}
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish plan
-  inputs:
-    targetPath: ${{ parameters.openTofuDir }}
-    artifactName: lakehouse
+- publish: ${{ parameters.openTofuDir }}
+  artifact: lakehouse
