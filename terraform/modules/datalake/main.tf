@@ -5,6 +5,25 @@ resource "azurerm_storage_account" "data_lake" {
   account_tier             = "Standard"
   account_replication_type = var.account_replication_type
 
+  public_network_access_enabled = false
+  local_user_enabled = false
+  
+
+  blob_properties {
+    delete_retention_policy {
+      days=7
+    }
+    container_delete_retention_policy {
+      days = 7
+    }
+  }
+
+  # network_rules {
+  #   private_link_access {
+  #     endpoint_resource_id = 
+  #   }
+  # }
+
   lifecycle {
     prevent_destroy = true
   }

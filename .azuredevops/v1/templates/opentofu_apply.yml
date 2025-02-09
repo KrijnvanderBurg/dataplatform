@@ -19,20 +19,19 @@ parameters:
   default: $(Pipeline.Workspace)/opentofu
 
 steps:
+- task: DownloadPipelineArtifact@2
+  displayName: Download plan
+  inputs:
+    artifactName: opentofu_plan
+    targetPath: ${{ parameters.openTofuPlanArtifactPath }}
+
 - task: AzureCLI@2
-  displayName: OpenTofu plan
+  displayName: OpenTofu apply
   inputs:
     azureSubscription: pers-reg-dev-eu-krijn
     scriptType: bash
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
-      mkdir ${{ parameters.openTofuPlanArtifactPath }}
-      tofu plan -out=${{ parameters.openTofuPlanArtifactPath }}/plan.out
+      tofu apply ${{ parameters.openTofuPlanArtifactPath }}/plan.out
     workingDirectory: ${{ parameters.openTofuDir }}
-
-- task: PublishPipelineArtifact@1
-  displayName: Publish plan
-  inputs:
-    targetPath: ${{ parameters.openTofuPlanArtifactPath }}
-    artifactName: opentofu
