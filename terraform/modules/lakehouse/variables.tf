@@ -2,6 +2,14 @@ variable "subscription_id" {
     type = string
 }
 
+variable "environment" {
+    type = string
+}
+
+variable "sequence_number" {
+    type = string
+}
+
 variable "resource_group_name" {
     type = string
 }
