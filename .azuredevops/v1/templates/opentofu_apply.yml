@@ -11,9 +11,6 @@ parameters:
   type: boolean
   default: false
 
-- name: openTofuDir
-  type: string
-
 - name: openTofuPlanArtifactPath
   type: string
   default: $(Pipeline.Workspace)/opentofu
