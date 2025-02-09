@@ -22,7 +22,8 @@ steps:
       export ARM_CLIENT_ID=$servicePrincipalId
       export ARM_CLIENT_SECRET=$servicePrincipalKey
       export ARM_TENANT_ID=$tenantId
-      
+      export ARM_USE_OIDC=true
+
       echo "ARM_CLIENT_ID: $ARM_CLIENT_ID"
       echo "ARM_CLIENT_SECRET: $ARM_CLIENT_SECRET"
       echo "ARM_TENANT_ID: $ARM_TENANT_ID"
