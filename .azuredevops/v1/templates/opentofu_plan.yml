@@ -23,5 +23,6 @@ steps:
     addSpnToEnvironment: true
     scriptLocation: inlineScript
     inlineScript: |
+      mkdir $(Pipeline.Workspace)/remote_backend/
       tofu plan -out=$(Pipeline.Workspace)/remote_backend/plan.out
     workingDirectory: ${{ parameters.openTofuDir }}
