@@ -1,5 +1,7 @@
 module "source" {
   source = "../datalake"
+  environment = var.environment
+  sequence_number = "01"
   subscription_id = var.subscription_id
   resource_group_name = var.resource_group_name
   location_primary = var.source_location_primary
