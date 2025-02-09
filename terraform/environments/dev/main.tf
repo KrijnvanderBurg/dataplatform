@@ -5,13 +5,7 @@ terraform {
       version = "=4.1.0"
     }
   }
-  backend "azurerm" {
-    resource_group_name  = "rg-init-dev-gwc-01"
-    storage_account_name = "sttfbackenddevgwc01"
-    container_name       = "tfstate"
-    key                  = "lakehouse.tfstate"
-    use_oidc             = true
-  }
+
 }
 
 provider "azurerm" {
