@@ -24,13 +24,7 @@ steps:
       export ARM_TENANT_ID=$tenantId
       export ARM_USE_OIDC=true
 
-- task: AzureCLI@2
+- script: |
+    tofu init
   displayName: OpenTofu SPN
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    addSpnToEnvironment: true
-    scriptLocation: inlineScript
-    inlineScript: |
-      tofu init
-    workingDirectory: ${{ parameters.openTofuDir }}
+  workingDirectory: ${{ parameters.openTofuDir }}

@@ -3,8 +3,8 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = ">= 4.1.0"
-        }
-      }
+    }
+  }
   # backend "azurerm" {
   #   resource_group_name  = "rg-init-dev-gwc-01"
   #   storage_account_name = "sttfbackenddevgwc01"
