@@ -15,20 +15,12 @@ steps:
 - download: current
   artifact: lakehouse
 
-- task: AzureCLI@2
-  displayName: tofu show
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      tofu show $(Pipeline.Workspace)/lakehouse/plan.out
+- script: |
+    tofu show 
+  displayName: OpenTofu show
+  workingDirectory: $(Pipeline.Workspace)/lakehouse/
 
-- task: AzureCLI@2
-  displayName: tofu apply
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      tofu apply $(Pipeline.Workspace)/lakehouse/plan.out
+- script: |
+    tofu apply plan.out
+  displayName: OpenTofu show
+  workingDirectory: $(Pipeline.Workspace)/lakehouse/

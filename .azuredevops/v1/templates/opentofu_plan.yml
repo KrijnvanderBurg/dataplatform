@@ -15,16 +15,10 @@ parameters:
   type: string
 
 steps:
-- task: AzureCLI@2
+- script: |
+    tofu plan -out=${{ parameters.openTofuDir }}/plan.out
   displayName: OpenTofu plan
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    addSpnToEnvironment: true
-    scriptLocation: inlineScript
-    inlineScript: |
-      tofu plan -out=${{ parameters.openTofuDir }}/plan.out
-    workingDirectory: ${{ parameters.openTofuDir }}
+  workingDirectory: ${{ parameters.openTofuDir }}
 
 - publish: ${{ parameters.openTofuDir }}
   artifact: lakehouse

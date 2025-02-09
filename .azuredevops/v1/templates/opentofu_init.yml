@@ -26,5 +26,5 @@ steps:
 
 - script: |
     tofu init
-  displayName: OpenTofu SPN
+  displayName: OpenTofu init
   workingDirectory: ${{ parameters.openTofuDir }}

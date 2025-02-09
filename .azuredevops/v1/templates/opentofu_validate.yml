@@ -15,13 +15,7 @@ parameters:
   type: string
 
 steps:
-- task: AzureCLI@2
+- script: |
+    tofu validate
   displayName: OpenTofu validate
-  inputs:
-    azureSubscription: pers-reg-dev-eu-krijn
-    scriptType: bash
-    addSpnToEnvironment: true
-    scriptLocation: inlineScript
-    inlineScript: |
-      tofu validate
-    workingDirectory: ${{ parameters.openTofuDir }}
+  workingDirectory: ${{ parameters.openTofuDir }}
