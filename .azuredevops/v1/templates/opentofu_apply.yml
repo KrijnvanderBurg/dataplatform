@@ -11,6 +11,9 @@ parameters:
   type: boolean
   default: false
 
+- name: openTofuPlanFilepath
+  type: string
+
 steps:
 - download: current
   artifact: lakehouse
@@ -18,7 +21,7 @@ steps:
 - script: |
     tofu show plan.out
   displayName: OpenTofu show
-  workingDirectory: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
+  workingDirectory: ${{ parameters.openTofuPlanFilepath }}
 
 - task: AzureCLI@2
   displayName: OpenTofu apply
@@ -28,4 +31,4 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       tofu apply plan.out
-    workingDirectory: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
+    workingDirectory: ${{ parameters.openTofuPlanFilepath }}

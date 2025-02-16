@@ -25,6 +25,5 @@ steps:
       tofu plan -out=${{ parameters.openTofuDir }}/plan.out
     workingDirectory: ${{ parameters.openTofuDir }}
 
-
 - publish: ${{ parameters.openTofuDir }}
   artifact: lakehouse

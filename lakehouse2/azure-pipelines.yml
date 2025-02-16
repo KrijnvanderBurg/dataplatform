@@ -35,7 +35,8 @@ stages:
               openTofuDir: $(Build.Repository.LocalPath)/lakehouse2/
 
           - template: /.azuredevops/v1/templates/opentofu_apply.yml
-
+            parameters:
+              openTofuPlanFilepath: $(Pipeline.Workspace)/lakehouse/
           # - publish: ${{ variables.pythonSrcDirectory }}
           #   displayName: Publish artifact module
           #   artifact: module
