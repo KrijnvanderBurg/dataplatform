@@ -8,6 +8,25 @@
  * * Databricks workspace
  */
 
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~>3.104.0"
+    }
+    random = {
+      source = "hashicorp/random"
+    }
+  }
+}
+
+provider "azurerm" {
+  subscription_id = var.subscription_id
+  tenant_id = var.tenant_id
+  use_oidc = true
+  features {}
+}
+
 module "adb_with_private_links_exfiltration_protection" {
   source           = "./modules/adb-with-private-links-exfiltration-protection"
   hubcidr          = var.hubcidr
