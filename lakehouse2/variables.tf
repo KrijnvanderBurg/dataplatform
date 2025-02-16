@@ -1,3 +1,11 @@
+variable "tenant_id" {
+type = string
+}
+
+variable "subscription_id" {
+  type = string
+}
+
 variable "hubcidr" {
   type        = string
   default     = "10.178.0.0/20"
