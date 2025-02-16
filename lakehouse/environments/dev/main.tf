@@ -10,8 +10,10 @@ module "adb_with_private_links_exfiltration_protection" {
   vnet_hub_cidr          = var.vnet_hub_cidr
   vnet_spoke_cidr        = var.vnet_spoke_cidr
   location       = var.location
+  metastoreip      = var.metastoreip
   dbfs_prefix      = var.dbfs_prefix
   workspace_prefix = var.workspace_prefix
+  firewallfqdn     = var.firewallfqdn
 }
 
 output "workspace_url" {
