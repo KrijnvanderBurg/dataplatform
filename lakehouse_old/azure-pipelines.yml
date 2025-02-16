@@ -24,19 +24,18 @@ stages:
 
           - template: /.azuredevops/v1/templates/opentofu_init.yml
             parameters:
-              openTofuDir: $(Build.Repository.LocalPath)/lakehouse2/
+              openTofuDir: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
         
           - template: /.azuredevops/v1/templates/opentofu_validate.yml
             parameters:
-              openTofuDir: $(Build.Repository.LocalPath)/lakehouse2/
+              openTofuDir: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
 
           - template: /.azuredevops/v1/templates/opentofu_plan.yml
             parameters:
-              openTofuDir: $(Build.Repository.LocalPath)/lakehouse2/
+              openTofuDir: $(Build.Repository.LocalPath)/lakehouse/environments/dev/
 
           - template: /.azuredevops/v1/templates/opentofu_apply.yml
-            parameters:
-              openTofuPlanFilepath: $(Build.Repository.LocalPath)/lakehouse2/
+
           # - publish: ${{ variables.pythonSrcDirectory }}
           #   displayName: Publish artifact module
           #   artifact: module

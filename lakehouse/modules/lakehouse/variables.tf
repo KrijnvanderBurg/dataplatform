@@ -1,36 +1,57 @@
-variable "subscription_id" {
-    type = string
+variable "hubcidr" {
+  type        = string
+  default     = "10.178.0.0/20"
+  description = "CIDR for Hub VNet"
 }
 
-variable "environment" {
-    type = string
+variable "spokecidr" {
+  type        = string
+  default     = "10.179.0.0/20"
+  description = "CIDR for Spoke VNet"
 }
 
-variable "sequence_number" {
-    type = string
+variable "rglocation" {
+  type        = string
+  default     = "southeastasia"
+  description = "Location of resource group to create"
 }
 
-variable "resource_group_name" {
-    type = string
+variable "metastoreip" {
+  type        = string
+  description = "IP Address of built-in Hive Metastore in the target region"
 }
 
-# source layer
-variable "source_location_primary" {
-  type = string
+variable "dbfs_prefix" {
+  type        = string
+  default     = "dbfs"
+  description = "Prefix for DBFS storage account name"
 }
 
-variable "source_location_primary_abbr" {
-  type = string
+variable "workspace_prefix" {
+  type        = string
+  default     = "adb"
+  description = "Prefix to use for Workspace name"
 }
 
-variable "source_storage_account_name" {
-  type = string
+variable "firewallfqdn" {
+  type        = list(any)
+  description = "Additional list of fully qualified domain names to add to firewall rules"
 }
 
-variable "source_account_replication_type" {
-  type = string
+variable "test_vm_password" {
+  type        = string
+  default     = "TesTed567!!!"
+  description = "Password for Test VM"
 }
 
-variable "source_containers" {
-  type = list(string)
+variable "private_subnet_endpoints" {
+  description = "The list of Service endpoints to associate with the private subnet."
+  type        = list(string)
+  default     = []
+}
+
+variable "tags" {
+  description = "map of tags to add to all resources"
+  type        = map(any)
+  default     = {}
 }
