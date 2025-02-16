@@ -6,7 +6,7 @@ provider "azurerm" {
 }
 
 module "lakehouse" {
-  source           = "../modules/lakehouse"
+  source           = "../../modules/lakehouse"
   vnet_hub_cidr          = var.vnet_hub_cidr
   vnet_spoke_cidr        = var.vnet_spoke_cidr
   location       = var.location
