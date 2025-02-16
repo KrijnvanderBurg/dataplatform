@@ -31,6 +31,10 @@ data "http" "my_public_ip" { // add your host machine ip into nsg
   }
 }
 
+locals {
+  ifconfig_co_json = jsondecode(data.http.my_public_ip.response_body)
+}
+
 resource "azurerm_network_security_rule" "test0" {
   name                        = "RDP"
   priority                    = 200
@@ -39,7 +43,7 @@ resource "azurerm_network_security_rule" "test0" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "3389"
-  source_address_prefixes     = ["62.45.102.228"]
+  source_address_prefixes     = [local.ifconfig_co_json.ip]
   destination_address_prefix  = "VirtualNetwork"
   network_security_group_name = azurerm_network_security_group.testvm-nsg.name
   resource_group_name         = azurerm_resource_group.this.name
@@ -82,5 +86,5 @@ resource "azurerm_subnet" "testvmsubnet" {
   name                 = "${local.prefix}-testvmsubnet"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = [cidrsubnet(local.cidr, 3, 3)]
+  address_prefixes     = [cidrsubnet(var.vnet_spoke_cidr, 3, 3)]
 }

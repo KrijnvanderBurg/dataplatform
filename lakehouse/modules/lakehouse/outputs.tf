@@ -14,13 +14,18 @@ output "arm_tenant_id" {
 }
 
 output "azure_region" {
-  value       = local.location
+  value       = var.location
   description = "Geo location of created resources"
 }
 
 output "resource_group" {
   value       = azurerm_resource_group.this.name
   description = "Name of created resource group"
+}
+
+output "my_ip_addr" {
+  value       = local.ifconfig_co_json.ip
+  description = "IP address of caller"
 }
 
 output "test_vm_public_ip" {

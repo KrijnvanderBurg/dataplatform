@@ -1,21 +1,29 @@
-variable "hubcidr" {
+variable "environment" {
+  type        = string
+  description = "Environment name"
+}
+
+variable "vnet_hub_cidr" {
   type        = string
   default     = "10.178.0.0/20"
   description = "CIDR for Hub VNet"
 }
 
-variable "spokecidr" {
+variable "vnet_spoke_cidr" {
   type        = string
   default     = "10.179.0.0/20"
   description = "CIDR for Spoke VNet"
 }
 
-variable "rglocation" {
+variable "location" {
   type        = string
-  default     = "southeastasia"
   description = "Location of resource group to create"
 }
 
+variable "location_short" {
+  type        = string
+  description = "Short location of resource group to create"
+}
 variable "metastoreip" {
   type        = string
   description = "IP Address of built-in Hive Metastore in the target region"

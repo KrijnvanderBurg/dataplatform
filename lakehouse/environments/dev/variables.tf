@@ -6,28 +6,40 @@ variable "subscription_id" {
   type = string
 }
 
-variable "hubcidr" {
+variable "environment" {
+  type = string
+}
+
+variable "resource_group_name_storage" {
+  type = string
+}
+
+variable "resource_group_name_databricks" {
+  type = string
+}
+
+variable "resource_group_name_network" {
+  type = string
+}
+
+variable "vnet_hub_cidr" {
   type        = string
-  default     = "10.178.0.0/20"
+  default     = "10.178.0.0/16"
   description = "CIDR for Hub VNet"
 }
 
-variable "spokecidr" {
+variable "vnet_spoke_cidr" {
   type        = string
-  default     = "10.179.0.0/20"
+  default     = "10.179.0.0/16"
   description = "CIDR for Spoke VNet"
 }
 
-variable "rglocation" {
+variable "location" {
   type        = string
   default     = "southeastasia"
   description = "Location of resource group to create"
 }
 
-variable "metastoreip" {
-  type        = string
-  description = "IP Address of built-in Hive Metastore in the target region"
-}
 
 variable "dbfs_prefix" {
   type        = string
@@ -40,6 +52,13 @@ variable "workspace_prefix" {
   default     = "adb"
   description = "Prefix to use for Workspace name"
 }
+
+
+variable "metastoreip" {
+  type        = string
+  description = "IP Address of built-in Hive Metastore in the target region"
+}
+
 
 variable "firewallfqdn" {
   type        = list(any)
