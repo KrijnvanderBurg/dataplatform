@@ -23,11 +23,6 @@ output "resource_group" {
   description = "Name of created resource group"
 }
 
-output "my_ip_addr" {
-  value       = local.ifconfig_co_json.ip
-  description = "IP address of caller"
-}
-
 output "test_vm_public_ip" {
   value       = azurerm_public_ip.testvmpublicip.ip_address
   description = "Public IP of the created virtual machine"
