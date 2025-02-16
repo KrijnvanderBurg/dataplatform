@@ -5,8 +5,8 @@ provider "azurerm" {
   features {}
 }
 
-module "adb_with_private_links_exfiltration_protection" {
-  source           = "./modules/lakehouse"
+module "lakehouse" {
+  source           = "../modules/lakehouse"
   vnet_hub_cidr          = var.vnet_hub_cidr
   vnet_spoke_cidr        = var.vnet_spoke_cidr
   location       = var.location
@@ -17,17 +17,17 @@ module "adb_with_private_links_exfiltration_protection" {
 }
 
 output "workspace_url" {
-  value = module.adb_with_private_links_exfiltration_protection.workspace_url
+  value = module.lakehouse.workspace_url
 }
 
 output "workspace_azure_resource_id" {
-  value = module.adb_with_private_links_exfiltration_protection.databricks_azure_workspace_resource_id
+  value = module.lakehouse.databricks_azure_workspace_resource_id
 }
 
 output "test_vm_public_ip" {
-  value = module.adb_with_private_links_exfiltration_protection.test_vm_public_ip
+  value = module.lakehouse.test_vm_public_ip
 }
 
 output "resource_group" {
-  value = module.adb_with_private_links_exfiltration_protection.resource_group
+  value = module.lakehouse.resource_group
 }
